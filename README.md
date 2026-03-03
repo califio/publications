@@ -1,8 +1,10 @@
 # Publications from Calif
 
-## Security Audits
+## Security Research
 
-### 2025
+* [A Race Within A Race: Exploiting CVE-2025-38617 in Linux Packet Sockets](research/CVE-2025-38617/writeup.md)
+
+## Security Audits
 
 * [Shamir39 Security Audit](security-audits/shamir39/Shamir39-Audit-Report.pdf), commissioned by an unnamed client.
 
