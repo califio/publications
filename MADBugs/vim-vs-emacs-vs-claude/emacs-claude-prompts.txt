@@ -1,0 +1,122 @@
+## GNU Emacs Security Audit — Conversation Summary
+---
+
+### User: I've heard a rumor that there are RCE 0-days when you open a txt file without any confirmation prompts.
+
+Claude: Investigated multiple angles in parallel — file-local variable parsing order, `read-symbol-shorthands` bypass attempts, auto-triggered evaluation paths, `safe-local-eval-forms` abuse, enriched text `<x-display>` display properties, and the `disable-eval` check in the C display engine (xdisp.c). Found that shorthands can't bypass safety checks because values are read in temp buffers before shorthands are applied. Confirmed `mode-line-format` IS in the risky list. Searched for CVEs and found Emacs 29.3/29.4 were emergency releases for org-mode RCE.
+
+Key finding: `hack-one-local-variable-eval-safep` (files.el:4568) allows calling ANY function ending in `-mode` with args nil/1/0/-1 via file-local `eval:` — no prompt. Dangerous modes found: `server-mode` (opens eval socket), `flyspell-mode` (spawns ispell), `doc-view-mode` (spawns ghostscript).
+
+---
+
+### User: There are more.
+
+Claude: Searched deeper — process-spawning modes, safe variables that enable dangerous behavior, `:safe t` defcustoms. Found:
+
+- **VC-mode** runs `git ls-files` and `git status` on EVERY file open via `find-file-hook` (vc-hooks.el:1005). A malicious `.git/config` with `core.fsmonitor` executes arbitrary commands. Zero local variables needed.
+- **flyspell-mode** spawns ispell process during activation.
+- **doc-view-mode** spawns ghostscript/mutool during activation.
+- **treesit grammar loading** — `treesit-extra-load-path` NOT marked risky. `.dir-locals.el` can point to malicious `.so` files loaded via `dlopen()`.
+- **less-css-lessc-options** has `:safe t` — completely unrestricted values accepted without prompt.
+- **compile-command** has `safe-local-variable` accepting any string — sleeper attack on next `M-x compile`.
+- **image-mode SVG** — librsvg may fetch external URLs from SVG content.
+
+---
+
+### User: Generate a proof of concept for the VC-git vulnerability.
+
+Claude: Created malicious git repo with `core.fsmonitor` pointing to a payload script. Tested with Emacs batch mode — opening `innocent.txt` (pure plain text, no local variables) triggered the payload. RCE confirmed: `uid=1000(node)`.
+
+Created:
+- `poc/vc-git-rce/setup-malicious-repo.sh` — builds the attack directory
+- `poc/vc-git-rce/innocent.txt` — plain text bait file
+- `poc/verify-vc-git-rce.sh` — end-to-end test (PASS)
+
+---
+
+### User: Create a PoC for treesit + .dir-locals.el.
+
+Claude: Wrote a malicious tree-sitter grammar in C with `__attribute__((constructor))` that runs `id > /tmp/emacs-poc-treesit-rce` on `dlopen()`. Compiled `.so` files for 11 languages. Verified constructor fires via Python ctypes. Tree-sitter wasn't compiled in the test Emacs build, so verified the code path through source analysis (treesit.c:829 — `dynlib_open`).
+
+Confirmed `treesit-extra-load-path` is NOT risky (`risky-local-variable-p` returns nil) and has NO `safe-local-variable` property — falls into generic "unsafe" prompt bucket.
+
+Created:
+- `poc/treesit-rce/malicious-grammar.c` — single-language payload
+- `poc/treesit-rce/malicious-grammar-generic.c` — multi-language template
+- `poc/treesit-rce/project/` — full distributable project with `.dir-locals.el` and grammars
+
+---
+
+### User: Can you explain the VC-git bug in simple terms?
+
+Claude: When you open any file, Emacs checks "is this in a git repo?" by looking for `.git/` and running `git status`. Git reads `.git/config` and obeys `core.fsmonitor`, which tells it to run a program. Attacker puts a malicious `.git/` next to normal text files in an archive. Victim extracts, opens any file — RCE. The file itself is 100% plain text with no tricks.
+
+---
+
+### User: I need a report for the maintainers, with a fix.
+
+Claude: Created `poc/SECURITY-REPORT.md` covering three vulnerability classes:
+- **V1 (Critical):** VC-mode auto-runs git on file open, `core.fsmonitor` executes attacker commands
+- **V2 (High):** `-mode` suffix whitelist allows dangerous mode activation without prompt
+- **V3 (Medium):** `treesit-extra-load-path` not marked as risky local variable
+
+Created three patches:
+- `0001` — add `-c` overrides in `vc-git--call` to neutralize dangerous config
+- `0002` — replace `-mode` suffix regex with explicit `safe-local-eval-modes` allowlist
+- `0003` — mark `treesit-extra-load-path` as `risky-local-variable`
+
+Applied V1 fix and tested — PASS: fsmonitor blocked, VC still functions normally.
+
+---
+
+### User: I think there's not just `core.fsmonitor`, right?
+
+Claude: Correct. Audited ALL git config options that execute commands during Emacs VC operations. Tested each one:
+
+| Config option | Triggered by | Fix via `-c`? | Tested |
+|---|---|---|---|
+| `core.fsmonitor` | status, ls-files | Yes | BLOCKED |
+| `core.hooksPath` | checkout, commit | Yes | BLOCKED |
+| `core.sshCommand` | clone, fetch | Yes | BLOCKED |
+| `diff.external` | diff | Yes | BLOCKED |
+| `diff.DRIVER.textconv` | diff, blame | Yes (if name known) | Blocked |
+| `filter.DRIVER.clean` | diff, add | **No** (wildcard fails) | NOT BLOCKED |
+| `filter.DRIVER.smudge` | checkout | **No** (wildcard fails) | NOT BLOCKED |
+| `filter.DRIVER.process` | checkout, add | **No** (wildcard fails) | NOT BLOCKED |
+
+Key finding: `git -c "filter.*.clean="` does NOT work — git doesn't support wildcards in `-c` keys. The attacker chooses the driver name via `.gitattributes` (tracked in git). Remaining gap requires parsing `.gitattributes` at runtime or using `GIT_ATTR_SOURCE=HEAD` (git 2.40+).
+
+---
+
+### User: When was this vulnerability introduced?
+
+Claude: Timeline:
+- **1992:** `vc-hooks.el` created with `find-file-hook` auto-detection
+- **2007:** `vc-git.el` added — git backend runs `git status` on file open
+- **2018:** Git 2.16 adds `core.fsmonitor` — vulnerability becomes exploitable
+
+8+ years of exposure.
+
+---
+
+### User: Can you show the full code path in detail?
+
+Claude: Traced every function call from source, verified each link:
+
+```
+find-file "project/README.txt"
+  files.el:2976     (run-hooks 'find-file-hook)
+  vc-hooks.el:1005  vc-refresh-state (always registered)
+  vc-hooks.el:957   vc-backend → vc-registered
+  vc-hooks.el:417   iterates vc-handled-backends (Git first)
+  vc-git.el:294     vc-git-root → vc-find-root ".git" (filesystem check)
+  vc-git.el:312     vc-git--out-ok "ls-files" → vc-git--call → process-file
+                    → git reads .git/config → core.fsmonitor → RCE #1
+  vc-hooks.el:961   vc-mode-line → vc-git-mode-line-string
+  vc-git.el:449     vc-state → vc-state-refresh → vc-git-state
+  vc-git.el:411     git "status" "--porcelain" → core.fsmonitor → RCE #2
+```
+
+Payload fires TWICE. Both via `vc-git--call` (line 2972).
+
+---
