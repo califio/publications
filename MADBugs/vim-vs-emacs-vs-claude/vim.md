@@ -33,8 +33,7 @@ This advisory itself is a PoC:
 
 ```shell
 vim -version
-VIM - Vi IMproved 9.2 (2026 Feb 14, compiled Mar 25 2026 22:04:13)
-
+# VIM - Vi IMproved 9.2 (2026 Feb 14, compiled Mar 25 2026 22:04:13)
 wget https://raw.githubusercontent.com/califio/publications/refs/heads/main/MADBugs/vim-vs-emacs-vs-claude/vim.md
 vim vim.md
 cat /tmp/calif-vim-rce-poc
@@ -42,7 +41,7 @@ cat /tmp/calif-vim-rce-poc
 
 # Recommendations
 
-Upgrade to VIM v9.2.0172.
+Upgrade to Vim v9.2.0172.
 
 ## Credits
 
