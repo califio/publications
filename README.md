@@ -1,5 +1,7 @@
 # Publications from Calif
 
+## [MAD Bugs: Month of AI-Discovered Bugs](https://github.com/califio/publications/tree/main/MADBugs)
+
 ## Security Research
 
 * [A Race Within A Race: Exploiting CVE-2025-38617 in Linux Packet Sockets](research/CVE-2025-38617/writeup.md)
