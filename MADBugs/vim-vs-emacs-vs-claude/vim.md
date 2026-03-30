@@ -4,7 +4,6 @@
 
 A two-bug chain in Vim allows arbitrary command execution when a user opens a crafted file. The `tabpanel` option can be set from a modeline without requiring `modelineexpr`, and its expression is later evaluated in the sandbox. That sandbox can be escaped because `autocmd_add()` does not check whether it is running in a secure context, allowing deferred execution outside the sandbox.
 
-```
 ---
 
 ## Technical Details
