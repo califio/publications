@@ -269,3 +269,5 @@ if (sigBytes == null) {
 }
 // Existing verification code continues unchanged
 ```
+
+PR: https://github.com/NationalSecurityAgency/ghidra/pull/9109
