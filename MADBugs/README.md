@@ -11,3 +11,4 @@ Between now and the end of April 2026, we’ll be dropping what we find in this 
 * 2026-03-30: [Vim tabpanel modeline RCE affects Vim < 9.2.0272](vim-vs-emacs-vs-claude)
 * 2026-03-30: [GNU Emacs: Multiple Remote Code Execution Vectors on File Open](vim-vs-emacs-vs-claude)
 * 2026-03-31: [Claude Wrote a Full FreeBSD Remote Kernel RCE with Root Shell (CVE-2026-4747)](CVE-2026-4747)
+* 2026-04-06: [Discovering a radare2 0-Day in Zero Day](radare2)
