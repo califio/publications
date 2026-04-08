@@ -152,7 +152,9 @@ f pdb.x____open__a_Calculator_ = 0x140001000 # 0 .text
 
 ## PoC
 
-Checkout [poc.py](poc.y).
+Video: http://youtube.com/watch?v=mmc7A__J_hY
+
+Code: [poc.py](poc.py)
 
 ## Patch Development: Prompt Commentary
 
