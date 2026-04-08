@@ -1,0 +1,9 @@
+services:
+  ghidra-server:
+    build: .
+    ports:
+      - "13100:13100"   # RMI registry
+      - "13101:13101"   # RMI SSL object channel
+      - "13102:13102"   # block stream
+    volumes:
+      - ./pki:/opt/pki

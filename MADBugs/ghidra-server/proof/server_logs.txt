@@ -1,0 +1,34 @@
+ghidra-server-1  | ========================================================================
+ghidra-server-1  |  SETUP COMPLETE
+ghidra-server-1  |  Repository 'SecretAnalysis' is restricted to admin only.
+ghidra-server-1  |  The analyst user has zero visibility into this repository.
+ghidra-server-1  | ========================================================================
+ghidra-server-1  | [+] Setup complete. Container ready for demo.
+ghidra-server-1  | INFO  Authentication callbacks requested by 0:0:0:0:0:0:0:1 (GhidraServer)  
+ghidra-server-1  | INFO  Repository server handle requested (poc@0:0:0:0:0:0:0:1) (RepositoryManager)  
+ghidra-server-1  | INFO  User 'analyst' authenticated (poc@0:0:0:0:0:0:0:1) (RepositoryManager)  
+ghidra-server-1  | INFO  Authentication callbacks requested by 160.79.104.10 (GhidraServer)  
+ghidra-server-1  | INFO  Repository server handle requested (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  User 'admin' authenticated (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  Authentication callbacks requested by 160.79.104.10 (GhidraServer)  
+ghidra-server-1  | INFO  Repository server handle requested (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  User 'analyst' authenticated (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  Authentication callbacks requested by 160.79.104.10 (GhidraServer)  
+ghidra-server-1  | INFO  Repository server handle requested (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  User 'admin' authenticated (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: generated handle (admin@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  User access list for repository 'SecretAnalysis' updated by: admin (Repository)  
+ghidra-server-1  | INFO  Authentication callbacks requested by 160.79.104.10 (GhidraServer)  
+ghidra-server-1  | INFO  Repository server handle requested (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  User 'analyst' authenticated (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: generated handle (analyst@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  Authentication callbacks requested by 160.79.104.10 (GhidraServer)  
+ghidra-server-1  | INFO  Repository server handle requested (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  User 'analyst' authenticated (poc@160.79.104.10) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: not listening! (admin) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: handle disposed (admin) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: not listening! (admin) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: handle disposed (admin) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: not listening! (analyst) (RepositoryManager)  
+ghidra-server-1  | INFO  [SecretAnalysis]: handle disposed (analyst) (RepositoryManager)  
+
