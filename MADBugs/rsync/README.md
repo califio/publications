@@ -4,13 +4,13 @@ tl;dr: A teammate gave Claude a Phrack article. It built a working
 rsync RCE on x86-64. He shared the generated exploit with me but forgot
 one file, and I needed it on ARM64 anyway. I gave Claude one prompt:
 *reproduce this*. Ninety minutes later it dropped a working exploit. I
-told it the exploit was slow; it made it 20x faster. We also asked it
-to audit the patched rsync, and it came back with new bugs.
+told it the exploit was slow (5 minutes); it made it 20x faster. We also
+asked it to audit the patched rsync, and it came back with new bugs.
 
 ## How this started
 
 Our new favourite pastime is feeding Claude Phrack articles and seeing
-what comes back. This time it was Phrack 72's *"Desync the Planet"*,
+what comes back. This time it was [Phrack 72's *"Desync the Planet"*](https://phrack.org/issues/72/11_md),
 which describes chaining CVE-2024-12085 (stack info leak) into
 CVE-2024-12084 (heap overflow) for unauthenticated RCE against
 `rsync --daemon`. A teammate handed Claude the article; it built a
