@@ -270,4 +270,9 @@ if (sigBytes == null) {
 // Existing verification code continues unchanged
 ```
 
-PR: https://github.com/NationalSecurityAgency/ghidra/pull/9109
+### Disclosure Timeline
+
+* 2026-04-08 07:42 GMT+8: Bug confirmed
+* 2026-04-08 15:40: Blog post published
+* 2026-04-08 16:03: [PR](https://github.com/NationalSecurityAgency/ghidra/pull/9109) opened, issue reported
+* 2026-04-09 22:00: Fix [merged](https://github.com/NationalSecurityAgency/ghidra/commit/8ca0226f11e547fabc46566905c8951fe6db4344) into ghidra 12.1
