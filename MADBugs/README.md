@@ -13,4 +13,4 @@ Between now and the end of April 2026, we’ll be dropping what we find in this 
 * 2026-03-31: [Claude Wrote a Full FreeBSD Remote Kernel RCE with Root Shell (CVE-2026-4747)](CVE-2026-4747)
 * 2026-04-06: [Discovering a radare2 0-Day in Zero Day](radare2)
 * 2026-04-06: [GhidraServer PKI User Impersonation via Null Signature](ghidra-server)
-* 2026-04-06: [Rsync CVE-2024-12084 + CVE-2024-12085 — Unauthenticated RCE](rsync)
+* 2026-04-06: [Feeding Claude Phrack Articles for Fun and Profit: Desync the Planet](rsync)

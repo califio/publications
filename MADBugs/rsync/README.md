@@ -1,4 +1,4 @@
-# Feeding Claude Phrack Articles for Fun and Profit
+# Feeding Claude Phrack Articles for Fun and Profit: Desync the Planet
 
 tl;dr: A teammate gave Claude a Phrack article. It built a working
 rsync RCE on x86-64. He shared the generated exploit with me but forgot
@@ -35,9 +35,8 @@ writeup and the broken exploit) to Claude:
 
 > **Read the WriteUp and reproduce this exploit with exploit.py**
 
-That was the entire brief. One prompt. Everything below, from building
-the missing protocol library to finding the truncated command string,
-came out of that single instruction. I just watched.
+That was the only prompt. Everything below came out of that single
+instruction with no further steering from me.
 
 ## What Claude figured out
 
@@ -50,35 +49,33 @@ was sending. Three things the source doesn't make obvious: daemon args
 are `\0`-terminated (not `\n`), checksum negotiation is *both sides
 write, then both sides read* (not request-response), and the post-setup
 `write_line` calls were bypassing the multiplex layer. The server was
-reading the `"ZZZZ..."` filter pattern as a multiplex header and dying
-with `unexpected tag 83` (`'Z' - 7`). Claude spotted that one by just
-counting: 83 + 7 = 90 = `'Z'`.
+reading the `"ZZZZ..."` filter pattern as a multiplex header and
+returning `unexpected tag 83` (83 + `MPLEX_BASE` = 90 = `'Z'`).
 
-**No GDB.** The container had no `gdb`, no `strace`, no root. So Claude
-built substitutes. An `LD_PRELOAD` `memcmp` hook to capture the
-uninitialized `sum2` buffer at the moment of comparison. A 200-line
-ptrace crash-catcher that attached to the forked rsync child, caught the
-SIGSEGV, and dumped registers plus the entire payload region from
-`/proc/PID/mem`. The memcmp hook is where it found the leak target had
-moved: from `sum2+8` on x86-64 to `sum2+24` on ARM64, a saved LR
-pointing into `start_server`, three frames up.
+**No GDB.** The container had no `gdb`, no `strace`, no root. Claude
+built substitutes: an `LD_PRELOAD` `memcmp` hook to capture the
+uninitialized `sum2` buffer at the moment of comparison, and a 200-line
+ptrace crash-catcher that attached to the forked rsync child, caught
+the SIGSEGV, and dumped registers plus the entire payload region from
+`/proc/PID/mem`. The memcmp hook showed the leak target had moved from
+`sum2+8` on x86-64 to `sum2+24` on ARM64 (a saved LR pointing into
+`start_server`, three frames up).
 
-**The trickiest bug.** This is the one I would not have found. The crash
-dump showed `shell_exec` *had* been called: `algctx` was zeroed by
-OpenSSL's `str xzr, [x19, #56]` *after* `freectx` returned, not before.
-Claude poked a `BRK #0` breakpoint right at `shell_exec`'s entry, caught
-the trap, printed `X0` (the cmd pointer), and followed
-`PTRACE_O_TRACEFORK`. Hit. Pointer correct. Fork happened. But the proof
-file never appeared. The breakpoint also printed the command string it
-read out of memory: `"touch /t"`. Eight bytes. Truncated.
+**The trickiest bug.** The crash dump showed `shell_exec` had been
+called: `algctx` was zeroed by OpenSSL's `str xzr, [x19, #56]` after
+`freectx` returned, not before. Claude set a `BRK #0` breakpoint at
+`shell_exec`'s entry, caught the trap, printed `X0` (the cmd pointer),
+and followed `PTRACE_O_TRACEFORK`. The breakpoint hit, the pointer was
+correct, and a fork was observed, but the proof file was never created.
+Reading the command string back from memory at that point gave
+`"touch /t"`, truncated at 8 bytes.
 
 The ARM64 build's `.bss` layout puts `last_match` at `ctx_evp+0x110`.
-The first thing `match_sums` does, *before* calling `sum_init`, is
-`last_match = 0`. Eight zero bytes. Right through the middle of the
-command string at `+0x108`. `system("touch /t")` tried to write to `/`
-and failed silently. Claude moved the command to `+0x58` (inside the
-`ctx_md` union, which the OpenSSL path never touches) and the proof file
-appeared.
+`match_sums` zeroes it before calling `sum_init`, which overwrites
+bytes 8-15 of the command string at `+0x108`. `system("touch /t")`
+tried to write to `/` and failed silently. Claude moved the command to
+`+0x58` (inside the `ctx_md` union, which the OpenSSL path never
+touches), which fixed it.
 
 Five issues total, all found and fixed without ever attaching a real
 debugger:
@@ -126,8 +123,8 @@ structural constants on ARM64. User-space addresses are
 stack. The page-offset bits of the leaked pointer are exactly the
 page-offset bits of `LEAK_OFFSET` (the base is page-aligned). It encoded
 those as first-try hints, one connection each. Second, for the ~6 truly
-random bytes, it wrapped the probe in `ThreadPoolExecutor(16)`: fire all
-256 guesses at once, take the first hit.
+random bytes, it wrapped the probe in `ThreadPoolExecutor(16)` to
+dispatch all 256 guesses concurrently and take the first match.
 
 The exploit now takes 14 seconds:
 
@@ -185,7 +182,7 @@ sys 0m1.609s
 cat /tmp/rce_proof.txt
 ```
 
-## And there's more
+## The audit
 
 Before any of this, the same teammate had asked Claude to audit the
 patched rsync:
@@ -199,98 +196,103 @@ preparing reports.
 
 ## Every prompt, both sessions
 
-The complete steering record. Prompts 1-12 are the original x86-64
-session (the teammate driving); 13-17 are the ARM64 port (me driving).
+Prompts 1-12 are the original x86-64 session (the teammate driving);
+13-17 are the ARM64 port (me driving).
 
-1. *Initial request*: exploit rsync CVE-2024-12084 (heap overflow) +
-   CVE-2024-12085 (info leak) into a full RCE chain against rsync 3.2.7
-   daemon, following the Phrack 72 "Desync the Planet" article.
+1. *Initial request* — Asked to exploit rsync CVE-2024-12084 (heap
+   overflow) + CVE-2024-12085 (info leak) into a full RCE chain against
+   rsync 3.2.7 daemon, following the Phrack 72 "Desync the Planet"
+   article.
 
-2. **"why are you modifying the rsync source?"** Claude had been adding
-   `fprintf` debug statements to sender.c and recompiling. He pointed
-   out this shifts binary offsets (`ctx_evp`, `shell_exec`, etc.) and
-   invalidates the exploit constants.
+2. **"why are you modifying the rsync source?"** — I had been adding
+   `fprintf` debug statements to sender.c and recompiling. The user
+   correctly pointed out this shifts binary offsets (ctx_evp, shell_exec,
+   etc.) and invalidates the exploit constants.
 
-3. **"you should be using gdb .."** Redirected Claude from
-   printf-debugging to GDB. Led to the attach-to-daemon workflow with
+3. **"you should be using gdb .."** — Redirected from printf-debugging
+   to GDB. Led to the attach-to-daemon workflow with
    `set follow-fork-mode child` that proved essential for every
    subsequent debugging step.
 
-4. **"what sandbox"** Claude had confused /tmp file isolation with
-   sandboxing. He clarified the environment.
+4. **"what sandbox"** — I had confused /tmp file isolation with
+   sandboxing. Clarified the environment.
 
-5. **"if you need root the password is x ?"** Root credentials to fix
-   `ptrace_scope` (was set to 1, blocking GDB attach). Claude ran
+5. **"if you need root the password is x ?"** — Provided root credentials
+   to fix `ptrace_scope` (was set to 1, blocking GDB attach). We ran
    `echo 0 > /proc/sys/kernel/yama/ptrace_scope`.
 
 6. **"are you following the phrack exploitation? it outlines it pretty
-   clear"** Critical redirect. Claude had been inventing a multi-entry
-   layout trying to align 40-byte `sum_buf` strides with 48-byte
-   `EVP_MD_CTX` field offsets. The Phrack one-shot contiguous write
-   approach is far simpler and more reliable.
+   clear"** — Critical redirect. I had been inventing a multi-entry
+   layout trying to align 40-byte sum_buf strides with 48-byte EVP_MD_CTX
+   field offsets. The Phrack one-shot contiguous write approach is far
+   simpler and more reliable.
 
 7. **"read the phrack exploit - they use the info leak + heap overflow
-   to get a reliable exploit."** Prompted Claude to actually read the
-   full article rather than working from partial understanding.
+   to get a reliable exploit."** — Prompted me to actually read the
+   full Phrack article rather than working from partial understanding.
 
-8. **"the writeup is in /tmp/rsync.txt"** Pointed Claude at the local
-   copy of the Phrack article. Saved time vs trying to web-fetch it
-   (the WebFetch AI model refused to extract exploit details).
+8. **"the writeup is in /tmp/rsync.txt"** — Pointed to the local copy of
+   the Phrack article. Saved time vs trying to web-fetch it (the
+   WebFetch AI model refused to extract exploit details).
 
 9. **"if you need to setup a qemu with the exact debian + rsync used
-   that is fine"** Offered the exact Debian 12 target environment.
-   Claude didn't end up needing it; it adapted the exploit to the
-   Ubuntu 22.04 system instead.
+   that is fine"** — Offered to set up the exact Debian 12 target
+   environment. We didn't end up needing this because we adapted the
+   exploit to our Ubuntu 22.04 system, but this would be the fastest
+   path for exact reproduction of the Phrack PoC.
 
 10. **"perfect it seems to work!! can you document your whole process +
     my prompts in a writeup! include how to get it working on other
-    installations etc and debugging instructions."** Led to writeup.md.
+    installations etc and debugging instructions."** — Led to this
+    writeup document.
 
 11. **"now that you have a good grasp of this vulnerability and
     exploitation can you audit the latest rsync for variants that may
-    allow exploitation"** Led to the rsync 3.4.1 audit.
+    allow exploitation"** — Led to the security audit of rsync 3.4.1
+    documented in the appendix.
 
-12. **"the WRITEUP didnt include all of my prompts"** This correction,
-    leading to the expanded prompt section.
+12. **"the WRITEUP didnt include all of my prompts"** — This correction,
+    leading to this expanded prompt section.
 
 ### ARM64 port session
 
-13. **"Read the WriteUp and reproduce this exploit with exploit.py"**
-    My only real prompt. Environment was Debian 12 / arm64 / glibc
-    2.36: different OS, different glibc, different *architecture* from
-    the writeup. No GDB, no strace, no root. Claude found and fixed
-    five distinct arm64-specific bugs. It built `rsync_lib.py` from
-    scratch by reading rsync 3.2.7 source; a socat wire capture
-    revealed args use `\0` not `\n`, checksum negotiation is
-    bidirectional, and `write_line` was bypassing the multiplex layer
-    (server: "unexpected tag 83" = `'Z' - MPLEX_BASE`). The trickiest
-    bug: `shell_exec` *did* fire and *did* fork, but `match_sums`
-    zeroes `last_match` at `ctx_evp+0x110` before `sum_init`,
-    truncating the command at byte 8. Claude diagnosed it with a
-    ptrace breakpoint on `shell_exec` that printed `X0` and followed
-    `PTRACE_O_TRACEFORK`: fork happened, cmd pointer correct, string
-    read back as `"touch /t"`. It moved cmd to `+0x58`.
+13. **"Read the WriteUp and reproduce this exploit with exploit.py"** —
+    Initial port request. Environment turned out to be Debian 12 / arm64
+    / glibc 2.36 — different OS, different glibc, different *architecture*
+    from the writeup. No GDB, no strace, no root. Five distinct
+    arm64-specific bugs were found and fixed (§3a). `rsync_lib.py` was
+    built from scratch by reading the rsync 3.2.7 source — a socat wire
+    capture of the real client revealed args use `\0` not `\n`, checksum
+    negotiation is bidirectional, and `write_line` was bypassing the
+    multiplex layer (server: "unexpected tag 83" = `'Z' - MPLEX_BASE`).
+    The trickiest bug: `shell_exec` *did* fire and *did* fork, but
+    `match_sums` zeroes `last_match` at `ctx_evp+0x110` before `sum_init`,
+    truncating the command string at byte 8. Diagnosed with a ptrace
+    breakpoint on `shell_exec` that printed `X0` and followed
+    `PTRACE_O_TRACEFORK` — the fork happened, the cmd pointer was right,
+    but the string read back as `"touch /t"`. Moved the command to
+    `+0x58` (inside the unused `ctx_md` struct).
 
-14. **"continue"** I re-granted permission after a tool-use rejection
-    during daemon startup. Claude resumed without issue.
+14. **"continue"** — Permission re-grant after a tool-use rejection during
+    the initial daemon startup. Resumed without issue.
 
-15. **"Alright, add to the writeup your adaptions"** Claude wrote
-    section 3a documenting all five arm64 bugs, the GDB-free
-    methodology (LD_PRELOAD probes, ptrace crash-catcher,
-    pattern-payload survival test), and the working run output.
+15. **"Alright, add to the writeup your adaptions"** — Wrote §3a
+    documenting all five arm64 bugs (A1-A5), the GDB-free debugging
+    methodology (LD_PRELOAD probes, ptrace crash-catcher, pattern-payload
+    survival test), and the working run output.
 
-16. **"Your exploit now takes 5 minutes to run, probably because of
-    the brute-forcing in first step. Make it faster."** Claude stacked
-    two fixes: a hint table (18/24 bytes are structural constants on
-    arm64: `0x00` canonical bits, `0xaa`/`0xff` region prefixes,
-    `LEAK_OFFSET` page-offset bits) and a `ThreadPoolExecutor(16)` for
-    the truly random bytes. 5 minutes to 14 seconds.
+16. **"Your exploit now takes 5 minutes to run, probably because of the
+    brute-forcing in first step. Make it faster."** — Two stacked fixes:
+    a hint table (18/24 bytes are structural constants on arm64 — `0x00`
+    canonical bits, `0xaa`/`0xff` region prefixes, `LEAK_OFFSET` page-
+    offset bits) and a `ThreadPoolExecutor(16)` for the truly random
+    bytes. 5 minutes → 14 seconds.
 
 17. **"Add to the writeup the ARM64 environment, and a note about
     speeding up, including a sample run [...] Also update the user
-    prompts with the prompts/responses so far"** Claude added the
-    arm64 environment table, the speedup section + timed run, and
-    entries 13-17 to this list.
+    prompts with the prompts/responses so far"** — Added the arm64
+    environment table to §0, the speedup section + timed run to §3a,
+    and these five entries to §7.
 
 ## Files
 
