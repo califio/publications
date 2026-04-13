@@ -26,6 +26,7 @@ Codex had to enumerate the target, narrow the reachable attack surface, audit th
 - [The Final Run](#the-final-run)
 - [The Bromance](#the-bromance)
 - [Conclusion](#conclusion)
+- [Artifacts](#artifacts)
 
 ## The Harness
 
