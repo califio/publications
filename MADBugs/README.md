@@ -15,3 +15,4 @@ Between now and the end of April 2026, we’ll be dropping what we find in this 
 * 2026-04-07: [GhidraServer PKI User Impersonation via Null Signature](ghidra-server)
 * 2026-04-09: [Feeding Claude Phrack Articles for Fun and Profit: Desync the Planet](rsync)
 * 2026-04-10: [Claude + Humans vs nginx: CVE-2026-27654](nginx-CVE-2026-27654)
+* 2026-04-13: [Codex Hacked a Samsung TV](samsung-tv)
