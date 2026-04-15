@@ -1,0 +1,215 @@
+# watchpoint-probe.lldb
+#
+# Companion to watchpoint-probe.js. Run as:
+#   lldb -s poc/watchpoint-probe.lldb -- \
+#     jsc-vuln/WebKit/WebKitBuild/Release/jsc \
+#     --useDollarVM=1 --useConcurrentJIT=0 poc/watchpoint-probe.js
+#
+# --useConcurrentJIT=0 keeps everything single-threaded so we don't have to
+# reason about which thread is in which state when we halt.
+#
+# Strategy:
+#   - Break on the brk #0 from $vm.breakpoint(). At each halt, the JS side
+#     has just print()ed a "[CHECKPOINT] label | 0xS2 | 0xS6" line with the
+#     Structure pointers parsed out of describe().
+#   - Call propertyReplacementWatchpointSet(offset) on each Structure ptr.
+#     Symbol exists (verified via nm). It's a member function: the C ABI is
+#     (Structure* this, int offset) -> WatchpointSet*. PropertyOffset for the
+#     first inline property is 0 (PropertyOffset.h: knownPolyProtoOffset = 0,
+#     and our objects have no poly proto, so p1 lands at offset 0).
+#   - The returned WatchpointSet*'s state is its first byte (m_state, uint8_t):
+#       0 = ClearWatchpoint, 1 = IsWatched, 2 = IsInvalidated
+#     A null return means the set was never created.
+#   - Read m_transitionWatchpointSet directly. It's an InlineWatchpointSet
+#     (uintptr_t). Encoding (Watchpoint.h:445-461):
+#       bit 0 = IsThinFlag (1=thin, 0=fat/pointer)
+#       bits 1-2 = state when thin: 0=Clear, 1=IsWatched, 2=IsInvalidated
+#       so: 0b001=1=Clear, 0b011=3=IsWatched, 0b101=5=IsInvalidated
+#     We don't have DWARF, so we don't know the field offset of
+#     m_transitionWatchpointSet within Structure. But we can find it: it's
+#     written with 3 (encodeState(IsWatched)) in all three Structure ctors.
+#     A fresh structure dump should show a 3 somewhere; the first transition
+#     should turn it to 5.
+#
+#   Alternative for transition state: dfgShouldWatch() is not exported, but
+#   transitionWatchpointSetIsStillValid() is inlined everywhere. Easier to
+#   find the field offset once and read raw.
+
+# We'll discover the m_transitionWatchpointSet offset on first halt by
+# scanning the Structure for the value 3 (thin IsWatched). The Structure is
+# small (~144 bytes); a single 3 in pointer-aligned slots is unambiguous.
+
+settings set target.x86-disassembly-flavor intel
+
+# Helper: dump replacement watchpoint state for (Structure*, offset).
+# Usage: replwp <struct_ptr> <offset>
+# We use the mangled symbol because there's no DWARF to resolve the C++ name.
+# __ZN3JSC9Structure32propertyReplacementWatchpointSetEi
+#   = JSC::Structure::propertyReplacementWatchpointSet(int)
+# Returns WatchpointSet* (or nullptr). WatchpointSet's first byte is m_state.
+command alias replwp expression -l c -- \
+  void* __s = (void*)$arg1; \
+  void* __wp = ((void*(*)(void*,int))0x$REPLWP_ADDR)(__s, $arg2); \
+  __wp ? *(unsigned char*)__wp : -1
+
+# That alias can't be parameterized at definition time, so we'll just use
+# raw `expr` calls inline. Define a python helper instead.
+
+script
+import lldb, re
+
+# Resolved on first use.
+g_replwp_addr = None
+g_twps_offset = None    # m_transitionWatchpointSet offset within Structure
+
+STATE = {-1: "NULL (set does not exist)", 0: "ClearWatchpoint", 1: "IsWatched", 2: "IsInvalidated"}
+THIN  = {1: "thin/Clear", 3: "thin/IsWatched", 5: "thin/IsInvalidated"}
+
+def resolve_replwp(target):
+    global g_replwp_addr
+    if g_replwp_addr is not None:
+        return g_replwp_addr
+    sym = target.FindSymbols("JSC::Structure::propertyReplacementWatchpointSet(int)")
+    if sym.GetSize() == 0:
+        # Try mangled.
+        for s in target.module["JavaScriptCore"]:
+            if "propertyReplacementWatchpointSet" in s.name:
+                g_replwp_addr = s.addr.GetLoadAddress(target)
+                print("  [resolved replwp via name scan: 0x{:x}]".format(g_replwp_addr))
+                return g_replwp_addr
+        print("  [!! could not resolve propertyReplacementWatchpointSet]")
+        return None
+    g_replwp_addr = sym[0].symbol.addr.GetLoadAddress(target)
+    print("  [resolved replwp: 0x{:x}]".format(g_replwp_addr))
+    return g_replwp_addr
+
+def find_twps_offset(process, struct_ptr):
+    """Scan a Structure for the InlineWatchpointSet field.
+
+    Heuristic: m_transitionWatchpointSet is a uintptr_t. On a fresh
+    (never-transitioned) Structure it holds encodeState(IsWatched) = 3.
+    On a transitioned-from Structure it holds 5. It's unlikely any other
+    8-byte-aligned word in the Structure is exactly 3 or 5 (those are
+    not valid pointers and not typical hash/count values). Scan the
+    first 256 bytes.
+    """
+    global g_twps_offset
+    if g_twps_offset is not None:
+        return g_twps_offset
+    err = lldb.SBError()
+    raw = process.ReadMemory(struct_ptr, 256, err)
+    if not err.Success():
+        print("  [!! ReadMemory failed: {}]".format(err))
+        return None
+    import struct as _struct
+    for off in range(0, 256, 8):
+        v = _struct.unpack_from("<Q", raw, off)[0]
+        if v == 3 or v == 5:
+            g_twps_offset = off
+            print("  [discovered m_transitionWatchpointSet at Structure+0x{:x} (value={})]".format(off, v))
+            return off
+    print("  [!! could not find m_transitionWatchpointSet by scan; dumping first 256 bytes]")
+    for off in range(0, 256, 8):
+        v = _struct.unpack_from("<Q", raw, off)[0]
+        print("    +0x{:02x}: 0x{:016x}".format(off, v))
+    return None
+
+def read_transition_state(process, struct_ptr):
+    off = find_twps_offset(process, struct_ptr)
+    if off is None:
+        return "?"
+    err = lldb.SBError()
+    v = process.ReadUnsignedFromMemory(struct_ptr + off, 8, err)
+    if not err.Success():
+        return "read-err"
+    if v & 1:
+        # thin: state in bits 1-2
+        return THIN.get(v, "thin/UNKNOWN({})".format(v))
+    else:
+        # fat: pointer to WatchpointSet, state is first byte
+        st = process.ReadUnsignedFromMemory(v, 1, err)
+        if not err.Success():
+            return "fat/read-err@0x{:x}".format(v)
+        return "fat/" + STATE.get(st, "UNKNOWN({})".format(st)) + "@0x{:x}".format(v)
+
+def read_replacement_state(target, process, struct_ptr, offset):
+    addr = resolve_replwp(target)
+    if addr is None:
+        return "unresolved"
+    # Call the member function. AArch64 PCS: x0=this, w1=offset, returns x0.
+    # We use the expression evaluator with a raw cast.
+    opts = lldb.SBExpressionOptions()
+    opts.SetLanguage(lldb.eLanguageTypeC)
+    opts.SetTryAllThreads(True)
+    expr = "((void*(*)(void*,int))0x{:x})((void*)0x{:x}, {})".format(addr, struct_ptr, offset)
+    val = target.EvaluateExpression(expr, opts)
+    if not val.IsValid() or val.GetError().Fail():
+        return "expr-err: " + str(val.GetError())
+    wp_ptr = val.GetValueAsUnsigned()
+    if wp_ptr == 0:
+        return STATE[-1]
+    err = lldb.SBError()
+    st = process.ReadUnsignedFromMemory(wp_ptr, 1, err)
+    if not err.Success():
+        return "read-err@0x{:x}".format(wp_ptr)
+    return STATE.get(st, "UNKNOWN({})".format(st)) + " @0x{:x}".format(wp_ptr)
+
+def on_brk(frame, bp_loc, internal_dict):
+    target = frame.GetThread().GetProcess().GetTarget()
+    process = frame.GetThread().GetProcess()
+    # The JS side just printed [CHECKPOINT] ...; we don't have easy access to
+    # stdout from here, so we re-derive the structure pointers by walking back:
+    # the JS side stuffed them into the print line, but we can't read that.
+    # Instead: the JS side ALSO leaves them in JS variables, but reading JS
+    # heap from a brk is fiddly. Simpler: we know the [CHECKPOINT] line is on
+    # stdout already. The user can correlate. We just need to be told the
+    # pointers. So: read them off the prior stdout line by tailing the log...
+    # too fragile. Better: have the JS side encode them into the breakpoint
+    # condition.
+    #
+    # Even simpler: the JS print()s the addresses, we read them from this
+    # script's controlling TTY. But lldb -s scripts don't easily share stdin.
+    #
+    # CHEAPEST: parse the [CHECKPOINT] line from process stdout. lldb has the
+    # process's stdout if launched under it. SBProcess.GetSTDOUT().
+    out = process.GetSTDOUT(8192)
+    # Find the most recent [CHECKPOINT] line.
+    lines = [l for l in out.split('\n') if '[CHECKPOINT]' in l]
+    if not lines:
+        print("  [!! no [CHECKPOINT] line in recent stdout; got: {!r}]".format(out[-200:]))
+        return False
+    line = lines[-1]
+    print("\n>>> {}".format(line))
+    ptrs = [int(x, 16) for x in re.findall(r'0x[0-9a-f]+', line)]
+    for i, p in enumerate(ptrs):
+        print("  Structure[{}] @ 0x{:x}".format(i, p))
+        print("    transition wp:  {}".format(read_transition_state(process, p)))
+        print("    repl wp [p1@0]: {}".format(read_replacement_state(target, process, p, 0)))
+        # p2 is the second inline property -> PropertyOffset 1
+        print("    repl wp [p2@1]: {}".format(read_replacement_state(target, process, p, 1)))
+    return False  # don't auto-continue; let user inspect & continue
+
+# Install. We can't `breakpoint set` from inside the script block portably,
+# so we register the handler and set the bp from outside.
+lldb.debugger.HandleCommand("breakpoint set --name functionBreakpoint")
+lldb.debugger.HandleCommand("breakpoint command add -F on_brk 1")
+
+# Also break on the firing functions so we get a stack trace whenever a
+# watchpoint actually fires. These are the events we're claiming DON'T happen.
+lldb.debugger.HandleCommand("breakpoint set --name 'JSC::Structure::firePropertyReplacementWatchpointSet'")
+lldb.debugger.HandleCommand("breakpoint set --name 'JSC::Structure::didTransitionFromThisStructure'")
+# ensurePropertyReplacementWatchpointSet: we want to see WHEN the set gets
+# created. Should fire during IC training, NOT before.
+lldb.debugger.HandleCommand("breakpoint set --name 'JSC::Structure::ensurePropertyReplacementWatchpointSet'")
+
+# Make 2/3/4 just log and continue (they fire a lot).
+lldb.debugger.HandleCommand("breakpoint command add -o 'thread backtrace -c 3' -o 'continue' 2")
+lldb.debugger.HandleCommand("breakpoint command add -o 'thread backtrace -c 3' -o 'continue' 3")
+lldb.debugger.HandleCommand("breakpoint command add -o 'thread backtrace -c 3' -o 'continue' 4")
+
+print("=== watchpoint-probe.lldb loaded ===")
+print("breakpoints: 1=$vm.breakpoint (inspect), 2=fireReplacement, 3=didTransition, 4=ensureReplacement")
+print("'run' to start, 'continue' at each [CHECKPOINT] halt")
+
+# end script block
+exit_script = True

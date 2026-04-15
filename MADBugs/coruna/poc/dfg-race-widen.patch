@@ -1,0 +1,53 @@
+diff --git a/Source/JavaScriptCore/dfg/DFGGraph.cpp b/Source/JavaScriptCore/dfg/DFGGraph.cpp
+index fe7855e8cd7..6839ad4483d 100644
+--- a/Source/JavaScriptCore/dfg/DFGGraph.cpp
++++ b/Source/JavaScriptCore/dfg/DFGGraph.cpp
+@@ -55,6 +55,7 @@
+ #include "Snippet.h"
+ #include "StackAlignment.h"
+ #include "StructureInlines.h"
++#include <unistd.h>  // usleep — CVE-2024-23222 race widening
+ #include <wtf/CommaPrinter.h>
+ #include <wtf/ListDump.h>
+ 
+@@ -1341,12 +1342,35 @@ JSValue Graph::tryGetConstantProperty(
+     // incompatible with the getDirect we're trying to do. The easiest way to do that is to
+     // determine if the structure belongs to the proven set.
+ 
+-    Locker cellLock { object->cellLock() };
+-    Structure* structure = object->structure();
+-    if (!structureSet.toStructureSet().contains(structure))
+-        return JSValue();
++    JSValue result;
++    {
++        Locker cellLock { object->cellLock() };
++        Structure* structure = object->structure();
++        if (!structureSet.toStructureSet().contains(structure))
++            return JSValue();
++        result = object->getDirectConcurrently(cellLock, structure, offset);
++    } // <-- cellLock released here
++
++    // === CVE-2024-23222 RACE WIDENING PATCH ===
++    static int sleepUs = -1;
++    if (sleepUs < 0) {
++        const char* env = getenv("JSC_TGCP_SLEEP_US");
++        sleepUs = env ? atoi(env) : 0;
++    }
++    if (sleepUs > 0) {
++        fprintf(stderr, "[tgcp] set.size=%zu offset=%d value=%s%p\n",
++                structureSet.size(), offset,
++                result.isCell() ? "cell:" : "noncell:",
++                result.isCell() ? static_cast<void*>(result.asCell()) : reinterpret_cast<void*>(JSValue::encode(result)));
++        if (structureSet.size() > 1) {
++            fprintf(stderr, "[tgcp] >>> MULTI-STRUCTURE FOLD: sleeping %dus <<<\n", sleepUs);
++            usleep(sleepUs);
++            fprintf(stderr, "[tgcp] wake\n");
++        }
++    }
++    // === END PATCH ===
+ 
+-    return object->getDirectConcurrently(cellLock, structure, offset);
++    return result;
+ }
+ 
+ JSValue Graph::tryGetConstantProperty(JSValue base, Structure* structure, PropertyOffset offset)

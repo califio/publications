@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 230" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13">
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0969da"/>
+    </marker>
+    <marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#8c959f"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/>
+    </marker>
+  </defs>
+
+  <style>
+    .cell    { fill: #fff;    stroke: #1f2328; stroke-width: 1.5; }
+    .hdr     { fill: #f6f8fa; stroke: #1f2328; stroke-width: 1.5; }
+    .bfly    { fill: #ddf4ff; stroke: #0969da; stroke-width: 1.5; }
+    .bflyhdr { fill: #b6e3ff; stroke: #0969da; stroke-width: 1.5; }
+    .fake    { fill: #ffebe9; stroke: #1f2328; stroke-width: 1.5; }
+    .label   { fill: #1f2328; }
+    .offset  { fill: #656d76; font-size: 11px; }
+    .red     { fill: #cf222e; font-size: 11px; }
+    .title   { fill: #1f2328; font-size: 12px; }
+    .ptr     { stroke: #0969da; stroke-width: 2;   fill: none; }
+    .ptrOld  { stroke: #8c959f; stroke-width: 1.5; fill: none; stroke-dasharray: 5 3; }
+    .ptrNew  { stroke: #cf222e; stroke-width: 2;   fill: none; }
+    .bracket { stroke: #cf222e; stroke-width: 1.5; fill: none; }
+  </style>
+
+  <!-- ============ trapArray JSCell ============ -->
+  <text x="30" y="48" class="title">pm.trapArray</text>
+  <g transform="translate(30,60)">
+    <rect class="hdr"  x="0" y="0"  width="150" height="34"/>
+    <rect class="bfly" x="0" y="34" width="150" height="34"/>
+    <text x="10" y="22" class="label">JSCell header</text>
+    <text x="10" y="56" class="label">Butterfly ptr</text>
+  </g>
+  <path class="ptr" d="M 180 111 L 238 111" marker-end="url(#arrowBlue)"/>
+
+  <!-- ============ trapArray's butterfly ============ -->
+  <text x="242" y="48" class="title">butterfly  (Contiguous)</text>
+  <g transform="translate(242,60)">
+    <rect class="bflyhdr" x="0" y="0"  width="180" height="34"/>
+    <rect class="bfly"    x="0" y="34" width="180" height="34"/>
+    <rect class="bfly"    x="0" y="68" width="180" height="34"/>
+    <text x="10" y="22"  class="label" font-size="11">vecLen=2 | pubLen=2</text>
+    <text x="10" y="56"  class="label">elem[0] = 1.1</text>
+    <text x="10" y="90"  class="label">elem[1] = &amp;phantom</text>
+  </g>
+
+  <!-- two arrows out of elem[1], right edge x=422 -->
+  <!-- original: dashed gray, lands at phantom +0x00 (y=77) -->
+  <path class="ptrOld" d="M 422 145 C 480 145, 510 77, 576 77" marker-end="url(#arrowGray)"/>
+  <text x="464" y="92" class="offset">before</text>
+
+  <!-- after +16: solid red, lands at phantom +0x10 (y=145) -->
+  <path class="ptrNew" d="M 422 145 L 576 145" marker-end="url(#arrowRed)"/>
+  <text x="475" y="160" class="red">after: +16</text>
+
+  <!-- ============ phantom object ============ -->
+  <text x="580" y="48" class="title">pm.phantom</text>
+  <g transform="translate(580,60)">
+    <rect class="hdr"  x="0" y="0"   width="220" height="34"/>
+    <rect class="cell" x="0" y="34"  width="220" height="34"/>
+    <rect class="fake" x="0" y="68"  width="220" height="34"/>
+    <rect class="fake" x="0" y="102" width="220" height="34"/>
+
+    <text x="10" y="22"  class="label">JSCell header</text>
+    <text x="10" y="56"  class="label">butterfly = null</text>
+    <text x="10" y="90"  class="label">inline[0]: fakeHeader</text>
+    <text x="10" y="124" class="label">inline[1]: fakeButterfly</text>
+
+    <text x="228" y="22"  class="offset">+0x00</text>
+    <text x="228" y="56"  class="offset">+0x08</text>
+    <text x="228" y="90"  class="offset">+0x10</text>
+    <text x="228" y="124" class="offset">+0x18</text>
+  </g>
+
+  <!-- ============ fake-JSCell bracket ============ -->
+  <!-- spans phantom rows 2-3: y = 60+68 .. 60+136 = 128..196 -->
+  <path class="bracket" d="M 850 128 L 860 128 L 860 196 L 850 196"/>
+  <text x="876" y="162" class="red" transform="rotate(-90, 876, 162)" text-anchor="middle">fake JSCell</text>
+
+  <!-- footer: the operation that does the redirect -->
+  <text x="30" y="218" class="offset">lowBits[0] += 16  →  trapArray[1] now points at phantom+0x10, where the inline slots become a forged JSCell header + butterfly</text>
+</svg>

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 230" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12">
+  <defs>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0969da"/>
+    </marker>
+  </defs>
+
+  <style>
+    .hdr     { fill: #f6f8fa; stroke: #1f2328; stroke-width: 1.5; }
+    .fixed   { fill: #ffebe9; stroke: #cf222e; stroke-width: 1.5; }
+    .steered { fill: #fff8c5; stroke: #1f2328; stroke-width: 1.5; }
+    .anywhere{ fill: #ddf4ff; stroke: #0969da; stroke-width: 1.5; stroke-dasharray: 4 2; }
+    .label   { fill: #1f2328; }
+    .small   { fill: #656d76; font-size: 10px; }
+    .red     { fill: #cf222e; font-size: 10px; }
+    .blue    { fill: #0969da; font-size: 10px; }
+    .title   { fill: #1f2328; font-size: 12px; font-weight: bold; }
+    .ptrRed  { stroke: #cf222e; stroke-width: 2; fill: none; }
+    .ptrBlue { stroke: #0969da; stroke-width: 2; fill: none; }
+  </style>
+
+  <rect x="0" y="0" width="880" height="230" fill="#ffffff"/>
+
+  <!-- adjacentObj -->
+  <text x="30" y="30" class="title">adjacentObj</text>
+  <g transform="translate(30,42)">
+    <rect class="hdr"   x="0" y="0"  width="180" height="34"/>
+    <rect class="fixed" x="0" y="34" width="180" height="34"/>
+    <text x="10" y="22" class="label">JSCell header</text>
+    <text x="10" y="56" class="label">butterfly</text>
+    <text x="186" y="22" class="small">+0</text>
+    <text x="186" y="56" class="small">+8</text>
+  </g>
+  <text x="30" y="134" class="red">corrupted once via phantom[5]</text>
+  <text x="30" y="148" class="red">= addr(rwArray)+8, never changes</text>
+
+  <!-- arrow: adjacentObj.butterfly → rwArray+8 -->
+  <path class="ptrRed" d="M 210 93 L 348 93" marker-end="url(#arrowRed)"/>
+  <text x="240" y="84" class="red">fixed</text>
+
+  <!-- adjacentObj[0] label -->
+  <text x="226" y="118" class="small">adjacentObj[0]</text>
+  <text x="226" y="132" class="small">= *(butterfly+0)</text>
+  <text x="226" y="146" class="small">= this slot →</text>
+
+  <!-- rwArray -->
+  <text x="354" y="30" class="title">rwArray</text>
+  <g transform="translate(354,42)">
+    <rect class="hdr"     x="0" y="0"  width="180" height="34"/>
+    <rect class="steered" x="0" y="34" width="180" height="34"/>
+    <text x="10" y="22" class="label">JSCell header</text>
+    <text x="10" y="56" class="label">butterfly</text>
+    <text x="186" y="22" class="small">+0</text>
+    <text x="186" y="56" class="small">+8</text>
+  </g>
+  <text x="354" y="134" class="blue">rewritten on every call</text>
+  <text x="354" y="148" class="blue">adjacentObj[0] = K(addr)</text>
+
+  <!-- arrow: rwArray.butterfly → anywhere -->
+  <path class="ptrBlue" d="M 534 93 L 678 93" marker-end="url(#arrowBlue)"/>
+  <text x="566" y="84" class="blue">steerable</text>
+
+  <!-- rwArray[0] label -->
+  <text x="556" y="118" class="small">rwArray[0]</text>
+  <text x="556" y="132" class="small">= *(butterfly+0)</text>
+  <text x="556" y="146" class="small">= *addr</text>
+
+  <!-- target memory -->
+  <text x="684" y="30" class="title">anywhere</text>
+  <g transform="translate(684,42)">
+    <rect class="anywhere" x="0" y="0"  width="160" height="34"/>
+    <rect class="anywhere" x="0" y="34" width="160" height="34"/>
+    <text x="10" y="22" class="label">*(addr)</text>
+    <text x="10" y="56" class="label">*(addr+8)</text>
+  </g>
+
+  <!-- footer -->
+  <text x="30" y="200" class="small">A butterfly pointer aimed at another object's butterfly pointer: writing adjacentObj[0] re-aims rwArray; reading rwArray[0] dereferences it.</text>
+</svg>

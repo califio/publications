@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 480" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="13">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0969da"/>
+    </marker>
+  </defs>
+
+  <style>
+    .cell    { fill: #fff; stroke: #1f2328; stroke-width: 1.5; }
+    .hdr     { fill: #f6f8fa; stroke: #1f2328; stroke-width: 1.5; }
+    .bfly    { fill: #ddf4ff; stroke: #0969da; stroke-width: 1.5; }
+    .bflyhdr { fill: #b6e3ff; stroke: #0969da; stroke-width: 1.5; }
+    .label   { fill: #1f2328; }
+    .offset  { fill: #656d76; font-size: 11px; }
+    .hint    { fill: #656d76; font-size: 11px; font-style: italic; }
+    .ptr     { stroke: #0969da; stroke-width: 2; fill: none; }
+    .title   { fill: #1f2328; font-size: 12px; }
+  </style>
+
+  <!-- ============ LEFT: plain object {x:1, y:2} ============ -->
+  <text x="60" y="22" class="title">{ x: 1, y: 2 }</text>
+
+  <text x="20" y="65" class="label">obj</text>
+  <line x1="44" y1="60" x2="78" y2="60" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <g transform="translate(80,40)">
+    <rect class="hdr"  x="0" y="0"   width="190" height="34"/>
+    <rect class="cell" x="0" y="34"  width="190" height="34"/>
+    <rect class="cell" x="0" y="68"  width="190" height="34"/>
+    <rect class="cell" x="0" y="102" width="190" height="34"/>
+
+    <text x="10" y="22"  class="label">JSCell header</text>
+    <text x="10" y="56"  class="label">Butterfly = null</text>
+    <text x="10" y="90"  class="label">inline[0]: x = 1</text>
+    <text x="10" y="124" class="label">inline[1]: y = 2</text>
+
+    <text x="200" y="22"  class="offset">+0x00</text>
+    <text x="200" y="56"  class="offset">+0x08</text>
+    <text x="200" y="90"  class="offset">+0x10</text>
+    <text x="200" y="124" class="offset">+0x18</text>
+  </g>
+
+  <!-- ============ RIGHT: array [1.1, 2.2, 3.3] ============ -->
+  <text x="500" y="22" class="title">[1.1, 2.2, 3.3]</text>
+
+  <text x="460" y="65" class="label">arr</text>
+  <line x1="484" y1="60" x2="518" y2="60" stroke="#333" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <g transform="translate(520,40)">
+    <rect class="hdr"  x="0" y="0"  width="190" height="34"/>
+    <rect class="bfly" x="0" y="34" width="190" height="34"/>
+    <rect class="cell" x="0" y="68" width="190" height="34"/>
+
+    <text x="10" y="22" class="label">JSCell header</text>
+    <text x="10" y="56" class="label">Butterfly ptr</text>
+    <text x="10" y="90" class="label">(inline unused)</text>
+
+    <text x="200" y="22" class="offset">+0x00</text>
+    <text x="200" y="56" class="offset">+0x08</text>
+  </g>
+
+  <!-- butterfly pointer arrow: from the JSCell-header/Butterfly-ptr seam down to the pubLen|elem[0] boundary -->
+  <!-- start: right edge at the seam (520+190=710, 40+34=74) -->
+  <!-- end: pubLen|elem[0] border (translate 120 + local 300 = 420) -->
+  <path class="ptr" d="M 710 74 L 760 74 L 760 250 L 420 250 L 420 318" marker-end="url(#arrowBlue)"/>
+
+  <!-- ============ BUTTERFLY ============ -->
+  <g transform="translate(120,320)">
+    <!-- left wing (named props, grows left) -->
+    <rect class="bfly"    x="0"   y="0" width="90" height="40"/>
+    <rect class="bfly"    x="90"  y="0" width="90" height="40"/>
+    <!-- header -->
+    <rect class="bflyhdr" x="180" y="0" width="60" height="40"/>
+    <rect class="bflyhdr" x="240" y="0" width="60" height="40"/>
+    <!-- right wing (indexed, grows right) -->
+    <rect class="bfly"    x="300" y="0" width="80" height="40"/>
+    <rect class="bfly"    x="380" y="0" width="80" height="40"/>
+    <rect class="bfly"    x="460" y="0" width="80" height="40"/>
+    <!-- open right edge -->
+    <rect x="540" y="0" width="40" height="40" fill="#ddf4ff" stroke="#0969da" stroke-width="1.5" stroke-dasharray="4 3"/>
+
+    <text x="12"  y="25" class="label">prop[-2]</text>
+    <text x="102" y="25" class="label">prop[-1]</text>
+    <text x="187" y="25" class="label" font-size="11">vecLen</text>
+    <text x="247" y="25" class="label" font-size="11">pubLen</text>
+    <text x="312" y="25" class="label">arr[0]</text>
+    <text x="392" y="25" class="label">arr[1]</text>
+    <text x="472" y="25" class="label">arr[2]</text>
+    <text x="552" y="25" class="label">…</text>
+
+    <!-- byte offsets along the bottom -->
+    <text x="35"  y="58" class="offset">−24</text>
+    <text x="125" y="58" class="offset">−16</text>
+    <text x="200" y="58" class="offset">−8</text>
+    <text x="262" y="58" class="offset">−4</text>
+    <text x="297" y="58" class="offset">0</text>
+    <text x="412" y="58" class="offset">+8</text>
+    <text x="492" y="58" class="offset">+16</text>
+  </g>
+
+  <!-- direction hints above butterfly -->
+  <text x="160" y="310" class="hint">← named props grow left</text>
+  <text x="340" y="310" class="hint">header</text>
+  <text x="500" y="310" class="hint">indexed elements grow right →</text>
+
+  <!-- pointer-lands-here annotation -->
+  <line x1="420" y1="395" x2="420" y2="372" stroke="#0969da" stroke-width="2" marker-end="url(#arrowBlue)"/>
+  <text x="370" y="412" class="hint">the pointer lands here</text>
+
+  <!-- exploit hint at offset +8 -->
+  <text x="80" y="450" class="offset">Overwrite the butterfly pointer at +0x08 → arr[i] reads/writes wherever you aimed it. That's the Step 10 primitive.</text>
+</svg>

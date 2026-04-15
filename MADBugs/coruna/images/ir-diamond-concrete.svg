@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 540" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+    <marker id="ad" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#999"/>
+    </marker>
+  </defs>
+
+  <style>
+    .blk      { fill: #fff; stroke: #1f2328; stroke-width: 1.5; rx: 4; }
+    .label    { fill: #1f2328; }
+    .dim      { fill: #656d76; font-size: 11px; }
+    .nid      { fill: #656d76; }
+    .bbhdr    { fill: #1f2328; font-weight: bold; font-size: 13px; }
+    .phi      { fill: #8250df; }
+    .bug      { fill: #cf222e; font-weight: bold; }
+    .tgcp     { fill: #0969da; font-size: 11px; font-style: italic; }
+    .edge     { stroke: #1f2328; stroke-width: 1.5; fill: none; }
+    .deadedge { stroke: #999; stroke-width: 1.5; fill: none; stroke-dasharray: 4 3; }
+    .anno     { fill: #656d76; font-size: 11px; font-style: italic; }
+  </style>
+
+  <!-- ===================== BB#4: top block ===================== -->
+  <text x="296" y="20" class="bbhdr">BB#4</text>
+  <rect class="blk" x="130" y="28" width="360" height="84"/>
+  <text x="146" y="50"><tspan class="nid">D@754</tspan><tspan class="label">  CheckStructure(obj, {S₂,S₆})</tspan></text>
+  <text x="146" y="74"><tspan class="nid">D@894</tspan><tspan class="label">  arr₁ = GetByOffset(obj, "p1")</tspan></text>
+  <text x="500" y="74" class="tgcp">← tgcp runs HERE</text>
+  <text x="146" y="98" class="label">       branch useDivergent</text>
+
+  <!-- edges out of BB#4 -->
+  <path class="edge" d="M 220 112 L 134 188" marker-end="url(#a)"/>
+  <text x="148" y="150" class="dim">false</text>
+  <path class="edge" d="M 400 112 L 486 188" marker-end="url(#a)"/>
+  <text x="450" y="150" class="dim">true</text>
+
+  <!-- ===================== BB#6: fall-through (left) ===================== -->
+  <text x="100" y="184" class="bbhdr">BB#6</text>
+  <rect class="blk" x="20" y="192" width="228" height="64"/>
+  <text x="36" y="220" class="dim">(fall through:</text>
+  <text x="36" y="238" class="dim"> arr₁ flows to BB#8)</text>
+
+  <!-- ===================== BB#5: divergent branch (right) ===================== -->
+  <text x="496" y="184" class="bbhdr">BB#5</text>
+  <rect class="blk" x="372" y="192" width="280" height="64"/>
+  <text x="388" y="218" class="label">arr₂ = fallbackArray</text>
+  <text x="388" y="240"><tspan class="nid">0[0]</tspan><tspan class="label"> → </tspan><tspan class="bug">ForceOSRExit</tspan></text>
+
+  <!-- edges into BB#8 -->
+  <path class="edge"     d="M 134 256 L 264 332" marker-end="url(#a)"/>
+  <path class="deadedge" d="M 486 256 L 356 332" marker-end="url(#ad)"/>
+  <text x="408" y="306" class="anno">(pruned)</text>
+
+  <!-- ===================== BB#8: merge block ===================== -->
+  <text x="296" y="328" class="bbhdr">BB#8</text>
+  <rect class="blk" x="130" y="336" width="360" height="156"/>
+  <text x="146" y="360"><tspan class="nid">D@569</tspan><tspan class="phi">  arr₃ = Φ(D@894, …)</tspan></text>
+  <text x="146" y="388"><tspan class="nid">D@614</tspan><tspan class="bug">  CheckArray(D@569)</tspan><tspan class="dim">  [read]</tspan></text>
+  <text x="500" y="388" class="tgcp">← reads valuesAtHead[D@569]</text>
+  <text x="146" y="412"><tspan class="nid">D@621</tspan><tspan class="bug">  CheckArray(D@569)</tspan><tspan class="dim">  [write]</tspan></text>
+  <text x="500" y="412" class="anno">← the guards the bug deletes</text>
+  <text x="146" y="444"><tspan class="nid">D@877</tspan><tspan class="label">  GetByVal(D@569, 1)</tspan></text>
+  <text x="500" y="444" class="anno">asDouble[0] = arr[1]</text>
+  <text x="146" y="468"><tspan class="nid">D@848</tspan><tspan class="label">  PutByValAlias(D@569, 1, …)</tspan></text>
+  <text x="500" y="468" class="anno">arr[1] = asDouble[0]</text>
+</svg>

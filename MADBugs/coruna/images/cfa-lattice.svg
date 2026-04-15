@@ -1,0 +1,129 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 580" font-family="ui-monospace, 'SF Mono', Menlo, monospace" font-size="13">
+  <style>
+    .node { fill: #fff; stroke: #333; stroke-width: 1.5; rx: 4; }
+    .top  { fill: #fee; stroke: #c33; }
+    .bot  { fill: #eef; stroke: #33c; }
+    .hot  { fill: #ffd; stroke: #c80; stroke-width: 2; }
+    .const{ fill: #efe; stroke: #383; }
+    text  { fill: #222; text-anchor: middle; dominant-baseline: middle; }
+    .lbl  { font-size: 11px; fill: #888; font-style: italic; text-anchor: middle; }
+    .rlbl { font-size: 11px; fill: #888; font-style: italic; text-anchor: start; }
+    line  { stroke: #999; stroke-width: 1; }
+    .join { stroke: #c80; stroke-width: 2; stroke-dasharray: 5 3; fill: none; }
+    .axis { stroke: #999; stroke-width: 1.5; }
+    .pill { fill: #fff; stroke: #c80; stroke-width: 1; rx: 3; }
+  </style>
+
+  <defs>
+    <marker id="joinhead" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#c80"/>
+    </marker>
+  </defs>
+
+  <!-- right-side precision axis: one continuous line, inline arrowheads -->
+  <g>
+    <line class="axis" x1="630" y1="50" x2="630" y2="510"/>
+    <path d="M 624 56 L 630 44 L 636 56 Z" fill="#999"/>
+    <path d="M 624 504 L 630 516 L 636 504 Z" fill="#999"/>
+    <text class="rlbl" x="638" y="50">less</text>
+    <text class="rlbl" x="638" y="62">precise</text>
+    <text class="rlbl" x="638" y="500">more</text>
+    <text class="rlbl" x="638" y="512">precise</text>
+  </g>
+
+  <!-- edges -->
+  <!-- T fans to layer 1 -->
+  <line x1="320" y1="58"  x2="180" y2="116"/>
+  <line x1="320" y1="58"  x2="460" y2="116"/>
+  <!-- SpecCell descends -->
+  <line x1="180" y1="144" x2="110" y2="196"/>
+  <line x1="180" y1="144" x2="250" y2="196"/>
+  <!-- SpecNumber descends to Int / Double  -->
+  <line x1="460" y1="144" x2="400" y2="196"/>
+  <line x1="460" y1="144" x2="520" y2="196"/>
+  <!-- SpecObject -> JSArray -->
+  <line x1="110" y1="224" x2="180" y2="286"/>
+  <!-- JSArray fans -->
+  <line x1="180" y1="314" x2="110" y2="366"/>
+  <line x1="180" y1="314" x2="320" y2="366"/>
+  <!-- ArrayWithDouble -> {trainingArray} -->
+  <line x1="110" y1="394" x2="200" y2="446"/>
+  <!-- {trainingArray} -> bottom -->
+  <line x1="200" y1="474" x2="320" y2="526"/>
+  <!-- right-side / loose ends to bottom -->
+  <line x1="250" y1="224" x2="320" y2="526"/>
+  <line x1="400" y1="224" x2="320" y2="526"/>
+  <line x1="520" y1="224" x2="320" y2="526"/>
+  <line x1="320" y1="394" x2="320" y2="526"/>
+
+  <!-- join: AWD and AWC converge upward at JSArray -->
+  <path class="join" d="M 130 366 L 195 322"/>
+  <path class="join" d="M 290 366 L 205 322" marker-end="url(#joinhead)"/>
+  <rect class="pill" x="248" y="320" width="92" height="20"/>
+  <text x="294" y="330" font-size="12" fill="#a60">&#x2294; = JSArray</text>
+
+  <!-- nodes -->
+  <g>
+    <rect class="node top" x="270" y="30" width="100" height="28"/>
+    <text x="320" y="44">&#x22A4;</text>
+    <text class="lbl" x="320" y="18">"could be anything"</text>
+  </g>
+
+  <!-- layer 1 -->
+  <g>
+    <rect class="node" x="130" y="116" width="100" height="28"/>
+    <text x="180" y="130">SpecCell</text>
+  </g>
+  <g>
+    <rect class="node" x="410" y="116" width="100" height="28"/>
+    <text x="460" y="130">SpecNumber</text>
+  </g>
+
+  <!-- layer 2 -->
+  <g>
+    <rect class="node" x="60" y="196" width="100" height="28"/>
+    <text x="110" y="210">SpecObject</text>
+  </g>
+  <g>
+    <rect class="node" x="200" y="196" width="100" height="28"/>
+    <text x="250" y="210">SpecString</text>
+  </g>
+  <g>
+    <rect class="node" x="350" y="196" width="100" height="28"/>
+    <text x="400" y="210">SpecInt</text>
+  </g>
+  <g>
+    <rect class="node" x="470" y="196" width="100" height="28"/>
+    <text x="520" y="210">SpecDouble</text>
+  </g>
+
+  <!-- layer 3 -->
+  <g>
+    <rect class="node" x="130" y="286" width="100" height="28"/>
+    <text x="180" y="300">JSArray</text>
+  </g>
+
+  <!-- layer 4 -->
+  <g>
+    <rect class="node hot" x="30" y="366" width="160" height="28"/>
+    <text x="110" y="380">ArrayWithDouble</text>
+  </g>
+  <g>
+    <rect class="node" x="230" y="366" width="180" height="28"/>
+    <text x="320" y="380">ArrayWithContiguous</text>
+  </g>
+
+  <!-- layer 5 -->
+  <g>
+    <rect class="node const" x="120" y="446" width="160" height="28"/>
+    <text x="200" y="460">{trainingArray}</text>
+    <text class="lbl" x="200" y="488">a specific known constant</text>
+  </g>
+
+  <!-- bottom -->
+  <g>
+    <rect class="node bot" x="270" y="526" width="100" height="28"/>
+    <text x="320" y="540">&#x22A5;</text>
+    <text class="lbl" x="320" y="568">"impossible / dead code"</text>
+  </g>
+</svg>

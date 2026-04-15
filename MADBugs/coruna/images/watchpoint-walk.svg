@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/>
+    </marker>
+  </defs>
+
+  <style>
+    .struct   { fill: #fff; stroke: #1f2328; stroke-width: 1.5; rx: 4; }
+    .label    { fill: #1f2328; }
+    .sname    { fill: #1f2328; font-weight: bold; font-size: 13px; }
+    .layout   { fill: #656d76; font-size: 10px; }
+    .dim      { fill: #656d76; font-size: 11px; }
+    .anno     { fill: #656d76; font-size: 11px; font-style: italic; }
+    .edge     { stroke: #1f2328; stroke-width: 1.5; fill: none; }
+    .op       { fill: #1f2328; font-size: 10px; }
+    .wp       { fill: #fdf2f2; stroke: #cf222e; stroke-width: 1.5; rx: 3; }
+    .wptext   { fill: #cf222e; font-size: 11px; }
+    .wphdr    { fill: #cf222e; font-size: 11px; font-weight: bold; }
+    .gap      { fill: #f6f8fa; stroke: #d0d7de; stroke-width: 1; stroke-dasharray: 4 3; rx: 3; }
+    .gaptext  { fill: #656d76; font-size: 11px; font-style: italic; }
+    .vtrack   { stroke: #8250df; stroke-width: 2; fill: none; }
+    .vtext    { fill: #8250df; font-size: 11px; }
+    .vlabel   { fill: #8250df; font-size: 11px; font-weight: bold; }
+    .change   { fill: #cf222e; font-size: 11px; font-weight: bold; }
+    .changea  { fill: #cf222e; font-size: 10px; }
+  </style>
+
+  <!-- ===================== row labels ===================== -->
+  <text x="10" y="48"  class="dim">replacement WP:</text>
+  <text x="10" y="146" class="dim">structure:</text>
+  <text x="10" y="244" class="vlabel">p1 holds:</text>
+
+  <!-- ===================== watchpoint coverage row ===================== -->
+  <!-- (S2, p1) box -->
+  <rect class="wp" x="120" y="20" width="100" height="50"/>
+  <text x="170" y="38" class="wphdr" text-anchor="middle">(S₂, p1)</text>
+  <text x="170" y="54" class="wptext" text-anchor="middle">IsWatched</text>
+  <line x1="170" y1="70" x2="170" y2="118" stroke="#cf222e" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- unwatched gap label -->
+  <rect class="gap" x="240" y="28" width="360" height="34"/>
+  <text x="420" y="50" class="gaptext" text-anchor="middle">unwatched: IC never profiled S₃ S₄ S₅</text>
+
+  <!-- (S6, p1) box -->
+  <rect class="wp" x="620" y="20" width="100" height="50"/>
+  <text x="670" y="38" class="wphdr" text-anchor="middle">(S₆, p1)</text>
+  <text x="670" y="54" class="wptext" text-anchor="middle">IsWatched</text>
+  <line x1="670" y1="70" x2="670" y2="118" stroke="#cf222e" stroke-width="1" stroke-dasharray="3 2"/>
+
+  <!-- ===================== structure row ===================== -->
+  <!-- S2 -->
+  <rect class="struct" x="130" y="120" width="80" height="56"/>
+  <text x="170" y="138" class="sname"  text-anchor="middle">S₂</text>
+  <text x="170" y="154" class="layout" text-anchor="middle">p1 @ 0</text>
+  <text x="170" y="167" class="layout" text-anchor="middle">p2 @ 1</text>
+
+  <!-- S3 -->
+  <rect class="struct" x="260" y="120" width="80" height="56"/>
+  <text x="300" y="138" class="sname"  text-anchor="middle">S₃</text>
+  <text x="300" y="154" class="layout" text-anchor="middle">p1 @ 0</text>
+
+  <!-- S4 -->
+  <rect class="struct" x="390" y="120" width="80" height="56"/>
+  <text x="430" y="138" class="sname"  text-anchor="middle">S₄</text>
+  <text x="430" y="158" class="layout" text-anchor="middle">(empty)</text>
+
+  <!-- S5 -->
+  <rect class="struct" x="510" y="120" width="80" height="56"/>
+  <text x="550" y="138" class="sname"  text-anchor="middle">S₅</text>
+  <text x="550" y="154" class="layout" text-anchor="middle">p1 @ 0</text>
+
+  <!-- S6 -->
+  <rect class="struct" x="630" y="120" width="80" height="56"/>
+  <text x="670" y="138" class="sname"  text-anchor="middle">S₆</text>
+  <text x="670" y="154" class="layout" text-anchor="middle">p1 @ 0</text>
+  <text x="670" y="167" class="layout" text-anchor="middle">p2 @ 1</text>
+
+  <!-- transitions -->
+  <path class="edge" d="M 210 148 L 258 148" marker-end="url(#a)"/>
+  <text x="234" y="140" class="op" text-anchor="middle">delete</text>
+  <text x="234" y="151" class="op" text-anchor="middle">p2</text>
+  <text x="234" y="194" class="anno" text-anchor="middle">(race shot,</text>
+  <text x="234" y="207" class="anno" text-anchor="middle"> Step 4)</text>
+
+  <path class="edge" d="M 340 148 L 388 148" marker-end="url(#a)"/>
+  <text x="364" y="140" class="op" text-anchor="middle">delete</text>
+  <text x="364" y="151" class="op" text-anchor="middle">p1</text>
+
+  <path class="edge" d="M 470 148 L 508 148" marker-end="url(#a)"/>
+  <text x="489" y="140" class="op" text-anchor="middle">add p1</text>
+  <text x="489" y="151" class="op" text-anchor="middle">= trap</text>
+
+  <path class="edge" d="M 590 148 L 628 148" marker-end="url(#a)"/>
+  <text x="609" y="140" class="op" text-anchor="middle">add</text>
+  <text x="609" y="151" class="op" text-anchor="middle">p2</text>
+
+  <!-- ===================== p1 value track ===================== -->
+  <!-- training -->
+  <line class="vtrack" x1="130" y1="240" x2="380" y2="240"/>
+  <text x="170" y="232" class="vtext" text-anchor="middle">trainingArray</text>
+  <!-- gap (gone) -->
+  <line x1="380" y1="240" x2="480" y2="240" stroke="#8250df" stroke-width="2" stroke-dasharray="3 4"/>
+  <text x="430" y="232" class="vtext" text-anchor="middle">(gone)</text>
+  <!-- trap -->
+  <line class="vtrack" x1="480" y1="240" x2="710" y2="240"/>
+  <text x="670" y="232" class="vtext" text-anchor="middle">trapArray</text>
+
+  <!-- step markers on the track -->
+  <circle cx="380" cy="240" r="3" fill="#8250df"/>
+  <circle cx="480" cy="240" r="4" fill="#cf222e"/>
+
+  <!-- arrow up from change point to S4->S5 transition -->
+  <path d="M 480 235 L 480 175" stroke="#cf222e" stroke-width="1.5" fill="none" marker-end="url(#ar)"/>
+
+  <!-- annotation -->
+  <text x="490" y="270" class="change">value changes here</text>
+  <text x="490" y="285" class="changea">but it's an ADD: S₄ has no p1,</text>
+  <text x="490" y="298" class="changea">isAdded=true → didReplaceProperty</text>
+  <text x="490" y="311" class="changea">never called, and S₄ has no</text>
+  <text x="490" y="324" class="changea">replacement watchpoint anyway</text>
+</svg>

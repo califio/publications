@@ -1,0 +1,251 @@
+diff --git a/Source/JavaScriptCore/dfg/DFGAbstractInterpreterInlines.h b/Source/JavaScriptCore/dfg/DFGAbstractInterpreterInlines.h
+index 3b795ac98cd..eacdce2db60 100644
+--- a/Source/JavaScriptCore/dfg/DFGAbstractInterpreterInlines.h
++++ b/Source/JavaScriptCore/dfg/DFGAbstractInterpreterInlines.h
+@@ -62,6 +62,9 @@
+ #include <wtf/BooleanLattice.h>
+ #include <wtf/CheckedArithmetic.h>
+ 
++// CVE-2024-23222 instrumentation: defined in DFGGraph.cpp
++extern "C" __thread const char* g_tgcpCallSite;
++
+ namespace JSC { namespace DFG {
+ 
+ template<typename AbstractStateType>
+diff --git a/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp b/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp
+index 026b71a27b0..d90303a6718 100644
+--- a/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp
++++ b/Source/JavaScriptCore/dfg/DFGConstantFoldingPhase.cpp
+@@ -1331,11 +1331,14 @@ private:
+         // We aren't set up to handle prototype stuff.
+         DFG_ASSERT(m_graph, node, variant.conditionSet().isEmpty());
+ 
++        g_tgcpCallSite = "CFold:emitGetByOffset";
+         if (JSValue value = m_graph.tryGetConstantProperty(baseValue.m_value, *m_graph.addStructureSet(variant.structureSet()), variant.offset())) {
++            g_tgcpCallSite = nullptr;
+             m_graph.convertToConstant(node, m_graph.freeze(value));
+             return;
+         }
+-        
++        g_tgcpCallSite = nullptr;
++
+         emitGetByOffset(indexInBlock, node, childEdge, identifierNumber, variant.offset());
+     }
+     
+diff --git a/Source/JavaScriptCore/dfg/DFGGraph.cpp b/Source/JavaScriptCore/dfg/DFGGraph.cpp
+index fe7855e8cd7..b5b00e45edb 100644
+--- a/Source/JavaScriptCore/dfg/DFGGraph.cpp
++++ b/Source/JavaScriptCore/dfg/DFGGraph.cpp
+@@ -28,6 +28,69 @@
+ 
+ #if ENABLE(DFG_JIT)
+ 
++// ──── CVE-2024-23222 ring-buffer instrumentation (no syscalls in hot path) ────
++#include <atomic>
++#include <mach/mach_time.h>
++#include <dlfcn.h>
++#include <unistd.h>
++namespace {
++struct TGCPEvent {
++    uint64_t tsc;
++    const void* base;       // JSObject*
++    const void* result;     // JSValue bits (or 0 if returned empty)
++    unsigned setSize;
++    unsigned offset;
++    int compileMode;        // m_plan.mode()
++    const char* callSite;   // static literal: "AI", "CFold", etc.
++    const char* outcome;    // static literal: "OK", "STRUCT-MISS"
++    void* ra0;              // __builtin_return_address(0)
++    void* ra1;              // __builtin_return_address(1)
++    const char* phase;      // g_dfgCurrentPhase at time of call
++};
++static constexpr int kTGCPRingSize = 4096;
++static TGCPEvent g_tgcpRing[kTGCPRingSize];
++static std::atomic<int> g_tgcpIdx{0};
++} // anon namespace
++// Exposed so call sites in other TUs can tag their phase. Plain pointer write.
++extern "C" __thread const char* g_tgcpCallSite = nullptr;
++extern "C" __thread const char* g_dfgCurrentPhase;
++namespace {
++// Dump the ring. Internal linkage (TAPI rejects new exports); lldb can still
++// call it via the mangled name from `nm | grep dumpTGCP`. Destructor attr
++// fires for jsc; for WebContent use lldb or rely on liveTraceTGCP below.
++__attribute__((destructor))
++static void dumpTGCPRing() {
++    int n = g_tgcpIdx.load();
++    if (n == 0) return;
++    Dl_info info;
++    dladdr((const void*)&dumpTGCPRing, &info);
++    fprintf(stderr, "═══ TGCP ring (%d events, image_base=%p, pid=%d) ═══\n",
++            n, info.dli_fbase, (int)getpid());
++    int start = (n > kTGCPRingSize) ? (n - kTGCPRingSize) : 0;
++    for (int i = start; i < n; ++i) {
++        auto& e = g_tgcpRing[i % kTGCPRingSize];
++        fprintf(stderr, "  [%4d] tsc=%llu mode=%d result=%p phase=%-32s %s\n",
++                i, (unsigned long long)e.tsc, e.compileMode, e.result,
++                e.phase ? e.phase : "?", e.outcome ? e.outcome : "");
++    }
++}
++// One-shot live trace for FTL-mode calls. WebContent forwards stderr to the
++// UI process for dev builds (ProcessLauncherCocoa.mm:195) so this hits the
++// run-minibrowser terminal. NOTE: fprintf latency is ON THE COMPILER THREAD
++// between CFA's call and CFold's call -> widens the race window. Useful for
++// first-light; gate on TGCP_QUIET=1 to restore tight timing for PIVOT tuning.
++static void liveTraceTGCP(int idx, int mode, const char* phase, const char* outcome, uint64_t tsc) {
++    static const bool quiet = getenv("TGCP_QUIET");
++    if (quiet) return;
++    if (mode < 4) return;  // FTL=4, FTLForOSREntry=5 only
++    fprintf(stderr, "[TGCP-LIVE pid=%d idx=%d mode=%d tsc=%llu phase=%s] %s\n",
++            (int)getpid(), idx, mode, (unsigned long long)tsc,
++            phase ? phase : "?", outcome ? outcome : "?");
++}
++} // anon namespace
++// ──────────────────────────────────────────────────────────────────────────────
++
++
+ #include "ArrayPrototype.h"
+ #include "CodeBlock.h"
+ #include "CodeBlockWithJITType.h"
+@@ -1341,12 +1404,58 @@ JSValue Graph::tryGetConstantProperty(
+     // incompatible with the getDirect we're trying to do. The easiest way to do that is to
+     // determine if the structure belongs to the proven set.
+ 
++    // ─── pre-cellLock log (catches structure-mismatch early returns) ───
++    void* ra0 = __builtin_return_address(0);  // immediate caller (overload wrapper or direct)
++    void* ra1 = __builtin_return_address(1);  // caller's caller
++    auto logEvent = [&](JSValue v, const char* outcome) {
++        int idx = g_tgcpIdx.fetch_add(1, std::memory_order_relaxed);
++        auto& e = g_tgcpRing[idx % kTGCPRingSize];
++        e.tsc = mach_absolute_time();
++        e.base = object;
++        e.result = reinterpret_cast<const void*>(JSValue::encode(v));
++        e.setSize = structureSet.size();
++        e.offset = (unsigned)offset;
++        e.compileMode = (int)m_plan.mode();
++        e.callSite = g_tgcpCallSite;
++        e.outcome = outcome;
++        e.ra0 = ra0;
++        e.ra1 = ra1;
++        e.phase = g_dfgCurrentPhase;
++        liveTraceTGCP(idx, e.compileMode, e.phase, outcome, e.tsc);
++    };
++    // ────────────────────────────────────
++
++    // EXPERIMENT: force-succeed the first FTL call by checking structure BEFORE
++    // delete-p2 has propagated. Replay: if we're in FTL and this is the first
++    // call for this object, ignore the structure mismatch and return what DFG saw.
++    static const int replayN = ({ const char* e = getenv("TGCP_REPLAY_FIRST_FTL"); e ? atoi(e) : 0; });
++    static std::atomic<int> ftlCallCount{0};
++    static std::atomic<int64_t> ftlCachedBits{0};
++    static std::atomic<const void*> ftlCachedObj{nullptr};
++    JSValue ftlCachedResult = JSValue::decode((EncodedJSValue)ftlCachedBits.load());
++
+     Locker cellLock { object->cellLock() };
+     Structure* structure = object->structure();
+-    if (!structureSet.toStructureSet().contains(structure))
++    if (!structureSet.toStructureSet().contains(structure)) {
++        if (replayN && (int)m_plan.mode() == 4 && ftlCachedObj.load() == (const void*)object && ftlCallCount.load() < replayN) {
++            ftlCallCount.fetch_add(1);
++            logEvent(ftlCachedResult, "REPLAY");
++            return ftlCachedResult;
++        }
++        logEvent(JSValue(), "STRUCT-MISS");
+         return JSValue();
++    }
++    // Cache successful result for potential replay
++    if (replayN && (int)m_plan.mode() == 2) {  // DFG mode: stash for FTL
++        ftlCachedBits.store((int64_t)JSValue::encode(object->getDirectConcurrently(cellLock, structure, offset)));
++        ftlCachedObj.store((const void*)object);
++    }
+ 
+-    return object->getDirectConcurrently(cellLock, structure, offset);
++    JSValue result = object->getDirectConcurrently(cellLock, structure, offset);
++    logEvent(result, "OK");
++    static const bool forceFail = getenv("TGCP_FORCE_FAIL");  // cached, evaluated once
++    if (forceFail) return JSValue();
++    return result;
+ }
+ 
+ JSValue Graph::tryGetConstantProperty(JSValue base, Structure* structure, PropertyOffset offset)
+diff --git a/Source/JavaScriptCore/dfg/DFGPhase.cpp b/Source/JavaScriptCore/dfg/DFGPhase.cpp
+index 48553444a8f..e905999bfcb 100644
+--- a/Source/JavaScriptCore/dfg/DFGPhase.cpp
++++ b/Source/JavaScriptCore/dfg/DFGPhase.cpp
+@@ -31,6 +31,9 @@
+ #include "DFGValidate.h"
+ #include "JSCJSValueInlines.h"
+ 
++// CVE-2024-23222 instrumentation: current phase name, written at begin/end
++extern "C" __thread const char* g_dfgCurrentPhase = nullptr;
++
+ namespace JSC { namespace DFG {
+ 
+ void Phase::validate()
+@@ -40,6 +43,7 @@ void Phase::validate()
+ 
+ void Phase::beginPhase()
+ {
++    g_dfgCurrentPhase = m_name;
+     if (Options::verboseValidationFailure()) {
+         StringPrintStream out;
+         m_graph.dump(out);
+diff --git a/Source/JavaScriptCore/jsc.cpp b/Source/JavaScriptCore/jsc.cpp
+index ca9e5422858..099b87b01a2 100644
+--- a/Source/JavaScriptCore/jsc.cpp
++++ b/Source/JavaScriptCore/jsc.cpp
+@@ -308,6 +308,8 @@ static JSC_DECLARE_HOST_FUNCTION(functionMemoryUsageStatistics);
+ static JSC_DECLARE_HOST_FUNCTION(functionCreateMemoryFootprint);
+ static JSC_DECLARE_HOST_FUNCTION(functionResetMemoryPeak);
+ static JSC_DECLARE_HOST_FUNCTION(functionAddressOf);
++static JSC_DECLARE_HOST_FUNCTION(functionMachTime);
++static JSC_DECLARE_HOST_FUNCTION(functionMarker);
+ static JSC_DECLARE_HOST_FUNCTION(functionVersion);
+ static JSC_DECLARE_HOST_FUNCTION(functionRun);
+ static JSC_DECLARE_HOST_FUNCTION(functionRunString);
+@@ -560,6 +562,8 @@ private:
+         addFunction(vm, "MemoryFootprint"_s, functionCreateMemoryFootprint, 0);
+         addFunction(vm, "resetMemoryPeak"_s, functionResetMemoryPeak, 0);
+         addFunction(vm, "addressOf"_s, functionAddressOf, 1);
++        addFunction(vm, "machTime"_s, functionMachTime, 0);
++        addFunction(vm, "marker"_s, functionMarker, 1);
+         addFunction(vm, "version"_s, functionVersion, 1);
+         addFunction(vm, "run"_s, functionRun, 1);
+         addFunction(vm, "runString"_s, functionRunString, 1);
+@@ -1640,6 +1644,37 @@ JSC_DEFINE_HOST_FUNCTION(functionVersion, (JSGlobalObject*, CallFrame*))
+     return JSValue::encode(jsUndefined());
+ }
+ 
++// ─── CVE-2024-23222 main-thread timestamp marker ───
++#include <mach/mach_time.h>
++JSC_DEFINE_HOST_FUNCTION(functionMachTime, (JSGlobalObject*, CallFrame*))
++{
++    return JSValue::encode(jsNumber(static_cast<double>(mach_absolute_time())));
++}
++namespace {
++struct MainMarker { uint64_t tsc; int tag; };
++static MainMarker g_mainMarkers[32];
++static std::atomic<int> g_mainMarkerIdx{0};
++__attribute__((destructor))
++static void dumpMainMarkers() {
++    int n = g_mainMarkerIdx.load();
++    if (n == 0) return;
++    fprintf(stderr, "═══ main-thread markers (%d) ═══\n", n);
++    for (int i = 0; i < n && i < 32; ++i)
++        fprintf(stderr, "  marker[%d] tsc=%llu tag=%d\n", i, (unsigned long long)g_mainMarkers[i].tsc, g_mainMarkers[i].tag);
++}
++}
++JSC_DEFINE_HOST_FUNCTION(functionMarker, (JSGlobalObject* globalObject, CallFrame* callFrame))
++{
++    int tag = callFrame->argument(0).toInt32(globalObject);
++    int idx = g_mainMarkerIdx.fetch_add(1, std::memory_order_relaxed);
++    if (idx < 32) {
++        g_mainMarkers[idx].tsc = mach_absolute_time();
++        g_mainMarkers[idx].tag = tag;
++    }
++    return JSValue::encode(jsUndefined());
++}
++// ────────────────────────────────────────────────────
++
+ JSC_DEFINE_HOST_FUNCTION(functionRun, (JSGlobalObject* globalObject, CallFrame* callFrame))
+ {
+     VM& vm = globalObject->vm();

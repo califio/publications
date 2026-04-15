@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 396" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+  </defs>
+
+  <style>
+    .blk      { fill: #fff; stroke: #1f2328; stroke-width: 1.5; rx: 4; }
+    .label    { fill: #1f2328; }
+    .dim      { fill: #656d76; font-size: 11px; }
+    .phi      { fill: #8250df; }
+    .decision { fill: #cf222e; font-weight: bold; }
+    .keep     { fill: #1a7f37; font-size: 11px; font-style: italic; }
+    .edge     { stroke: #1f2328; stroke-width: 1.5; fill: none; }
+    .anno     { fill: #656d76; font-size: 11px; font-style: italic; }
+  </style>
+
+  <!-- ===================== top block ===================== -->
+  <rect class="blk" x="120" y="20" width="280" height="84"/>
+  <text x="136" y="42" class="label">CheckStructure(obj, {S₂,S₆})</text>
+  <text x="416" y="42" class="keep">← survives</text>
+  <text x="136" y="66" class="label">arr₁ = obj.p1</text>
+  <text x="416" y="66" class="decision">← decision 1:</text>
+  <text x="430" y="82" class="anno">fold this load?</text>
+  <text x="136" y="90" class="label">branch(useDivergent)</text>
+
+  <!-- edges out -->
+  <path class="edge" d="M 200 104 L 120 164" marker-end="url(#a)"/>
+  <text x="130" y="134" class="dim">false</text>
+  <path class="edge" d="M 320 104 L 400 164" marker-end="url(#a)"/>
+  <text x="370" y="134" class="dim">true</text>
+
+  <!-- ===================== left branch ===================== -->
+  <rect class="blk" x="20" y="168" width="200" height="60"/>
+  <text x="36" y="194" class="dim">(arr₁ flows</text>
+  <text x="36" y="212" class="dim"> through)</text>
+
+  <!-- ===================== right branch ===================== -->
+  <rect class="blk" x="300" y="168" width="200" height="60"/>
+  <text x="316" y="202" class="label">arr₂ = fallbackArray</text>
+
+  <!-- edges into merge -->
+  <path class="edge" d="M 120 228 L 230 284" marker-end="url(#a)"/>
+  <path class="edge" d="M 400 228 L 290 284" marker-end="url(#a)"/>
+
+  <!-- ===================== merge block ===================== -->
+  <rect class="blk" x="120" y="288" width="280" height="90"/>
+  <text x="136" y="312" class="phi">arr₃ = Φ(arr₁, arr₂)</text>
+  <text x="416" y="312" class="anno">← "whichever flowed in"</text>
+  <text x="136" y="336" class="label">CheckArray(arr₃, Double)</text>
+  <text x="416" y="336" class="decision">← decision 2:</text>
+  <text x="430" y="352" class="anno">delete this guard?</text>
+  <text x="136" y="360" class="label">read arr₃[1]</text>
+</svg>

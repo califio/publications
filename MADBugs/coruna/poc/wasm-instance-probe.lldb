@@ -1,0 +1,45 @@
+# =====================================================================
+# NOTE: this approach didn't pan out. The constexpr offsetOf* helpers
+# don't evaluate cleanly at `b main` against a release framework, and
+# the Wasm::Instance constructor breakpoint never fires (the symbol
+# is inlined/dead-stripped in release). What actually worked: let the
+# .js print describe(JSWebAssemblyInstance), attach to the live PID,
+# and walk `((JSC::JSWebAssemblyInstance*)<addr>)->m_instance.m_ptr`
+# by hand. See the header comment in wasm-instance-probe.js. Kept for
+# reference; don't expect it to run as-is.
+# =====================================================================
+#
+# lldb -s poc/wasm-instance-probe.lldb -- $FW/jsc poc/wasm-instance-probe.js
+#
+# Breaks on the Wasm::Instance constructor, captures `this` (which is the
+# fastMalloc'd block), reports the requested size via the static helpers,
+# and the actual block size via malloc_size(). Three hits: cassowary,
+# mid, trimmed.
+
+# One-time: dump the constants we need to interpret the numbers.
+# These are constexpr/static so they evaluate without a live frame.
+b main
+run
+expr -- (size_t) sizeof(JSC::Wasm::Instance)
+expr -- (size_t) sizeof(JSC::Wasm::Global::Value)
+expr -- (size_t) JSC::Wasm::Instance::offsetOfTail()
+# offsetOfGlobalPtr(numImportFunctions, numTables, globalIndex)
+expr -- (size_t) JSC::Wasm::Instance::offsetOfGlobalPtr(0, 1, 0)
+expr -- (size_t) JSC::Wasm::Instance::offsetOfGlobalPtr(0, 1, 1)
+expr -- (size_t) JSC::Wasm::Instance::offsetOfGlobalPtr(0, 0, 0)
+br del 1
+
+# Now the per-instance probe. The constructor takes (vm, module, mode);
+# `this` in x0 (arm64 C++ ABI) is the fastMalloc'd block.
+breakpoint set -n 'JSC::Wasm::Instance::Instance' -G true
+breakpoint command add -s python
+inst = frame.registers[0].GetChildMemberWithName("x0").GetValueAsUnsigned()
+sz = frame.EvaluateExpression(f"(size_t)malloc_size((void*){inst})").GetValueAsUnsigned()
+# pull module info from the second arg if available; otherwise just print
+print(f"  Instance @ 0x{inst:012x}  malloc_size = {sz}")
+# stash for later poking
+lldb.debugger.HandleCommand(f"expr void* $inst_{sz} = (void*){inst}")
+return False
+DONE
+
+continue

@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 910 760" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#333"/>
+    </marker>
+    <marker id="aRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#cf222e"/>
+    </marker>
+    <marker id="aGreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#1a7f37"/>
+    </marker>
+  </defs>
+
+  <style>
+    .col      { fill: #f6f8fa; stroke: #d0d7de; stroke-width: 1; }
+    .winbefore{ fill: #dafbe1; stroke: none; }
+    .winafter { fill: #ffebe9; stroke: none; }
+    .label    { fill: #1f2328; }
+    .dim      { fill: #656d76; }
+    .small    { fill: #656d76; font-size: 10px; }
+    .iter     { fill: #1f2328; font-weight: bold; }
+    .strike   { stroke: #cf222e; stroke-width: 2.5; fill: none; }
+    .ok       { fill: #1a7f37; }
+    .bad      { fill: #cf222e; font-weight: bold; }
+    .stale    { fill: #bc4c00; font-style: italic; }
+    .hit      { fill: #cf222e; font-weight: bold; font-size: 13px; }
+    .xthread  { stroke: #1f2328; stroke-width: 1.5; fill: none; }
+    .xstrike  { stroke: #cf222e; stroke-width: 2; fill: none; }
+    .winlbl   { fill: #656d76; font-size: 10px; font-style: italic; }
+    .timeline { stroke: #8c959f; stroke-width: 1; stroke-dasharray: 2 4; }
+    .colhdr   { fill: #1f2328; font-size: 13px; font-weight: bold; }
+  </style>
+
+  <!-- ============ column backgrounds ============ -->
+  <rect class="col" x="20"  y="40" width="380" height="690"/>
+  <rect class="col" x="430" y="40" width="470" height="690"/>
+
+  <!-- ============ window backgrounds (compiler column only) ============ -->
+  <!-- "must happen BEFORE delete" zone -->
+  <rect class="winbefore" x="432" y="130" width="466" height="170"/>
+  <!-- "delete lands HERE" zone -->
+  <rect class="winafter"  x="432" y="340" width="466" height="120"/>
+
+  <!-- ============ headers ============ -->
+  <text x="30"  y="30" class="colhdr">main thread (warmup loop)</text>
+  <text x="440" y="30" class="colhdr">compiler thread (FTL pipeline)</text>
+
+  <!-- vertical timelines -->
+  <line class="timeline" x1="400" y1="50" x2="400" y2="720"/>
+  <line class="timeline" x1="430" y1="50" x2="430" y2="720"/>
+
+  <!-- ============ MAIN THREAD ============ -->
+
+  <!-- iter ~100K: tier-up -->
+  <text x="30" y="64"  class="iter">iter ~100,000</text>
+  <text x="40" y="80"  class="dim">executeCounter crosses</text>
+  <text x="40" y="94"  class="dim">FTL threshold</text>
+  <path class="xthread" d="M 230 90 L 438 90" marker-end="url(#a)"/>
+
+  <!-- compiler: dequeue -->
+  <text x="440" y="80" class="label">dequeue, build DFG,</text>
+  <text x="440" y="94" class="dim">early phases  (~tens of µs)</text>
+
+  <!-- iter 100,001..131,071 busy wait -->
+  <text x="30" y="130" class="iter">iter 100,001 .. 131,071</text>
+  <text x="40" y="146" class="dim">trigger(false, true)</text>
+  <text x="40" y="160" class="dim">→ early return</text>
+  <text x="40" y="174" class="small">~few hundred cycles each</text>
+
+  <!-- ============ COMPILER: CFA pass (the BEFORE window) ============ -->
+  <text x="440" y="146" class="label" font-weight="bold">CFA pass, block #4:</text>
+  <text x="450" y="164" class="label">tryGetConstantProperty(targetObj, "p1")</text>
+  <text x="460" y="180" class="dim">reads targetObj.p1 → trainingArray</text>
+  <text x="460" y="196" class="dim">reads targetObj→structure() → S₂</text>
+  <text x="460" y="212" class="ok">S₂ ∈ {S₂, S₆}  ✓</text>
+  <text x="460" y="228" class="ok">return trainingArray</text>
+
+  <text x="450" y="252" class="label">publish to lattice:</text>
+  <text x="460" y="268" class="label">block#8.valuesAtHead[D@569] :=</text>
+  <text x="470" y="284" class="ok">{trainingArray, ArrayWithDouble}</text>
+
+  <!-- ============ THE SHOT ============ -->
+  <text x="30" y="306" class="iter">iter 131,072</text>
+  <text x="40" y="324" class="bad">delete targetObj.p2</text>
+  <text x="50" y="340" class="dim">structure: S₂ → S₃</text>
+
+  <!-- the strike arrow crossing threads, lands mid-gap -->
+  <path class="xstrike" d="M 200 320 L 438 320" marker-end="url(#aRed)"/>
+
+  <!-- window width annotation: span the green→red gap (y=300..340) -->
+  <line x1="370" y1="300" x2="370" y2="340" stroke="#656d76" stroke-width="1"/>
+  <line x1="366" y1="300" x2="374" y2="300" stroke="#656d76" stroke-width="1"/>
+  <line x1="366" y1="340" x2="374" y2="340" stroke="#656d76" stroke-width="1"/>
+  <text x="252" y="298" class="small">~1700-tick window</text>
+
+  <!-- ============ COMPILER: ConstantFolding (the AFTER window) ============ -->
+  <text x="440" y="356" class="label" font-weight="bold">ConstantFolding, block #4:</text>
+  <text x="450" y="374" class="label">tryGetConstantProperty(…)</text>
+  <text x="460" y="390" class="dim">reads targetObj→structure() → <tspan class="bad">S₃</tspan></text>
+  <text x="460" y="406" class="bad">S₃ ∉ {S₂, S₆}  ✗</text>
+  <text x="460" y="422" class="dim">return JSValue()  ← correctly fails!</text>
+  <text x="450" y="440" class="dim">local AbstractValue := ⊤</text>
+  <text x="450" y="454" class="small">(but valuesAtHead NOT updated; that's CFA's job)</text>
+
+  <!-- ============ COMPILER: ConstantFolding block #8 - THE HIT ============ -->
+  <text x="440" y="486" class="label" font-weight="bold">ConstantFolding, block #8:</text>
+  <text x="450" y="504" class="label">beginBasicBlock(#8):</text>
+  <text x="460" y="520" class="dim">copy block#8.valuesAtHead[D@569]</text>
+  <text x="470" y="536" class="stale">↑ STALE — written before delete</text>
+  <text x="460" y="552" class="dim">local AbstractValue[D@569] :=</text>
+  <text x="470" y="568" class="stale">{trainingArray, ArrayWithDouble}</text>
+
+  <text x="450" y="592" class="label">visit CheckArray(D@569):</text>
+  <text x="460" y="608" class="dim">"type already ArrayWithDouble?"</text>
+  <text x="460" y="626" class="hit">yes → node→remove(m_graph)  ◄═══ HIT</text>
+  <!-- box around the HIT line -->
+  <rect x="454" y="612" width="380" height="20" fill="none" stroke="#cf222e" stroke-width="2" rx="2"/>
+
+  <!-- ============ COMPILER: CFA #2 (too late) ============ -->
+  <text x="440" y="656" class="label" font-weight="bold">CFA pass #2:</text>
+  <text x="450" y="672" class="dim">tgcp fails (S₃) → recompute valuesAtHead[D@569] := ⊤</text>
+  <text x="450" y="688" class="small">lattice now correct — but CheckArray is gone, no un-remove</text>
+
+  <!-- ============ MAIN: post-shot busy wait ============ -->
+  <text x="30" y="656" class="iter">iter 131,073 .. 16,777,215</text>
+  <text x="40" y="672" class="dim">trigger(false, true)</text>
+  <text x="40" y="686" class="small">~16.6M iterations of busy-wait</text>
+
+  <!-- ============ COMPILER: install ============ -->
+  <text x="440" y="712" class="dim">B3 lowering, regalloc, codegen, install</text>
+  <path class="xthread" d="M 720 720 L 398 720" marker-end="url(#aGreen)"/>
+  <text x="40" y="712" class="ok">trigger now points at code with</text>
+  <text x="40" y="726" class="ok">no IndexingType check on arr</text>
+</svg>

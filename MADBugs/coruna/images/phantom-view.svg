@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="12">
+  <defs>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#0969da"/>
+    </marker>
+    <marker id="arrowGray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#656d76"/>
+    </marker>
+  </defs>
+
+  <style>
+    .cell    { fill: #fff;    stroke: #1f2328; stroke-width: 1.5; }
+    .hdr     { fill: #f6f8fa; stroke: #1f2328; stroke-width: 1.5; }
+    .fake    { fill: #ffebe9; stroke: #cf222e; stroke-width: 1.5; stroke-dasharray: 4 2; }
+    .read    { fill: #dafbe1; stroke: #1f2328; stroke-width: 1.5; }
+    .write   { fill: #fff8c5; stroke: #1f2328; stroke-width: 1.5; }
+    .label   { fill: #1f2328; }
+    .offset  { fill: #656d76; font-size: 10px; }
+    .small   { fill: #656d76; font-size: 10px; }
+    .green   { fill: #1a7f37; font-size: 10px; }
+    .yellow  { fill: #9a6700; font-size: 10px; }
+    .title   { fill: #1f2328; font-size: 12px; font-weight: bold; }
+    .ptr     { stroke: #0969da; stroke-width: 2;   fill: none; }
+    .objsep  { stroke: #cf222e; stroke-width: 2;   fill: none; }
+  </style>
+
+  <!-- white background so dark-mode pages don't eat the text -->
+  <rect x="0" y="0" width="920" height="360" fill="#ffffff"/>
+
+  <!-- ============ the fake JSCell (phantom) ============ -->
+  <text x="20" y="30" class="title">phantom (fake JSCell)</text>
+  <text x="20" y="44" class="small">at pm.phantom+0x10</text>
+  <g transform="translate(20,56)">
+    <rect class="fake" x="0" y="0"  width="190" height="34"/>
+    <rect class="fake" x="0" y="34" width="190" height="34"/>
+    <text x="10" y="22" class="label">fakeHeader</text>
+    <text x="10" y="56" class="label">fakeButterfly</text>
+    <text x="120" y="22" class="offset">(JSCell hdr)</text>
+    <text x="120" y="56" class="offset">(butterfly*)</text>
+  </g>
+
+  <!-- butterfly pointer arc → overlapObj+0 -->
+  <!-- caption sits ABOVE the arc, well clear of the phantom[i] column -->
+  <text x="218" y="42" class="small" fill="#0969da">points at overlapObj,</text>
+  <text x="218" y="54" class="small" fill="#0969da">treated as element base</text>
+  <path class="ptr" d="M 210 107 C 270 107, 290 73, 360 73" marker-end="url(#arrowBlue)"/>
+
+  <!-- ============ phantom[i] index labels ============ -->
+  <g transform="translate(304,56)">
+    <text x="0" y="22"  class="offset">phantom[0]</text>
+    <text x="0" y="56"  class="offset">phantom[1]</text>
+    <text x="0" y="90"  class="offset">phantom[2]</text>
+    <text x="0" y="124" class="offset">phantom[3]</text>
+    <text x="0" y="158" class="offset">phantom[4]</text>
+    <text x="0" y="192" class="offset">phantom[5]</text>
+  </g>
+
+  <!-- thin index arrows -->
+  <g stroke="#8c959f" stroke-width="0.8" fill="none">
+    <line x1="358" y1="73"  x2="372" y2="73"  marker-end="url(#arrowGray)"/>
+    <line x1="358" y1="107" x2="372" y2="107" marker-end="url(#arrowGray)"/>
+    <line x1="358" y1="141" x2="372" y2="141" marker-end="url(#arrowGray)"/>
+    <line x1="358" y1="175" x2="372" y2="175" marker-end="url(#arrowGray)"/>
+    <line x1="358" y1="209" x2="372" y2="209" marker-end="url(#arrowGray)"/>
+    <line x1="358" y1="243" x2="372" y2="243" marker-end="url(#arrowGray)"/>
+  </g>
+
+  <!-- ============ nursery memory: two adjacent 32-byte objects ============ -->
+  <text x="376" y="30" class="title">heap  (32-byte size class, same free-list interval)</text>
+
+  <g transform="translate(376,56)">
+    <!-- overlapObj -->
+    <rect class="hdr"   x="0" y="0"   width="260" height="34"/>
+    <rect class="cell"  x="0" y="34"  width="260" height="34"/>
+    <rect class="read"  x="0" y="68"  width="260" height="34"/>
+    <rect class="cell"  x="0" y="102" width="260" height="34"/>
+    <!-- adjacentObj -->
+    <rect class="hdr"   x="0" y="136" width="260" height="34"/>
+    <rect class="write" x="0" y="170" width="260" height="34"/>
+    <rect class="cell"  x="0" y="204" width="260" height="34"/>
+    <rect class="cell"  x="0" y="238" width="260" height="34"/>
+
+    <text x="10" y="22"  class="label">JSCell header</text>
+    <text x="10" y="56"  class="label">butterfly ptr</text>
+    <text x="10" y="90"  class="label">inline[0] = overlapObj.b1</text>
+    <text x="10" y="124" class="label">inline[1]</text>
+
+    <text x="10" y="158" class="label">JSCell header</text>
+    <text x="10" y="192" class="label">butterfly ptr</text>
+    <text x="10" y="226" class="label">inline[0] = adjacentObj.a1</text>
+    <text x="10" y="260" class="label">inline[1] = adjacentObj.a2</text>
+
+    <!-- byte offsets -->
+    <text x="268" y="22"  class="offset">+0</text>
+    <text x="268" y="56"  class="offset">+8</text>
+    <text x="268" y="90"  class="offset">+16</text>
+    <text x="268" y="124" class="offset">+24</text>
+    <text x="268" y="158" class="offset">+32</text>
+    <text x="268" y="192" class="offset">+40</text>
+    <text x="268" y="226" class="offset">+48</text>
+    <text x="268" y="260" class="offset">+56</text>
+  </g>
+
+  <!-- 32-byte object boundary marker -->
+  <path class="objsep" d="M 372 192 L 660 192"/>
+  <text x="688" y="190" class="small" fill="#cf222e">phantom[4]+ crosses</text>
+  <text x="688" y="202" class="small" fill="#cf222e">into the next object</text>
+
+  <!-- object name brackets on the right -->
+  <path d="M 670 58  L 678 58  L 678 186 L 670 186" stroke="#1f2328" stroke-width="1.2" fill="none"/>
+  <text x="688" y="118" class="label">overlapObj</text>
+  <text x="688" y="132" class="small">(32 bytes)</text>
+
+  <path d="M 670 196 L 678 196 L 678 326 L 670 326" stroke="#1f2328" stroke-width="1.2" fill="none"/>
+  <text x="688" y="256" class="label">adjacentObj</text>
+  <text x="688" y="270" class="small">(32 bytes)</text>
+
+  <!-- usage callouts -->
+  <text x="20" y="180" class="green">phantom[2] → addrof:</text>
+  <text x="20" y="194" class="small">set overlapObj.b1 = target,</text>
+  <text x="20" y="208" class="small">read phantom[2] as a double,</text>
+  <text x="20" y="222" class="small">get target's address bits</text>
+
+  <text x="20" y="260" class="yellow">phantom[5] → write64:</text>
+  <text x="20" y="274" class="small">overwrite adjacentObj's</text>
+  <text x="20" y="288" class="small">butterfly ptr with any addr,</text>
+  <text x="20" y="302" class="small">then adjacentObj[i] = *addr</text>
+
+  <!-- footer -->
+  <text x="20" y="346" class="offset">phantom[i] = *(fakeButterfly + i×8) = *(addr(overlapObj) + i×8)  —  no bounds check, walks straight off the end into the neighbor</text>
+</svg>

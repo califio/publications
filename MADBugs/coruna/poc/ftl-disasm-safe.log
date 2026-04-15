@@ -1,0 +1,1797 @@
+Graph just before FTL lowering:
+
+       60: DFG for trigger#DdQKmo:[0x1334fc5e0->0x1334fc310->0x13345e300, DFGFunctionCall, 3117 (DidTryToEnterInLoop) (StrictMode)]:
+       60:   Fixpoint state: FixpointConverged; Form: SSA; Unification state: GloballyUnified; Ref count state: ExactRefCount
+       60:   Argument formats for entrypoint index: 0 : FlushedJSValue, FlushedJSValue, FlushedBoolean
+
+     0 60: Block #0 (bc#0): (OSR target)
+     0 60:   Execution count: 1.000000
+     0 60:   Predecessors:
+     0 60:   Successors: #1 #2
+     0 60:   Dominated by: #0
+     0 60:   Dominates: #0 #1 #2 #3 #4 #6 #7 #8
+     0 60:   Dominance Frontier: 
+     0 60:   Iterated Dominance Frontier: 
+     0 60:   Backwards dominates by: #root #0
+     0 60:   Backwards dominates: #0
+     0 60:   Control equivalent to: #0
+     0 60:   States: StructuresAreWatched
+     0 60:   Live: 
+     0 60:   Values: 
+  0  0 60:    D@1:< 309:->	JSConstant(JS|PureInt, Other, Undefined, bc#0, ExitValid)
+  1  0 60:   D@15:< 1:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, OtherObj, Weak:Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, bc#0, ExitValid)
+  2  0 60:  D@891:< 2:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Array, Weak:Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, bc#0, ExitValid)
+  3  0 60:   D@68:< 76:->	JSConstant(JS|PureNum|NeedsNaNOrInfinity|UseAsOther, BoolInt32, Int32: 1, bc#0, ExitValid)
+  4  0 60:   D@54:< 1:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Final, Weak:Object: 0x1334f4160 with butterfly 0x700a0027e8(base=0x700a0027c0) (Structure %BP:Object), StructureID: 44112, bc#0, ExitValid)
+  5  0 60:  D@875:< 4:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Uint32Array, Weak:Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, bc#0, ExitValid)
+  6  0 60:   D@60:< 11:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther|UseAsInt|ReallyWantsInt, BoolInt32, Int32: 0, bc#0, ExitValid)
+  7  0 60:  D@885:< 4:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Float64Array, Weak:Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, bc#0, ExitValid)
+  8  0 60:    D@3:< 2:->	JSConstant(JS|PureInt, Other, Undefined, bc#0, ExitValid)
+  9  0 60:   D@40:< 7:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Final, Weak:Object: 0x1334f4150 with butterfly 0x700a0027c8(base=0x700a0027a0) (Structure %DK:Object), StructureID: 43776, bc#0, ExitValid)
+ 10  0 60:   D@79:< 216:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Final, Weak:Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, bc#0, ExitValid)
+ 11  0 60:  D@699:< 1:->	Int52Constant(Int52|PureInt, Int52Any, Int32: 16, bc#0, ExitValid)
+ 12  0 60:  D@568:<!0:->	ExitOK(MustGen, W:SideState, bc#0, ExitValid)
+ 13  0 60:  D@694:<!0:->	InitializeEntrypointArguments(MustGen, W:SideState, ClobbersExit, bc#0, ExitValid)
+ 14  0 60:  D@581:<!0:->	ExitOK(MustGen, W:SideState, bc#0, ExitValid)
+ 15  0 60:  D@576:< 1:->	GetStack(JS|PureInt, BoolInt32|Bool, arg1, machine:arg1, FlushedJSValue, R:Stack(arg1), bc#0, ExitValid)
+ 16  0 60:  D@574:< 1:->	GetStack(JS|PureInt, Bool, arg2, machine:arg2, FlushedBoolean, R:Stack(arg2), bc#0, ExitValid)
+ 17  0 60:  D@566:<!0:->	KillStack(MustGen, loc0, W:Stack(loc0), ClobbersExit, bc#0, ExitValid)
+ 18  0 60:    D@4:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc0, W:SideState, ClobbersExit, bc#0, ExitInvalid)
+ 19  0 60:   D@29:<!0:->	KillStack(MustGen, loc1, W:Stack(loc1), ClobbersExit, bc#0, ExitInvalid)
+ 20  0 60:    D@6:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc1, W:SideState, ClobbersExit, bc#0, ExitInvalid)
+ 21  0 60:  D@562:<!0:->	KillStack(MustGen, loc2, W:Stack(loc2), ClobbersExit, bc#0, ExitInvalid)
+ 22  0 60:    D@8:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc2, W:SideState, ClobbersExit, bc#0, ExitInvalid)
+ 23  0 60:  D@559:<!0:->	KillStack(MustGen, loc3, W:Stack(loc3), ClobbersExit, bc#0, ExitInvalid)
+ 24  0 60:   D@10:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc3, W:SideState, ClobbersExit, bc#0, ExitInvalid)
+ 25  0 60:  D@555:<!0:->	KillStack(MustGen, loc4, W:Stack(loc4), ClobbersExit, bc#0, ExitInvalid)
+ 26  0 60:   D@12:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc4, W:SideState, ClobbersExit, bc#0, ExitInvalid)
+ 27  0 60:  D@551:<!0:->	KillStack(MustGen, loc4, W:Stack(loc4), ClobbersExit, bc#0, ExitInvalid)
+ 28  0 60:   D@16:<!0:->	MovHint(Check:Untyped:Kill:D@15, MustGen, loc4, W:SideState, ClobbersExit, bc#0, ExitInvalid)
+ 29  0 60:   D@17:<!0:->	ExitOK(MustGen, W:SideState, bc#0, ExitValid)
+ 30  0 60:   D@18:<!0:->	InvalidationPoint(MustGen, W:SideState, Exits, bc#0, ExitValid)
+ 31  0 60:  D@709:<!0:->	KillStack(MustGen, loc5, W:Stack(loc5), ClobbersExit, bc#1, ExitValid)
+ 32  0 60:   D@21:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc5, W:SideState, ClobbersExit, bc#1, ExitInvalid)
+ 33  0 60:  D@693:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#4, ExitValid)
+ 34  0 60:   D@23:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#4, ExitInvalid)
+ 35  0 60:  D@550:<!0:->	KillStack(MustGen, loc7, W:Stack(loc7), ClobbersExit, bc#7, ExitValid)
+ 36  0 60:   D@25:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc7, W:SideState, ClobbersExit, bc#7, ExitInvalid)
+ 37  0 60:   D@28:<!0:->	Branch(Boolean:Kill:D@574, MustGen, T:#1/w:1.000000, F:#2/w:1.000000, W:SideState, bc#10, ExitValid)
+     0 60:   States: TakeBoth, StructuresAreWatched
+     0 60:   Live: D@1, D@3, D@40, D@54, D@60, D@68, D@79, D@576, D@699<Int52>, D@875, D@885, D@891
+     0 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@40=>(Final, TOP, TOP, Object: 0x1334f4150 with butterfly 0x700a0027c8(base=0x700a0027a0) (Structure %Av:Object), StructureID: 43776, 1:StructuresAreWatched), D@54=>(Final, NonArray, [%BP:Object], Object: 0x1334f4160 with butterfly 0x700a0027e8(base=0x700a0027c0) (Structure %BP:Object), StructureID: 44112, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), D@90=>(Bool, False, 1:StructuresAreWatched), D@576=>(BytecodeTop, TOP, TOP, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched), D@891=>(Array, ArrayWithDouble, [%Cq:Array,ArrayWithDouble], Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, 1:StructuresAreWatched)
+
+     1 60: Block #1 (bc#13):
+     1 60:   Execution count: 1.000000
+     1 60:   Predecessors: #0
+     1 60:   Successors:
+     1 60:   Dominated by: #0 #1
+     1 60:   Dominates: #1
+     1 60:   Dominance Frontier: 
+     1 60:   Iterated Dominance Frontier: 
+     1 60:   Backwards dominates by: #root #1
+     1 60:   Backwards dominates: #1
+     1 60:   Control equivalent to: #1
+     1 60:   States: StructuresAreWatched
+     1 60:   Live: D@3
+     1 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched)
+  0  1 60:  D@828:<!0:->	ExitOK(MustGen, W:SideState, bc#13, ExitValid)
+  1  1 60:   D@30:<!0:->	Return(Check:Untyped:Kill:D@3, MustGen, W:SideState, Exits, bc#13, ExitValid)
+     1 60:   States: InvalidBranchDirection, StructuresAreWatched, CFAInvalidated
+     1 60:   Live: 
+     1 60:   Values: 
+
+     2 60: Block #2 (bc#15):
+     2 60:   Execution count: 1.000000
+     2 60:   Predecessors: #0
+     2 60:   Successors: #3 #4
+     2 60:   Dominated by: #0 #2
+     2 60:   Dominates: #2 #3 #4 #6 #7 #8
+     2 60:   Dominance Frontier: 
+     2 60:   Iterated Dominance Frontier: 
+     2 60:   Backwards dominates by: #root #2
+     2 60:   Backwards dominates: #2
+     2 60:   Control equivalent to: #2
+     2 60:   States: StructuresAreWatched
+     2 60:   Live: D@1, D@3, D@40, D@54, D@60, D@68, D@79, D@576, D@699<Int52>, D@875, D@885, D@891
+     2 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@40=>(Final, TOP, TOP, Object: 0x1334f4150 with butterfly 0x700a0027c8(base=0x700a0027a0) (Structure %Av:Object), StructureID: 43776, 1:StructuresAreWatched), D@54=>(Final, NonArray, [%BP:Object], Object: 0x1334f4160 with butterfly 0x700a0027e8(base=0x700a0027c0) (Structure %BP:Object), StructureID: 44112, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), D@90=>(Bool, False, 1:StructuresAreWatched), D@576=>(BytecodeTop, TOP, TOP, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched), D@891=>(Array, ArrayWithDouble, [%Cq:Array,ArrayWithDouble], Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, 1:StructuresAreWatched)
+  0  2 60:  D@342:<!0:->	ExitOK(MustGen, W:SideState, bc#15, ExitValid)
+  1  2 60:  D@549:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#15, ExitValid)
+  2  2 60:   D@37:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#15, ExitInvalid)
+  3  2 60:  D@546:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#22, ExitValid)
+  4  2 60:   D@41:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#22, ExitInvalid)
+  5  2 60:  D@543:<!0:->	KillStack(MustGen, loc7, W:Stack(loc7), ClobbersExit, bc#33, ExitValid)
+  6  2 60:   D@44:<!0:->	MovHint(Check:Untyped:D@40, MustGen, loc7, W:SideState, ClobbersExit, bc#33, ExitInvalid)
+  7  2 60:  D@610:< 2:->	BooleanToNumber(Check:Untyped:Kill:D@576, JS|PureInt, Int32, Exits, bc#36, ExitValid)
+  8  2 60:   D@47:<!0:->	Branch(Check:Int32:D@610, MustGen, T:#3/w:1.000000, F:#4/w:1.000000, W:SideState, Exits, bc#36, ExitValid)
+     2 60:   States: TakeBoth, StructuresAreWatched
+     2 60:   Live: D@1, D@3, D@40, D@54, D@60, D@68, D@79, D@610, D@699<Int52>, D@875, D@885, D@891
+     2 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@40=>(Final, TOP, TOP, Object: 0x1334f4150 with butterfly 0x700a0027c8(base=0x700a0027a0) (Structure %Av:Object), StructureID: 43776, 1:StructuresAreWatched), D@54=>(Final, NonArray, [%BP:Object], Object: 0x1334f4160 with butterfly 0x700a0027e8(base=0x700a0027c0) (Structure %BP:Object), StructureID: 44112, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), D@90=>(Bool, False, 1:StructuresAreWatched), D@610=>(Int32, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched), D@891=>(Array, ArrayWithDouble, [%Cq:Array,ArrayWithDouble], Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, 1:StructuresAreWatched)
+
+     3 60: Block #3 (bc#39):
+     3 60:   Execution count: 1.000000
+     3 60:   Predecessors: #2
+     3 60:   Successors:
+     3 60:   Dominated by: #0 #2 #3
+     3 60:   Dominates: #3
+     3 60:   Dominance Frontier: 
+     3 60:   Iterated Dominance Frontier: 
+     3 60:   Backwards dominates by: #root #3
+     3 60:   Backwards dominates: #3
+     3 60:   Control equivalent to: #3
+     3 60:   States: StructuresAreWatched
+     3 60:   Live: D@1, D@54
+     3 60:   Values: D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@54=>(Final, NonArray, [%BP:Object], Object: 0x1334f4160 with butterfly 0x700a0027e8(base=0x700a0027c0) (Structure %BP:Object), StructureID: 44112, 1:StructuresAreWatched)
+  0  3 60:  D@690:<!0:->	ExitOK(MustGen, W:SideState, bc#39, ExitValid)
+  1  3 60:  D@541:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#39, ExitValid)
+  2  3 60:   D@51:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#39, ExitInvalid)
+  3  3 60:  D@825:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#46, ExitValid)
+  4  3 60:   D@55:<!0:->	ZombieHint(Check:Untyped:Kill:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#46, ExitInvalid)
+  5  3 60:  D@689:<!0:->	KillStack(MustGen, loc7, W:Stack(loc7), ClobbersExit, bc#57, ExitValid)
+  6  3 60:   D@58:<!0:->	MovHint(Check:Untyped:Kill:D@54, MustGen, loc7, W:SideState, ClobbersExit, bc#57, ExitInvalid)
+  7  3 60:  D@611:<!0:->	ForceOSRExit(MustGen, W:SideState, Exits, bc#60, ExitValid)
+  8  3 60:    D@0:<!0:->	Unreachable(MustGen, W:SideState, bc#60, ExitValid)
+     3 60:   States: InvalidBranchDirection, StructuresAreWatched, CFAInvalidated
+     3 60:   Live: 
+     3 60:   Values: 
+
+     4 60: Block #4 (bc#66):
+     4 60:   Execution count: 1.000000
+     4 60:   Predecessors: #2
+     4 60:   Successors: #6 #7
+     4 60:   Dominated by: #0 #2 #4
+     4 60:   Dominates: #4 #6 #7 #8
+     4 60:   Dominance Frontier: 
+     4 60:   Iterated Dominance Frontier: 
+     4 60:   Backwards dominates by: #root #4 #8
+     4 60:   Backwards dominates: #4
+     4 60:   Control equivalent to: #4 #8
+     4 60:   States: StructuresAreWatched
+     4 60:   Live: D@1, D@3, D@40, D@60, D@68, D@79, D@610, D@699<Int52>, D@875, D@885, D@891
+     4 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@40=>(Final, TOP, TOP, Object: 0x1334f4150 with butterfly 0x700a0027c8(base=0x700a0027a0) (Structure %Av:Object), StructureID: 43776, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), D@90=>(Bool, False, 1:StructuresAreWatched), D@610=>(Int32, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched), D@891=>(Array, ArrayWithDouble, [%Cq:Array,ArrayWithDouble], Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, 1:StructuresAreWatched)
+  0  4 60:  D@306:<!0:->	ExitOK(MustGen, W:SideState, bc#66, ExitValid)
+  1  4 60:  D@530:<!0:->	MovHint(Check:Untyped:D@40, MustGen, loc7, W:SideState, ClobbersExit, bc#66, ExitInvalid)
+  2  4 60:  D@526:<!0:->	ExitOK(MustGen, W:SideState, bc#66, ExitValid)
+  3  4 60:  D@525:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#66, ExitValid)
+  4  4 60:   D@66:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#66, ExitInvalid)
+  5  4 60:   D@71:<!0:->	LoopHint(MustGen, W:SideState, bc#73, ExitValid)
+  6  4 60:  D@522:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#75, ExitValid)
+  7  4 60:   D@76:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#75, ExitInvalid)
+  8  4 60:  D@521:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#82, ExitValid)
+  9  4 60:   D@80:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#82, ExitInvalid)
+ 10  4 60:   D@84:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#93, ExitValid)
+ 11  4 60:   D@85:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#93, ExitValid)
+ 12  4 60:  D@350:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#99, ExitInvalid)
+ 13  4 60:   D@88:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#99, ExitInvalid)
+ 14  4 60:  D@349:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#106, ExitInvalid)
+ 15  4 60:   D@94:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#106, ExitInvalid)
+ 16  4 60:   D@99:<!0:->	LoopHint(MustGen, W:SideState, bc#113, ExitValid)
+ 17  4 60:  D@515:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#115, ExitValid)
+ 18  4 60:  D@104:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#115, ExitInvalid)
+ 19  4 60:  D@513:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#122, ExitValid)
+ 20  4 60:  D@108:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#122, ExitInvalid)
+ 21  4 60:  D@112:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#133, ExitValid)
+ 22  4 60:  D@113:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#133, ExitValid)
+ 23  4 60:  D@512:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#139, ExitInvalid)
+ 24  4 60:  D@116:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#139, ExitInvalid)
+ 25  4 60:  D@507:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#146, ExitInvalid)
+ 26  4 60:  D@122:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#146, ExitInvalid)
+ 27  4 60:  D@127:<!0:->	LoopHint(MustGen, W:SideState, bc#153, ExitValid)
+ 28  4 60:  D@712:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#155, ExitValid)
+ 29  4 60:  D@132:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#155, ExitInvalid)
+ 30  4 60:  D@688:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#162, ExitValid)
+ 31  4 60:  D@136:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#162, ExitInvalid)
+ 32  4 60:  D@140:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#173, ExitValid)
+ 33  4 60:  D@141:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#173, ExitValid)
+ 34  4 60:  D@503:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#179, ExitInvalid)
+ 35  4 60:  D@144:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#179, ExitInvalid)
+ 36  4 60:  D@821:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#186, ExitInvalid)
+ 37  4 60:  D@150:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#186, ExitInvalid)
+ 38  4 60:  D@155:<!0:->	LoopHint(MustGen, W:SideState, bc#193, ExitValid)
+ 39  4 60:  D@359:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#195, ExitValid)
+ 40  4 60:  D@160:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#195, ExitInvalid)
+ 41  4 60:  D@358:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#202, ExitValid)
+ 42  4 60:  D@164:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#202, ExitInvalid)
+ 43  4 60:  D@168:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#213, ExitValid)
+ 44  4 60:  D@169:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#213, ExitValid)
+ 45  4 60:  D@502:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#219, ExitInvalid)
+ 46  4 60:  D@172:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#219, ExitInvalid)
+ 47  4 60:  D@495:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#226, ExitInvalid)
+ 48  4 60:  D@178:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#226, ExitInvalid)
+ 49  4 60:  D@183:<!0:->	LoopHint(MustGen, W:SideState, bc#233, ExitValid)
+ 50  4 60:  D@492:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#235, ExitValid)
+ 51  4 60:  D@188:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#235, ExitInvalid)
+ 52  4 60:  D@685:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#242, ExitValid)
+ 53  4 60:  D@192:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#242, ExitInvalid)
+ 54  4 60:  D@196:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#253, ExitValid)
+ 55  4 60:  D@197:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#253, ExitValid)
+ 56  4 60:  D@488:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#259, ExitInvalid)
+ 57  4 60:  D@200:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#259, ExitInvalid)
+ 58  4 60:  D@820:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#266, ExitInvalid)
+ 59  4 60:  D@206:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#266, ExitInvalid)
+ 60  4 60:  D@211:<!0:->	LoopHint(MustGen, W:SideState, bc#273, ExitValid)
+ 61  4 60:  D@684:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#275, ExitValid)
+ 62  4 60:  D@216:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#275, ExitInvalid)
+ 63  4 60:  D@483:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#282, ExitValid)
+ 64  4 60:  D@220:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#282, ExitInvalid)
+ 65  4 60:  D@224:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#293, ExitValid)
+ 66  4 60:  D@225:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#293, ExitValid)
+ 67  4 60:  D@481:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#299, ExitInvalid)
+ 68  4 60:  D@228:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#299, ExitInvalid)
+ 69  4 60:  D@475:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#306, ExitInvalid)
+ 70  4 60:  D@234:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#306, ExitInvalid)
+ 71  4 60:  D@239:<!0:->	LoopHint(MustGen, W:SideState, bc#313, ExitValid)
+ 72  4 60:  D@474:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#315, ExitValid)
+ 73  4 60:  D@244:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#315, ExitInvalid)
+ 74  4 60:  D@466:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#322, ExitValid)
+ 75  4 60:  D@248:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#322, ExitInvalid)
+ 76  4 60:  D@252:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#333, ExitValid)
+ 77  4 60:  D@253:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#333, ExitValid)
+ 78  4 60:  D@465:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#339, ExitInvalid)
+ 79  4 60:  D@256:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#339, ExitInvalid)
+ 80  4 60:  D@459:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#346, ExitInvalid)
+ 81  4 60:  D@262:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#346, ExitInvalid)
+ 82  4 60:  D@267:<!0:->	LoopHint(MustGen, W:SideState, bc#353, ExitValid)
+ 83  4 60:  D@457:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#355, ExitValid)
+ 84  4 60:  D@272:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#355, ExitInvalid)
+ 85  4 60:   D@39:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#362, ExitValid)
+ 86  4 60:  D@276:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#362, ExitInvalid)
+ 87  4 60:  D@280:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#373, ExitValid)
+ 88  4 60:  D@281:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#373, ExitValid)
+ 89  4 60:  D@453:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#379, ExitInvalid)
+ 90  4 60:  D@284:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#379, ExitInvalid)
+ 91  4 60:  D@451:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#386, ExitInvalid)
+ 92  4 60:  D@290:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#386, ExitInvalid)
+ 93  4 60:  D@295:<!0:->	LoopHint(MustGen, W:SideState, bc#393, ExitValid)
+ 94  4 60:  D@450:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#395, ExitValid)
+ 95  4 60:  D@300:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#395, ExitInvalid)
+ 96  4 60:  D@445:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#402, ExitValid)
+ 97  4 60:  D@304:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#402, ExitInvalid)
+ 98  4 60:  D@308:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#413, ExitValid)
+ 99  4 60:  D@309:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#413, ExitValid)
+100  4 60:  D@713:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#419, ExitInvalid)
+101  4 60:  D@312:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#419, ExitInvalid)
+102  4 60:  D@683:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#426, ExitInvalid)
+103  4 60:  D@318:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#426, ExitInvalid)
+104  4 60:  D@323:<!0:->	LoopHint(MustGen, W:SideState, bc#433, ExitValid)
+105  4 60:  D@439:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#435, ExitValid)
+106  4 60:  D@328:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#435, ExitInvalid)
+107  4 60:  D@818:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#442, ExitValid)
+108  4 60:  D@332:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#442, ExitInvalid)
+109  4 60:  D@336:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#453, ExitValid)
+110  4 60:  D@337:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#453, ExitValid)
+111  4 60:  D@370:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#459, ExitInvalid)
+112  4 60:  D@340:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#459, ExitInvalid)
+113  4 60:  D@438:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#466, ExitInvalid)
+114  4 60:  D@346:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#466, ExitInvalid)
+115  4 60:  D@351:<!0:->	LoopHint(MustGen, W:SideState, bc#473, ExitValid)
+116  4 60:  D@437:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#475, ExitValid)
+117  4 60:  D@356:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#475, ExitInvalid)
+118  4 60:  D@431:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#482, ExitValid)
+119  4 60:  D@360:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#482, ExitInvalid)
+120  4 60:  D@364:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#493, ExitValid)
+121  4 60:  D@365:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#493, ExitValid)
+122  4 60:  D@681:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#499, ExitInvalid)
+123  4 60:  D@368:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#499, ExitInvalid)
+124  4 60:  D@428:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#506, ExitInvalid)
+125  4 60:  D@374:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#506, ExitInvalid)
+126  4 60:  D@379:<!0:->	LoopHint(MustGen, W:SideState, bc#513, ExitValid)
+127  4 60:  D@817:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#515, ExitValid)
+128  4 60:  D@384:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#515, ExitInvalid)
+129  4 60:  D@679:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#522, ExitValid)
+130  4 60:  D@388:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#522, ExitInvalid)
+131  4 60:  D@392:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#533, ExitValid)
+132  4 60:  D@393:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#533, ExitValid)
+133  4 60:  D@419:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#539, ExitInvalid)
+134  4 60:  D@396:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#539, ExitInvalid)
+135  4 60:  D@417:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#546, ExitInvalid)
+136  4 60:  D@402:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#546, ExitInvalid)
+137  4 60:  D@407:<!0:->	LoopHint(MustGen, W:SideState, bc#553, ExitValid)
+138  4 60:  D@411:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#555, ExitValid)
+139  4 60:  D@412:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#555, ExitInvalid)
+140  4 60:  D@409:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#562, ExitValid)
+141  4 60:  D@416:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#562, ExitInvalid)
+142  4 60:  D@420:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#573, ExitValid)
+143  4 60:  D@421:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#573, ExitValid)
+144  4 60:  D@403:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#579, ExitInvalid)
+145  4 60:  D@424:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#579, ExitInvalid)
+146  4 60:  D@401:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#586, ExitInvalid)
+147  4 60:  D@430:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#586, ExitInvalid)
+148  4 60:  D@435:<!0:->	LoopHint(MustGen, W:SideState, bc#593, ExitValid)
+149  4 60:  D@400:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#595, ExitValid)
+150  4 60:  D@440:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#595, ExitInvalid)
+151  4 60:  D@399:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#602, ExitValid)
+152  4 60:  D@444:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#602, ExitInvalid)
+153  4 60:  D@448:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#613, ExitValid)
+154  4 60:  D@449:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#613, ExitValid)
+155  4 60:  D@378:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#619, ExitInvalid)
+156  4 60:  D@452:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#619, ExitInvalid)
+157  4 60:  D@377:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#626, ExitInvalid)
+158  4 60:  D@458:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#626, ExitInvalid)
+159  4 60:  D@463:<!0:->	LoopHint(MustGen, W:SideState, bc#633, ExitValid)
+160  4 60:  D@394:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#635, ExitValid)
+161  4 60:  D@468:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#635, ExitInvalid)
+162  4 60:  D@390:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#642, ExitValid)
+163  4 60:  D@472:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#642, ExitInvalid)
+164  4 60:  D@476:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#653, ExitValid)
+165  4 60:  D@477:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#653, ExitValid)
+166  4 60:  D@389:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#659, ExitInvalid)
+167  4 60:  D@480:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#659, ExitInvalid)
+168  4 60:  D@380:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#666, ExitInvalid)
+169  4 60:  D@486:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#666, ExitInvalid)
+170  4 60:  D@491:<!0:->	LoopHint(MustGen, W:SideState, bc#673, ExitValid)
+171  4 60:  D@714:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#675, ExitValid)
+172  4 60:  D@496:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#675, ExitInvalid)
+173  4 60:  D@678:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#682, ExitValid)
+174  4 60:  D@500:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#682, ExitInvalid)
+175  4 60:  D@504:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#693, ExitValid)
+176  4 60:  D@505:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#693, ExitValid)
+177  4 60:  D@376:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#699, ExitInvalid)
+178  4 60:  D@508:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#699, ExitInvalid)
+179  4 60:  D@814:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#706, ExitInvalid)
+180  4 60:  D@514:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#706, ExitInvalid)
+181  4 60:  D@519:<!0:->	LoopHint(MustGen, W:SideState, bc#713, ExitValid)
+182  4 60:  D@387:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#715, ExitValid)
+183  4 60:  D@524:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#715, ExitInvalid)
+184  4 60:  D@386:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#722, ExitValid)
+185  4 60:  D@528:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#722, ExitInvalid)
+186  4 60:  D@532:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#733, ExitValid)
+187  4 60:  D@533:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#733, ExitValid)
+188  4 60:  D@375:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#739, ExitInvalid)
+189  4 60:  D@536:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#739, ExitInvalid)
+190  4 60:  D@373:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#746, ExitInvalid)
+191  4 60:  D@542:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#746, ExitInvalid)
+192  4 60:  D@547:<!0:->	LoopHint(MustGen, W:SideState, bc#753, ExitValid)
+193  4 60:  D@369:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#755, ExitValid)
+194  4 60:  D@552:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#755, ExitInvalid)
+195  4 60:  D@675:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#762, ExitValid)
+196  4 60:  D@556:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#762, ExitInvalid)
+197  4 60:  D@560:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#773, ExitValid)
+198  4 60:  D@561:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#773, ExitValid)
+199  4 60:  D@366:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#779, ExitInvalid)
+200  4 60:  D@564:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#779, ExitInvalid)
+201  4 60:  D@811:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#786, ExitInvalid)
+202  4 60:  D@570:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#786, ExitInvalid)
+203  4 60:  D@575:<!0:->	LoopHint(MustGen, W:SideState, bc#793, ExitValid)
+204  4 60:  D@674:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#795, ExitValid)
+205  4 60:  D@580:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#795, ExitInvalid)
+206  4 60:  D@361:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#802, ExitValid)
+207  4 60:  D@584:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#802, ExitInvalid)
+208  4 60:  D@588:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#813, ExitValid)
+209  4 60:  D@589:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#813, ExitValid)
+210  4 60:  D@355:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#819, ExitInvalid)
+211  4 60:  D@592:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#819, ExitInvalid)
+212  4 60:  D@352:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#826, ExitInvalid)
+213  4 60:  D@598:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#826, ExitInvalid)
+214  4 60:  D@603:<!0:->	LoopHint(MustGen, W:SideState, bc#833, ExitValid)
+215  4 60:  D@345:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#835, ExitValid)
+216  4 60:  D@608:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#835, ExitInvalid)
+217  4 60:  D@341:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#842, ExitValid)
+218  4 60:  D@612:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#842, ExitInvalid)
+219  4 60:  D@616:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#853, ExitValid)
+220  4 60:  D@617:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#853, ExitValid)
+221  4 60:  D@339:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#859, ExitInvalid)
+222  4 60:  D@620:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#859, ExitInvalid)
+223  4 60:  D@338:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#866, ExitInvalid)
+224  4 60:  D@626:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#866, ExitInvalid)
+225  4 60:  D@631:<!0:->	LoopHint(MustGen, W:SideState, bc#873, ExitValid)
+226  4 60:  D@334:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#875, ExitValid)
+227  4 60:  D@636:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#875, ExitInvalid)
+228  4 60:   D@53:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#882, ExitValid)
+229  4 60:  D@640:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#882, ExitInvalid)
+230  4 60:  D@644:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#893, ExitValid)
+231  4 60:  D@645:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#893, ExitValid)
+232  4 60:  D@331:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#899, ExitInvalid)
+233  4 60:  D@648:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#899, ExitInvalid)
+234  4 60:  D@329:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#906, ExitInvalid)
+235  4 60:  D@654:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#906, ExitInvalid)
+236  4 60:  D@659:<!0:->	LoopHint(MustGen, W:SideState, bc#913, ExitValid)
+237  4 60:  D@327:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#915, ExitValid)
+238  4 60:  D@664:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#915, ExitInvalid)
+239  4 60:  D@324:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#922, ExitValid)
+240  4 60:  D@668:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#922, ExitInvalid)
+241  4 60:  D@672:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#933, ExitValid)
+242  4 60:  D@673:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#933, ExitValid)
+243  4 60:  D@716:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#939, ExitInvalid)
+244  4 60:  D@676:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#939, ExitInvalid)
+245  4 60:  D@669:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#946, ExitInvalid)
+246  4 60:  D@682:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#946, ExitInvalid)
+247  4 60:  D@687:<!0:->	LoopHint(MustGen, W:SideState, bc#953, ExitValid)
+248  4 60:  D@322:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#955, ExitValid)
+249  4 60:  D@692:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#955, ExitInvalid)
+250  4 60:  D@809:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#962, ExitValid)
+251  4 60:  D@696:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#962, ExitInvalid)
+252  4 60:  D@700:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#973, ExitValid)
+253  4 60:  D@701:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#973, ExitValid)
+254  4 60:  D@398:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#979, ExitInvalid)
+255  4 60:  D@704:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#979, ExitInvalid)
+256  4 60:  D@320:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#986, ExitInvalid)
+257  4 60:  D@710:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#986, ExitInvalid)
+258  4 60:  D@715:<!0:->	LoopHint(MustGen, W:SideState, bc#993, ExitValid)
+259  4 60:  D@319:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#995, ExitValid)
+260  4 60:  D@720:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#995, ExitInvalid)
+261  4 60:  D@313:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1002, ExitValid)
+262  4 60:  D@724:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1002, ExitInvalid)
+263  4 60:  D@728:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1013, ExitValid)
+264  4 60:  D@729:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1013, ExitValid)
+265  4 60:  D@667:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1019, ExitInvalid)
+266  4 60:  D@732:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1019, ExitInvalid)
+267  4 60:  D@311:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1026, ExitInvalid)
+268  4 60:  D@738:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1026, ExitInvalid)
+269  4 60:  D@743:<!0:->	LoopHint(MustGen, W:SideState, bc#1033, ExitValid)
+270  4 60:  D@807:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1035, ExitValid)
+271  4 60:  D@748:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1035, ExitInvalid)
+272  4 60:  D@665:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1042, ExitValid)
+273  4 60:  D@752:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1042, ExitInvalid)
+274  4 60:  D@756:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1053, ExitValid)
+275  4 60:  D@757:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1053, ExitValid)
+276  4 60:    D@7:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1059, ExitInvalid)
+277  4 60:  D@760:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1059, ExitInvalid)
+278  4 60:    D@9:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1066, ExitInvalid)
+279  4 60:  D@766:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1066, ExitInvalid)
+280  4 60:  D@771:<!0:->	LoopHint(MustGen, W:SideState, bc#1073, ExitValid)
+281  4 60:   D@13:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1075, ExitValid)
+282  4 60:  D@776:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1075, ExitInvalid)
+283  4 60:   D@19:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1082, ExitValid)
+284  4 60:  D@780:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1082, ExitInvalid)
+285  4 60:  D@784:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1093, ExitValid)
+286  4 60:  D@785:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1093, ExitValid)
+287  4 60:   D@24:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1099, ExitInvalid)
+288  4 60:  D@788:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1099, ExitInvalid)
+289  4 60:   D@26:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1106, ExitInvalid)
+290  4 60:  D@794:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1106, ExitInvalid)
+291  4 60:  D@799:<!0:->	LoopHint(MustGen, W:SideState, bc#1113, ExitValid)
+292  4 60:   D@27:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1115, ExitValid)
+293  4 60:  D@804:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1115, ExitInvalid)
+294  4 60:   D@31:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1122, ExitValid)
+295  4 60:  D@808:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1122, ExitInvalid)
+296  4 60:  D@812:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1133, ExitValid)
+297  4 60:  D@813:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1133, ExitValid)
+298  4 60:  D@406:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1139, ExitInvalid)
+299  4 60:  D@816:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1139, ExitInvalid)
+300  4 60:  D@405:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1146, ExitInvalid)
+301  4 60:  D@822:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1146, ExitInvalid)
+302  4 60:  D@827:<!0:->	LoopHint(MustGen, W:SideState, bc#1153, ExitValid)
+303  4 60:   D@33:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1155, ExitValid)
+304  4 60:  D@832:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1155, ExitInvalid)
+305  4 60:   D@34:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1162, ExitValid)
+306  4 60:  D@836:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1162, ExitInvalid)
+307  4 60:  D@840:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1173, ExitValid)
+308  4 60:  D@841:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1173, ExitValid)
+309  4 60:   D@35:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1179, ExitInvalid)
+310  4 60:  D@844:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1179, ExitInvalid)
+311  4 60:   D@38:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1186, ExitInvalid)
+312  4 60:  D@850:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1186, ExitInvalid)
+313  4 60:  D@855:<!0:->	LoopHint(MustGen, W:SideState, bc#1193, ExitValid)
+314  4 60:  D@718:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1195, ExitValid)
+315  4 60:  D@860:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1195, ExitInvalid)
+316  4 60:  D@663:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1202, ExitValid)
+317  4 60:  D@864:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1202, ExitInvalid)
+318  4 60:  D@868:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1213, ExitValid)
+319  4 60:  D@869:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1213, ExitValid)
+320  4 60:   D@42:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1219, ExitInvalid)
+321  4 60:  D@872:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1219, ExitInvalid)
+322  4 60:  D@806:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1226, ExitInvalid)
+323  4 60:  D@878:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1226, ExitInvalid)
+324  4 60:  D@883:<!0:->	LoopHint(MustGen, W:SideState, bc#1233, ExitValid)
+325  4 60:  D@415:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1235, ExitValid)
+326  4 60:  D@888:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1235, ExitInvalid)
+327  4 60:  D@414:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1242, ExitValid)
+328  4 60:  D@892:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1242, ExitInvalid)
+329  4 60:  D@896:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1253, ExitValid)
+330  4 60:  D@897:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1253, ExitValid)
+331  4 60:   D@43:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1259, ExitInvalid)
+332  4 60:  D@900:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1259, ExitInvalid)
+333  4 60:   D@45:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1266, ExitInvalid)
+334  4 60:  D@906:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1266, ExitInvalid)
+335  4 60:  D@911:<!0:->	LoopHint(MustGen, W:SideState, bc#1273, ExitValid)
+336  4 60:   D@48:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1275, ExitValid)
+337  4 60:  D@916:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1275, ExitInvalid)
+338  4 60:  D@662:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1282, ExitValid)
+339  4 60:  D@920:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1282, ExitInvalid)
+340  4 60:  D@924:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1293, ExitValid)
+341  4 60:  D@925:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1293, ExitValid)
+342  4 60:   D@49:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1299, ExitInvalid)
+343  4 60:  D@928:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1299, ExitInvalid)
+344  4 60:  D@803:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1306, ExitInvalid)
+345  4 60:  D@934:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1306, ExitInvalid)
+346  4 60:  D@939:<!0:->	LoopHint(MustGen, W:SideState, bc#1313, ExitValid)
+347  4 60:  D@661:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1315, ExitValid)
+348  4 60:  D@600:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1315, ExitInvalid)
+349  4 60:   D@56:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1322, ExitValid)
+350  4 60:    D@2:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1322, ExitInvalid)
+351  4 60:  D@571:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1333, ExitValid)
+352  4 60:  D@601:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1333, ExitValid)
+353  4 60:   D@57:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1339, ExitInvalid)
+354  4 60:  D@602:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1339, ExitInvalid)
+355  4 60:   D@61:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1346, ExitInvalid)
+356  4 60:  D@941:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1346, ExitInvalid)
+357  4 60:  D@940:<!0:->	LoopHint(MustGen, W:SideState, bc#1353, ExitValid)
+358  4 60:   D@62:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1355, ExitValid)
+359  4 60:  D@938:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1355, ExitInvalid)
+360  4 60:   D@64:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1362, ExitValid)
+361  4 60:  D@937:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1362, ExitInvalid)
+362  4 60:  D@936:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1373, ExitValid)
+363  4 60:  D@935:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1373, ExitValid)
+364  4 60:   D@65:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1379, ExitInvalid)
+365  4 60:  D@933:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1379, ExitInvalid)
+366  4 60:   D@67:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1386, ExitInvalid)
+367  4 60:  D@932:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1386, ExitInvalid)
+368  4 60:  D@931:<!0:->	LoopHint(MustGen, W:SideState, bc#1393, ExitValid)
+369  4 60:   D@70:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1395, ExitValid)
+370  4 60:  D@930:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1395, ExitInvalid)
+371  4 60:   D@74:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1402, ExitValid)
+372  4 60:  D@929:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1402, ExitInvalid)
+373  4 60:  D@927:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1413, ExitValid)
+374  4 60:  D@926:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1413, ExitValid)
+375  4 60:   D@73:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1419, ExitInvalid)
+376  4 60:  D@923:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1419, ExitInvalid)
+377  4 60:   D@75:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1426, ExitInvalid)
+378  4 60:  D@922:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1426, ExitInvalid)
+379  4 60:  D@921:<!0:->	LoopHint(MustGen, W:SideState, bc#1433, ExitValid)
+380  4 60:   D@77:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1435, ExitValid)
+381  4 60:  D@919:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1435, ExitInvalid)
+382  4 60:   D@81:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1442, ExitValid)
+383  4 60:  D@918:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1442, ExitInvalid)
+384  4 60:  D@917:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1453, ExitValid)
+385  4 60:  D@915:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1453, ExitValid)
+386  4 60:  D@719:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1459, ExitInvalid)
+387  4 60:  D@914:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1459, ExitInvalid)
+388  4 60:  D@658:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1466, ExitInvalid)
+389  4 60:  D@913:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1466, ExitInvalid)
+390  4 60:  D@912:<!0:->	LoopHint(MustGen, W:SideState, bc#1473, ExitValid)
+391  4 60:   D@82:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1475, ExitValid)
+392  4 60:  D@910:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1475, ExitInvalid)
+393  4 60:  D@801:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1482, ExitValid)
+394  4 60:  D@909:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1482, ExitInvalid)
+395  4 60:  D@908:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1493, ExitValid)
+396  4 60:  D@907:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1493, ExitValid)
+397  4 60:  D@426:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1499, ExitInvalid)
+398  4 60:  D@905:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1499, ExitInvalid)
+399  4 60:   D@83:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1506, ExitInvalid)
+400  4 60:  D@904:<!0:->	MovHint(Check:Untyped:D@60, MustGen, loc6, W:SideState, ClobbersExit, bc#1506, ExitInvalid)
+401  4 60:  D@903:<!0:->	FilterInByStatus(Check:Untyped:D@40, MustGen, (Simple, <id='uid:(uo)', [0x30000aa90:[0xaa90/43664, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200], 0x30000ac50:[0xac50/44112, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200, Leaf (Watched)]], [<Object: 0x133444200 with butterfly 0x0(base=0xfffffffffffffff8) (Structure 0x30000a940:[0xa940/43328, Object, (1/6, 0/0){constructor:0}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]), StructureID: 43328: Absence of uo with prototype Object: 0x11100cdc8 with butterfly 0x700a0082a8(base=0x700a008220) (Structure 0x300005c90:[0x5c90/23696, Object, (0/0, 12/16){toString:64, toLocaleString:65, valueOf:66, hasOwnProperty:67, propertyIsEnumerable:68, isPrototypeOf:69, __defineGetter__:70, __defineSetter__:71, __lookupGetter__:72, __lookupSetter__:73, __proto__:74, constructor:75}, NonArray, Leaf (Watched)]), StructureID: 23696>, <Object: 0x11100cdc8 with butterfly 0x700a0082a8(base=0x700a008220) (Structure 0x300005c90:[0x5c90/23696, Object, (0/0, 12/16){toString:64, toLocaleString:65, valueOf:66, hasOwnProperty:67, propertyIsEnumerable:68, isPrototypeOf:69, __defineGetter__:70, __defineSetter__:71, __lookupGetter__:72, __lookupSetter__:73, __proto__:74, constructor:75}, NonArray, Leaf (Watched)]), StructureID: 23696: Absence of uo with prototype <JSValue()>>], offset = -1>), W:SideState, bc#1509, ExitValid)
+402  4 60:  D@758:<!0:->	CheckStructure(Cell:D@40, MustGen, [%DK:Object, %BP:Object], R:JSCell_structureID, Exits, bc#1509, ExitValid)
+403  4 60:   D@87:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1509, ExitValid)
+404  4 60:  D@902:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1509, ExitInvalid)
+405  4 60:  D@901:<!0:->	FilterGetByStatus(Check:Untyped:D@40, MustGen, (Simple, <id='uid:(p1)', [0x30000ac50:[0xac50/44112, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200, Leaf (Watched)], 0x30000aa90:[0xaa90/43664, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200]], [], offset = 64>, seenInJIT = true), W:SideState, bc#1513, ExitValid)
+406  4 60:  D@899:< 1:->	GetButterfly(Cell:D@40, Storage|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Other, R:JSObject_butterfly, bc#1513, ExitValid)
+407  4 60:  D@898:< 2:->	GetByOffset(Check:Untyped:Kill:D@899, KnownCell:Kill:D@40, JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Array|NonBoolInt32, id5{p1}, 64, R:NamedProperties(5), bc#1513, ExitValid)  predicting Array|NonBoolInt32
+408  4 60:   D@91:<!0:->	KillStack(MustGen, loc5, W:Stack(loc5), ClobbersExit, bc#1513, ExitValid)
+409  4 60:  D@895:<!0:->	MovHint(Check:Untyped:D@898, MustGen, loc5, W:SideState, ClobbersExit, bc#1513, ExitInvalid)
+410  4 60:  D@894:<!0:->	Branch(Int32:Kill:D@610, MustGen, T:#6/w:1.000000, F:#7/w:1.000000, W:SideState, bc#1519, ExitValid)
+     4 60:   States: TakeBoth, StructuresAreWatched
+     4 60:   Live: D@1, D@3, D@60, D@68, D@79, D@699<Int52>, D@875, D@885, D@891, D@898
+     4 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched), D@891=>(Array, ArrayWithDouble, [%Cq:Array,ArrayWithDouble], Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, 1:StructuresAreWatched), D@898=>(HeapTop, TOP, TOP, 1:StructuresAreWatched)
+
+     6 60: Block #6 (bc#1522):
+     6 60:   Execution count: 1.000000
+     6 60:   Predecessors: #4
+     6 60:   Successors: #8
+     6 60:   Dominated by: #0 #2 #4 #6
+     6 60:   Dominates: #6
+     6 60:   Dominance Frontier: #8
+     6 60:   Iterated Dominance Frontier: #8
+     6 60:   Backwards dominates by: #root #6 #8
+     6 60:   Backwards dominates: #6
+     6 60:   Control equivalent to: #6
+     6 60:   States: StructuresAreWatched
+     6 60:   Live: D@1, D@3, D@60, D@68, D@79, D@699<Int52>, D@875, D@885, D@891
+     6 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched), D@891=>(Array, ArrayWithDouble, [%Cq:Array,ArrayWithDouble], Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, 1:StructuresAreWatched)
+  0  6 60:  D@657:<!0:->	ExitOK(MustGen, W:SideState, bc#1522, ExitValid)
+  1  6 60:   D@92:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1522, ExitValid)
+  2  6 60:  D@893:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1522, ExitInvalid)
+  3  6 60:  D@800:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1529, ExitValid)
+  4  6 60:  D@890:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1529, ExitInvalid)
+  5  6 60:  D@656:<!0:->	KillStack(MustGen, loc5, W:Stack(loc5), ClobbersExit, bc#1540, ExitValid)
+  6  6 60:  D@889:<!0:->	MovHint(Check:Untyped:D@891, MustGen, loc5, W:SideState, ClobbersExit, bc#1540, ExitInvalid)
+  7  6 60:   D@97:< 1:->	Upsilon(Check:Untyped:Kill:D@891, ^569, W:SideState, bc#1543, ExitValid)
+  8  6 60:  D@887:<!0:->	Jump(MustGen, T:#8, W:SideState, bc#1543, ExitValid)
+     6 60:   States: InvalidBranchDirection, StructuresAreWatched
+     6 60:   Live: D@1, D@3, D@60, D@68, D@79, shadow(D@569), D@699<Int52>, D@875, D@885
+     6 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), shadow(D@569)=>(Array, ArrayWithDouble, [%Cq:Array,ArrayWithDouble], Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched)
+
+     7 60: Block #7 (bc#1543):
+     7 60:   Execution count: 1.000000
+     7 60:   Predecessors: #4
+     7 60:   Successors: #8
+     7 60:   Dominated by: #0 #2 #4 #7
+     7 60:   Dominates: #7
+     7 60:   Dominance Frontier: #8
+     7 60:   Iterated Dominance Frontier: #8
+     7 60:   Backwards dominates by: #root #7 #8
+     7 60:   Backwards dominates: #7
+     7 60:   Control equivalent to: #7
+     7 60:   States: StructuresAreWatched
+     7 60:   Live: D@1, D@3, D@60, D@68, D@79, D@699<Int52>, D@875, D@885, D@898
+     7 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched), D@898=>(HeapTop, TOP, TOP, 1:StructuresAreWatched)
+  0  7 60:  D@303:<!0:->	ExitOK(MustGen, W:SideState, bc#1543, ExitValid)
+  1  7 60:  D@305:< 1:->	Upsilon(Check:Untyped:Kill:D@898, ^569, W:SideState, bc#1543, ExitValid)
+  2  7 60:  D@708:<!0:->	Jump(MustGen, T:#8, W:SideState, bc#1543, ExitValid)
+     7 60:   States: InvalidBranchDirection, StructuresAreWatched
+     7 60:   Live: D@1, D@3, D@60, D@68, D@79, shadow(D@569), D@699<Int52>, D@875, D@885
+     7 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), shadow(D@569)=>(HeapTop, TOP, TOP, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched)
+
+     8 60: Block #8 (bc#1543):
+     8 60:   Execution count: 1.000000
+     8 60:   Predecessors: #6 #7
+     8 60:   Successors:
+     8 60:   Dominated by: #0 #2 #4 #8
+     8 60:   Dominates: #8
+     8 60:   Dominance Frontier: 
+     8 60:   Iterated Dominance Frontier: 
+     8 60:   Backwards dominates by: #root #8
+     8 60:   Backwards dominates: #4 #6 #7 #8
+     8 60:   Control equivalent to: #4 #8
+     8 60:   States: StructuresAreWatched
+     8 60:   Live: D@1, D@3, D@60, D@68, D@79, shadow(D@569), D@699<Int52>, D@875, D@885
+     8 60:   Values: D@3=>(Other, Undefined, 1:StructuresAreWatched), D@15=>(OtherObj, NonArray, [%By:JSLexicalEnvironment], Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920, 1:StructuresAreWatched), D@60=>(BoolInt32, Int32: 0, 1:StructuresAreWatched), D@68=>(BoolInt32, Int32: 1, 1:StructuresAreWatched), D@79=>(Final, NonArray, [%C6:Object], Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336, 1:StructuresAreWatched), shadow(D@569)=>(HeapTop, TOP, TOP, 1:StructuresAreWatched), D@699<Int52>=>(Int32AsInt52, Int32: 16, 1:StructuresAreWatched), D@875=>(Uint32Array, Uint32ArrayMode, [%Am:Uint32Array], Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, 1:StructuresAreWatched), D@885=>(Float64Array, Float64ArrayMode, [%Aj:Float64Array], Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752, 1:StructuresAreWatched)
+  0  8 60:  D@569:< 8:->	Phi(JS|PureInt, Array|NonBoolInt32, W:SideState, bc#1543, ExitInvalid)
+  1  8 60:   D@98:<!0:->	MovHint(Check:Untyped:D@569, MustGen, loc5, W:SideState, ClobbersExit, bc#1543, ExitInvalid)
+  2  8 60:  D@101:<!0:->	ExitOK(MustGen, W:SideState, bc#1543, ExitValid)
+  3  8 60:  D@105:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1543, ExitValid)
+  4  8 60:  D@886:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1543, ExitInvalid)
+  5  8 60:  D@106:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1550, ExitValid)
+  6  8 60:  D@884:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1550, ExitInvalid)
+  7  8 60:  D@107:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1561, ExitValid)
+  8  8 60:  D@882:<!0:->	MovHint(Check:Untyped:D@885, MustGen, loc8, W:SideState, ClobbersExit, bc#1561, ExitInvalid)
+  9  8 60:  D@109:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1564, ExitValid)
+ 10  8 60:  D@881:<!0:->	MovHint(Check:Untyped:D@60, MustGen, loc9, W:SideState, ClobbersExit, bc#1564, ExitInvalid)
+ 11  8 60:  D@614:<!0:->	CheckArray(Check:Cell:D@569, MustGen, Double+Array+InBounds+AsIs+Read, R:JSCell_indexingType,JSCell_structureID, Exits, bc#1567, ExitValid)
+ 12  8 60:  D@618:< 3:->	GetButterfly(Cell:D@569, Storage|PureInt, R:JSObject_butterfly, bc#1567, ExitValid)
+ 13  8 60:  D@597:< 1:->	GetArrayLength(KnownCell:D@569, Check:Untyped:D@618, Int32|PureInt, Int32, Double+Array+InBounds+AsIs+Read, R:Butterfly_publicLength, Exits, bc#1567, ExitValid)
+ 14  8 60:  D@606:<!1:->	CheckInBounds(Int32:D@68, KnownInt32:Kill:D@597, JS|MustGen|PureInt, Int32, Exits, bc#1567, ExitValid)
+ 15  8 60:  D@880:<!2:->	GetByVal(KnownCell:D@569, Int32:D@68, Check:Untyped:D@618, Check:Untyped:Kill:D@606, Double|MustGen|VarArgs|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, AnyIntAsDouble|NonIntAsDouble, Double+Array+InBounds+AsIs+Read, R:Butterfly_publicLength,IndexedDoubleProperties, Exits, bc#1567, ExitValid)  predicting NonIntAsDouble
+ 16  8 60:  D@434:<!0:->	KillStack(MustGen, loc10, W:Stack(loc10), ClobbersExit, bc#1567, ExitInvalid)
+ 17  8 60:  D@879:<!0:->	MovHint(DoubleRep:D@880<Double>, MustGen, loc10, W:SideState, ClobbersExit, bc#1567, ExitInvalid)
+ 18  8 60:  D@619:< 4:->	ConstantStoragePointer(Storage|PureInt, 0x78340000c0, bc#1573, ExitValid)
+ 19  8 60:  D@877:<!0:->	PutByVal(KnownCell:D@885, Int32:D@60, DoubleRep:Kill:D@880<Double>, Check:Untyped:D@619, Check:Untyped:D@60, MustGen|VarArgs, Float64Array+OriginalNonArray+InBounds+AsIs+Write, R:MiscFields, W:TypedArrayProperties, Exits, ClobbersExit, bc#1573, ExitValid)
+ 20  8 60:  D@433:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1579, ExitValid)
+ 21  8 60:  D@876:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1579, ExitInvalid)
+ 22  8 60:  D@111:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1586, ExitValid)
+ 23  8 60:  D@874:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1586, ExitInvalid)
+ 24  8 60:  D@114:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1597, ExitValid)
+ 25  8 60:  D@873:<!0:->	MovHint(Check:Untyped:D@875, MustGen, loc8, W:SideState, ClobbersExit, bc#1597, ExitInvalid)
+ 26  8 60:  D@115:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1600, ExitValid)
+ 27  8 60:  D@871:<!0:->	MovHint(Check:Untyped:D@60, MustGen, loc9, W:SideState, ClobbersExit, bc#1600, ExitInvalid)
+ 28  8 60:  D@118:<!0:->	KillStack(MustGen, loc11, W:Stack(loc11), ClobbersExit, bc#1603, ExitValid)
+ 29  8 60:  D@870:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc11, W:SideState, ClobbersExit, bc#1603, ExitInvalid)
+ 30  8 60:  D@721:<!0:->	KillStack(MustGen, loc12, W:Stack(loc12), ClobbersExit, bc#1610, ExitValid)
+ 31  8 60:  D@867:<!0:->	MovHint(Check:Untyped:D@875, MustGen, loc12, W:SideState, ClobbersExit, bc#1610, ExitInvalid)
+ 32  8 60:  D@866:<!2:->	GetByVal(KnownCell:D@875, Int32:D@60, Check:Untyped:D@619, Check:Untyped:D@60, Int52|MustGen|VarArgs|PureNum|NeedsNaNOrInfinity|UseAsOther, Int52Any, Uint32Array+OriginalNonArray+InBounds+AsIs+Read, R:TypedArrayProperties,MiscFields, Exits, bc#1621, ExitValid)  predicting AnyIntAsDouble
+ 33  8 60:  D@653:<!0:->	KillStack(MustGen, loc10, W:Stack(loc10), ClobbersExit, bc#1621, ExitInvalid)
+ 34  8 60:  D@865:<!0:->	MovHint(Int52Rep:D@866<Int52>, MustGen, loc10, W:SideState, ClobbersExit, bc#1621, ExitInvalid)
+ 35  8 60:  D@862:<!2:->	ArithAdd(Int52Rep:Kill:D@866<Int52>, Int52Rep:Kill:D@699<Int52>, Int52|MustGen|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther|MayHaveDoubleResult, Int52Any, CheckOverflow, Exits, bc#1627, ExitValid)
+ 36  8 60:  D@119:<!0:->	KillStack(MustGen, loc10, W:Stack(loc10), ClobbersExit, bc#1627, ExitInvalid)
+ 37  8 60:  D@861:<!0:->	MovHint(Int52Rep:D@862<Int52>, MustGen, loc10, W:SideState, ClobbersExit, bc#1627, ExitInvalid)
+ 38  8 60:  D@859:<!0:->	PutByVal(KnownCell:Kill:D@875, Int32:D@60, Int52Rep:Kill:D@862<Int52>, Check:Untyped:D@619, Check:Untyped:D@60, MustGen|VarArgs, Uint32Array+OriginalNonArray+InBounds+AsIs+Write, R:MiscFields, W:TypedArrayProperties, Exits, ClobbersExit, bc#1633, ExitValid)
+ 39  8 60:  D@796:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1639, ExitValid)
+ 40  8 60:  D@858:<!0:->	MovHint(Check:Untyped:D@569, MustGen, loc8, W:SideState, ClobbersExit, bc#1639, ExitInvalid)
+ 41  8 60:  D@443:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1642, ExitValid)
+ 42  8 60:  D@857:<!0:->	MovHint(Check:Untyped:D@68, MustGen, loc9, W:SideState, ClobbersExit, bc#1642, ExitInvalid)
+ 43  8 60:  D@442:<!0:->	KillStack(MustGen, loc11, W:Stack(loc11), ClobbersExit, bc#1645, ExitValid)
+ 44  8 60:  D@856:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc11, W:SideState, ClobbersExit, bc#1645, ExitInvalid)
+ 45  8 60:  D@120:<!0:->	KillStack(MustGen, loc12, W:Stack(loc12), ClobbersExit, bc#1652, ExitValid)
+ 46  8 60:  D@854:<!0:->	MovHint(Check:Untyped:D@885, MustGen, loc12, W:SideState, ClobbersExit, bc#1652, ExitInvalid)
+ 47  8 60:  D@853:<!2:->	GetByVal(KnownCell:Kill:D@885, Int32:Kill:D@60, Check:Untyped:Kill:D@619, Check:Untyped:D@60, Double|MustGen|VarArgs|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, BytecodeDouble|DoubleImpureNaN, Float64Array+OriginalNonArray+InBounds+AsIs+Read, R:TypedArrayProperties,MiscFields, Exits, bc#1663, ExitValid)  predicting NonIntAsDouble
+ 48  8 60:  D@121:<!0:->	KillStack(MustGen, loc10, W:Stack(loc10), ClobbersExit, bc#1663, ExitInvalid)
+ 49  8 60:  D@852:<!0:->	MovHint(DoubleRep:D@853<Double>, MustGen, loc10, W:SideState, ClobbersExit, bc#1663, ExitInvalid)
+ 50  8 60:  D@621:<!0:->	CheckArray(Cell:D@569, MustGen, Double+Array+InBounds+AsIs+Write, R:JSCell_indexingType,JSCell_structureID, Exits, bc#1669, ExitValid)
+ 51  8 60:  D@851:<!0:->	PutByValAlias(KnownCell:Kill:D@569, Int32:D@68, Check:DoubleRepReal:Kill:D@853<Double>, Check:Untyped:Kill:D@618, MustGen|VarArgs, Double+Array+InBounds+AsIs+Write, R:Butterfly_publicLength,Butterfly_vectorLength,IndexedDoubleProperties, W:IndexedDoubleProperties, Exits, ClobbersExit, bc#1669, ExitValid)
+ 52  8 60:  D@849:<!0:->	LoopHint(MustGen, W:SideState, bc#1679, ExitValid)
+ 53  8 60:  D@124:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1681, ExitValid)
+ 54  8 60:  D@848:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1681, ExitInvalid)
+ 55  8 60:  D@652:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1688, ExitValid)
+ 56  8 60:  D@847:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1688, ExitInvalid)
+ 57  8 60:  D@846:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1699, ExitValid)
+ 58  8 60:  D@845:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1699, ExitValid)
+ 59  8 60:  D@125:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1705, ExitInvalid)
+ 60  8 60:  D@843:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1705, ExitInvalid)
+ 61  8 60:  D@793:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1712, ExitInvalid)
+ 62  8 60:  D@842:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1712, ExitInvalid)
+ 63  8 60:  D@839:<!0:->	LoopHint(MustGen, W:SideState, bc#1719, ExitValid)
+ 64  8 60:  D@651:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1721, ExitValid)
+ 65  8 60:  D@838:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1721, ExitInvalid)
+ 66  8 60:  D@129:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1728, ExitValid)
+ 67  8 60:  D@837:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1728, ExitInvalid)
+ 68  8 60:  D@835:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1739, ExitValid)
+ 69  8 60:  D@834:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1739, ExitValid)
+ 70  8 60:  D@130:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1745, ExitInvalid)
+ 71  8 60:  D@833:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1745, ExitInvalid)
+ 72  8 60:  D@133:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1752, ExitInvalid)
+ 73  8 60:  D@831:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1752, ExitInvalid)
+ 74  8 60:  D@830:<!0:->	LoopHint(MustGen, W:SideState, bc#1759, ExitValid)
+ 75  8 60:  D@134:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1761, ExitValid)
+ 76  8 60:  D@829:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1761, ExitInvalid)
+ 77  8 60:  D@137:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1768, ExitValid)
+ 78  8 60:  D@826:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1768, ExitInvalid)
+ 79  8 60:  D@824:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1779, ExitValid)
+ 80  8 60:  D@823:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1779, ExitValid)
+ 81  8 60:  D@138:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1785, ExitInvalid)
+ 82  8 60:  D@819:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1785, ExitInvalid)
+ 83  8 60:  D@139:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1792, ExitInvalid)
+ 84  8 60:  D@815:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1792, ExitInvalid)
+ 85  8 60:  D@810:<!0:->	LoopHint(MustGen, W:SideState, bc#1799, ExitValid)
+ 86  8 60:  D@142:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1801, ExitValid)
+ 87  8 60:  D@805:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1801, ExitInvalid)
+ 88  8 60:   D@86:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1808, ExitValid)
+ 89  8 60:  D@802:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1808, ExitInvalid)
+ 90  8 60:  D@798:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1819, ExitValid)
+ 91  8 60:  D@797:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1819, ExitValid)
+ 92  8 60:  D@145:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1825, ExitInvalid)
+ 93  8 60:  D@795:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1825, ExitInvalid)
+ 94  8 60:  D@146:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1832, ExitInvalid)
+ 95  8 60:  D@790:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1832, ExitInvalid)
+ 96  8 60:  D@786:<!0:->	LoopHint(MustGen, W:SideState, bc#1839, ExitValid)
+ 97  8 60:  D@147:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1841, ExitValid)
+ 98  8 60:  D@781:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1841, ExitInvalid)
+ 99  8 60:  D@149:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1848, ExitValid)
+100  8 60:  D@777:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1848, ExitInvalid)
+101  8 60:  D@774:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1859, ExitValid)
+102  8 60:  D@773:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1859, ExitValid)
+103  8 60:  D@723:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1865, ExitInvalid)
+104  8 60:  D@770:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1865, ExitInvalid)
+105  8 60:  D@650:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1872, ExitInvalid)
+106  8 60:  D@769:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1872, ExitInvalid)
+107  8 60:  D@768:<!0:->	LoopHint(MustGen, W:SideState, bc#1879, ExitValid)
+108  8 60:  D@151:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1881, ExitValid)
+109  8 60:  D@767:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1881, ExitInvalid)
+110  8 60:  D@792:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1888, ExitValid)
+111  8 60:  D@765:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1888, ExitInvalid)
+112  8 60:  D@764:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1899, ExitValid)
+113  8 60:  D@763:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1899, ExitValid)
+114  8 60:  D@454:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1905, ExitInvalid)
+115  8 60:  D@762:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1905, ExitInvalid)
+116  8 60:  D@152:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1912, ExitInvalid)
+117  8 60:  D@761:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1912, ExitInvalid)
+118  8 60:  D@759:<!0:->	LoopHint(MustGen, W:SideState, bc#1919, ExitValid)
+119  8 60:  D@153:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1921, ExitValid)
+120  8 60:  D@755:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1921, ExitInvalid)
+121  8 60:  D@156:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1928, ExitValid)
+122  8 60:  D@754:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1928, ExitInvalid)
+123  8 60:  D@753:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1939, ExitValid)
+124  8 60:  D@751:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1939, ExitValid)
+125  8 60:  D@647:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1945, ExitInvalid)
+126  8 60:  D@750:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1945, ExitInvalid)
+127  8 60:  D@157:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1952, ExitInvalid)
+128  8 60:  D@749:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1952, ExitInvalid)
+129  8 60:  D@747:<!0:->	LoopHint(MustGen, W:SideState, bc#1959, ExitValid)
+130  8 60:  D@791:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#1961, ExitValid)
+131  8 60:  D@746:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#1961, ExitInvalid)
+132  8 60:  D@646:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#1968, ExitValid)
+133  8 60:  D@745:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#1968, ExitInvalid)
+134  8 60:  D@744:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#1979, ExitValid)
+135  8 60:  D@742:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1979, ExitValid)
+136  8 60:  D@161:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1985, ExitInvalid)
+137  8 60:  D@741:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1985, ExitInvalid)
+138  8 60:  D@162:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#1992, ExitInvalid)
+139  8 60:  D@740:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#1992, ExitInvalid)
+140  8 60:  D@739:<!0:->	LoopHint(MustGen, W:SideState, bc#1999, ExitValid)
+141  8 60:  D@165:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2001, ExitValid)
+142  8 60:  D@737:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2001, ExitInvalid)
+143  8 60:  D@166:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2008, ExitValid)
+144  8 60:  D@736:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2008, ExitInvalid)
+145  8 60:  D@735:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2019, ExitValid)
+146  8 60:  D@734:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2019, ExitValid)
+147  8 60:  D@170:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2025, ExitInvalid)
+148  8 60:  D@730:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2025, ExitInvalid)
+149  8 60:  D@171:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2032, ExitInvalid)
+150  8 60:  D@722:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2032, ExitInvalid)
+151  8 60:  D@717:<!0:->	LoopHint(MustGen, W:SideState, bc#2039, ExitValid)
+152  8 60:  D@173:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2041, ExitValid)
+153  8 60:  D@711:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2041, ExitInvalid)
+154  8 60:  D@174:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2048, ExitValid)
+155  8 60:  D@707:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2048, ExitInvalid)
+156  8 60:  D@703:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2059, ExitValid)
+157  8 60:  D@702:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2059, ExitValid)
+158  8 60:  D@462:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2065, ExitInvalid)
+159  8 60:  D@697:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2065, ExitInvalid)
+160  8 60:  D@461:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2072, ExitInvalid)
+161  8 60:  D@691:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2072, ExitInvalid)
+162  8 60:  D@686:<!0:->	LoopHint(MustGen, W:SideState, bc#2079, ExitValid)
+163  8 60:  D@176:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2081, ExitValid)
+164  8 60:  D@680:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2081, ExitInvalid)
+165  8 60:  D@177:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2088, ExitValid)
+166  8 60:  D@677:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2088, ExitInvalid)
+167  8 60:  D@671:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2099, ExitValid)
+168  8 60:  D@670:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2099, ExitValid)
+169  8 60:  D@179:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2105, ExitInvalid)
+170  8 60:  D@666:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2105, ExitInvalid)
+171  8 60:  D@181:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2112, ExitInvalid)
+172  8 60:  D@660:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2112, ExitInvalid)
+173  8 60:  D@655:<!0:->	LoopHint(MustGen, W:SideState, bc#2119, ExitValid)
+174  8 60:  D@725:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2121, ExitValid)
+175  8 60:  D@649:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2121, ExitInvalid)
+176  8 60:  D@642:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2128, ExitValid)
+177  8 60:  D@643:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2128, ExitInvalid)
+178  8 60:  D@639:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2139, ExitValid)
+179  8 60:  D@638:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2139, ExitValid)
+180  8 60:  D@182:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2145, ExitInvalid)
+181  8 60:  D@634:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2145, ExitInvalid)
+182  8 60:  D@789:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2152, ExitInvalid)
+183  8 60:  D@628:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2152, ExitInvalid)
+184  8 60:  D@623:<!0:->	LoopHint(MustGen, W:SideState, bc#2159, ExitValid)
+185  8 60:  D@471:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2161, ExitValid)
+186  8 60:  D@615:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2161, ExitInvalid)
+187  8 60:  D@470:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2168, ExitValid)
+188  8 60:  D@613:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2168, ExitInvalid)
+189  8 60:  D@609:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2179, ExitValid)
+190  8 60:  D@607:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2179, ExitValid)
+191  8 60:  D@184:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2185, ExitInvalid)
+192  8 60:  D@604:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2185, ExitInvalid)
+193  8 60:  D@185:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2192, ExitInvalid)
+194  8 60:  D@599:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2192, ExitInvalid)
+195  8 60:  D@596:<!0:->	LoopHint(MustGen, W:SideState, bc#2199, ExitValid)
+196  8 60:  D@187:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2201, ExitValid)
+197  8 60:  D@594:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2201, ExitInvalid)
+198  8 60:  D@641:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2208, ExitValid)
+199  8 60:  D@591:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2208, ExitInvalid)
+200  8 60:  D@587:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2219, ExitValid)
+201  8 60:  D@586:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2219, ExitValid)
+202  8 60:  D@189:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2225, ExitInvalid)
+203  8 60:  D@582:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2225, ExitInvalid)
+204  8 60:  D@787:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2232, ExitInvalid)
+205  8 60:  D@577:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2232, ExitInvalid)
+206  8 60:  D@573:<!0:->	LoopHint(MustGen, W:SideState, bc#2239, ExitValid)
+207  8 60:  D@637:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2241, ExitValid)
+208  8 60:  D@567:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2241, ExitInvalid)
+209  8 60:  D@193:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2248, ExitValid)
+210  8 60:  D@563:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2248, ExitInvalid)
+211  8 60:  D@558:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2259, ExitValid)
+212  8 60:  D@557:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2259, ExitValid)
+213  8 60:  D@194:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2265, ExitInvalid)
+214  8 60:  D@554:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2265, ExitInvalid)
+215  8 60:  D@198:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2272, ExitInvalid)
+216  8 60:  D@548:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2272, ExitInvalid)
+217  8 60:  D@544:<!0:->	LoopHint(MustGen, W:SideState, bc#2279, ExitValid)
+218  8 60:  D@199:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2281, ExitValid)
+219  8 60:  D@538:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2281, ExitInvalid)
+220  8 60:  D@202:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2288, ExitValid)
+221  8 60:  D@537:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2288, ExitInvalid)
+222  8 60:  D@534:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2299, ExitValid)
+223  8 60:  D@531:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2299, ExitValid)
+224  8 60:  D@203:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2305, ExitInvalid)
+225  8 60:  D@529:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2305, ExitInvalid)
+226  8 60:  D@204:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2312, ExitInvalid)
+227  8 60:  D@523:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2312, ExitInvalid)
+228  8 60:  D@516:<!0:->	LoopHint(MustGen, W:SideState, bc#2319, ExitValid)
+229  8 60:  D@205:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2321, ExitValid)
+230  8 60:  D@511:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2321, ExitInvalid)
+231  8 60:   D@96:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2328, ExitValid)
+232  8 60:  D@506:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2328, ExitInvalid)
+233  8 60:  D@501:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2339, ExitValid)
+234  8 60:  D@497:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2339, ExitValid)
+235  8 60:  D@208:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2345, ExitInvalid)
+236  8 60:  D@494:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2345, ExitInvalid)
+237  8 60:  D@209:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2352, ExitInvalid)
+238  8 60:  D@485:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2352, ExitInvalid)
+239  8 60:  D@479:<!0:->	LoopHint(MustGen, W:SideState, bc#2359, ExitValid)
+240  8 60:  D@210:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2361, ExitValid)
+241  8 60:  D@473:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2361, ExitInvalid)
+242  8 60:  D@213:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2368, ExitValid)
+243  8 60:  D@467:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2368, ExitInvalid)
+244  8 60:  D@464:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2379, ExitValid)
+245  8 60:  D@460:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2379, ExitValid)
+246  8 60:  D@726:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2385, ExitInvalid)
+247  8 60:  D@456:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2385, ExitInvalid)
+248  8 60:  D@635:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2392, ExitInvalid)
+249  8 60:  D@447:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2392, ExitInvalid)
+250  8 60:  D@441:<!0:->	LoopHint(MustGen, W:SideState, bc#2399, ExitValid)
+251  8 60:  D@214:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2401, ExitValid)
+252  8 60:  D@436:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2401, ExitInvalid)
+253  8 60:  D@783:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2408, ExitValid)
+254  8 60:  D@429:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2408, ExitInvalid)
+255  8 60:  D@425:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2419, ExitValid)
+256  8 60:  D@423:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2419, ExitValid)
+257  8 60:  D@482:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2425, ExitInvalid)
+258  8 60:  D@418:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2425, ExitInvalid)
+259  8 60:  D@215:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2432, ExitInvalid)
+260  8 60:  D@410:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2432, ExitInvalid)
+261  8 60:  D@404:<!0:->	LoopHint(MustGen, W:SideState, bc#2439, ExitValid)
+262  8 60:  D@217:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2441, ExitValid)
+263  8 60:  D@397:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2441, ExitInvalid)
+264  8 60:  D@219:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2448, ExitValid)
+265  8 60:  D@391:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2448, ExitInvalid)
+266  8 60:  D@385:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2459, ExitValid)
+267  8 60:  D@383:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2459, ExitValid)
+268  8 60:  D@633:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2465, ExitInvalid)
+269  8 60:  D@381:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2465, ExitInvalid)
+270  8 60:  D@221:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2472, ExitInvalid)
+271  8 60:  D@372:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2472, ExitInvalid)
+272  8 60:  D@367:<!0:->	LoopHint(MustGen, W:SideState, bc#2479, ExitValid)
+273  8 60:  D@782:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2481, ExitValid)
+274  8 60:  D@357:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2481, ExitInvalid)
+275  8 60:  D@632:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2488, ExitValid)
+276  8 60:  D@354:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2488, ExitInvalid)
+277  8 60:  D@348:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2499, ExitValid)
+278  8 60:  D@347:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2499, ExitValid)
+279  8 60:  D@226:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2505, ExitInvalid)
+280  8 60:  D@344:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2505, ExitInvalid)
+281  8 60:  D@227:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2512, ExitInvalid)
+282  8 60:  D@335:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2512, ExitInvalid)
+283  8 60:  D@330:<!0:->	LoopHint(MustGen, W:SideState, bc#2519, ExitValid)
+284  8 60:  D@230:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2521, ExitValid)
+285  8 60:  D@325:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2521, ExitInvalid)
+286  8 60:  D@231:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2528, ExitValid)
+287  8 60:  D@321:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2528, ExitInvalid)
+288  8 60:  D@317:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2539, ExitValid)
+289  8 60:  D@316:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2539, ExitValid)
+290  8 60:  D@233:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2545, ExitInvalid)
+291  8 60:  D@314:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2545, ExitInvalid)
+292  8 60:  D@235:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2552, ExitInvalid)
+293  8 60:  D@307:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2552, ExitInvalid)
+294  8 60:  D@302:<!0:->	LoopHint(MustGen, W:SideState, bc#2559, ExitValid)
+295  8 60:  D@236:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2561, ExitValid)
+296  8 60:  D@296:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2561, ExitInvalid)
+297  8 60:  D@237:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2568, ExitValid)
+298  8 60:  D@292:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2568, ExitInvalid)
+299  8 60:  D@288:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2579, ExitValid)
+300  8 60:  D@287:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2579, ExitValid)
+301  8 60:  D@490:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2585, ExitInvalid)
+302  8 60:  D@283:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2585, ExitInvalid)
+303  8 60:  D@489:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2592, ExitInvalid)
+304  8 60:  D@275:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2592, ExitInvalid)
+305  8 60:  D@270:<!0:->	LoopHint(MustGen, W:SideState, bc#2599, ExitValid)
+306  8 60:  D@240:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2601, ExitValid)
+307  8 60:  D@264:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2601, ExitInvalid)
+308  8 60:  D@241:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2608, ExitValid)
+309  8 60:  D@260:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2608, ExitInvalid)
+310  8 60:  D@257:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2619, ExitValid)
+311  8 60:  D@255:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2619, ExitValid)
+312  8 60:  D@242:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2625, ExitInvalid)
+313  8 60:  D@250:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2625, ExitInvalid)
+314  8 60:  D@245:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2632, ExitInvalid)
+315  8 60:  D@243:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2632, ExitInvalid)
+316  8 60:  D@238:<!0:->	LoopHint(MustGen, W:SideState, bc#2639, ExitValid)
+317  8 60:  D@727:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2641, ExitValid)
+318  8 60:  D@232:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2641, ExitInvalid)
+319  8 60:  D@630:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2648, ExitValid)
+320  8 60:  D@229:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2648, ExitInvalid)
+321  8 60:  D@223:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2659, ExitValid)
+322  8 60:  D@222:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2659, ExitValid)
+323  8 60:  D@246:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2665, ExitInvalid)
+324  8 60:  D@218:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2665, ExitInvalid)
+325  8 60:  D@779:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2672, ExitInvalid)
+326  8 60:  D@212:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2672, ExitInvalid)
+327  8 60:  D@207:<!0:->	LoopHint(MustGen, W:SideState, bc#2679, ExitValid)
+328  8 60:  D@499:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2681, ExitValid)
+329  8 60:  D@201:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2681, ExitInvalid)
+330  8 60:  D@498:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2688, ExitValid)
+331  8 60:  D@195:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2688, ExitInvalid)
+332  8 60:  D@191:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2699, ExitValid)
+333  8 60:  D@190:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2699, ExitValid)
+334  8 60:  D@247:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2705, ExitInvalid)
+335  8 60:  D@186:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2705, ExitInvalid)
+336  8 60:  D@249:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2712, ExitInvalid)
+337  8 60:  D@180:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2712, ExitInvalid)
+338  8 60:  D@175:<!0:->	LoopHint(MustGen, W:SideState, bc#2719, ExitValid)
+339  8 60:  D@251:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2721, ExitValid)
+340  8 60:  D@167:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2721, ExitInvalid)
+341  8 60:  D@629:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2728, ExitValid)
+342  8 60:  D@163:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2728, ExitInvalid)
+343  8 60:  D@159:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2739, ExitValid)
+344  8 60:  D@158:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2739, ExitValid)
+345  8 60:  D@254:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2745, ExitInvalid)
+346  8 60:  D@154:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2745, ExitInvalid)
+347  8 60:  D@778:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2752, ExitInvalid)
+348  8 60:  D@148:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2752, ExitInvalid)
+349  8 60:  D@143:<!0:->	LoopHint(MustGen, W:SideState, bc#2759, ExitValid)
+350  8 60:  D@627:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2761, ExitValid)
+351  8 60:  D@135:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2761, ExitInvalid)
+352  8 60:  D@258:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2768, ExitValid)
+353  8 60:  D@131:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2768, ExitInvalid)
+354  8 60:  D@128:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2779, ExitValid)
+355  8 60:  D@126:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2779, ExitValid)
+356  8 60:  D@259:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2785, ExitInvalid)
+357  8 60:  D@123:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2785, ExitInvalid)
+358  8 60:  D@261:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2792, ExitInvalid)
+359  8 60:  D@117:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2792, ExitInvalid)
+360  8 60:  D@110:<!0:->	LoopHint(MustGen, W:SideState, bc#2799, ExitValid)
+361  8 60:  D@263:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2801, ExitValid)
+362  8 60:  D@103:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2801, ExitInvalid)
+363  8 60:  D@265:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2808, ExitValid)
+364  8 60:  D@100:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2808, ExitInvalid)
+365  8 60:   D@95:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2819, ExitValid)
+366  8 60:   D@93:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2819, ExitValid)
+367  8 60:  D@266:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2825, ExitInvalid)
+368  8 60:   D@89:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2825, ExitInvalid)
+369  8 60:  D@268:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2832, ExitInvalid)
+370  8 60:   D@78:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2832, ExitInvalid)
+371  8 60:   D@72:<!0:->	LoopHint(MustGen, W:SideState, bc#2839, ExitValid)
+372  8 60:  D@269:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2841, ExitValid)
+373  8 60:   D@63:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2841, ExitInvalid)
+374  8 60:  D@102:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2848, ExitValid)
+375  8 60:   D@59:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2848, ExitInvalid)
+376  8 60:   D@52:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2859, ExitValid)
+377  8 60:   D@50:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2859, ExitValid)
+378  8 60:  D@271:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2865, ExitInvalid)
+379  8 60:   D@46:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2865, ExitInvalid)
+380  8 60:  D@273:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2872, ExitInvalid)
+381  8 60:   D@36:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2872, ExitInvalid)
+382  8 60:   D@32:<!0:->	LoopHint(MustGen, W:SideState, bc#2879, ExitValid)
+383  8 60:  D@274:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2881, ExitValid)
+384  8 60:   D@22:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2881, ExitInvalid)
+385  8 60:  D@277:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2888, ExitValid)
+386  8 60:   D@11:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2888, ExitInvalid)
+387  8 60:    D@5:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2899, ExitValid)
+388  8 60:  D@310:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2899, ExitValid)
+389  8 60:  D@731:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2905, ExitInvalid)
+390  8 60:  D@315:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2905, ExitInvalid)
+391  8 60:  D@625:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2912, ExitInvalid)
+392  8 60:  D@326:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2912, ExitInvalid)
+393  8 60:  D@333:<!0:->	LoopHint(MustGen, W:SideState, bc#2919, ExitValid)
+394  8 60:  D@278:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2921, ExitValid)
+395  8 60:  D@343:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2921, ExitInvalid)
+396  8 60:  D@775:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2928, ExitValid)
+397  8 60:  D@353:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2928, ExitInvalid)
+398  8 60:  D@362:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2939, ExitValid)
+399  8 60:  D@363:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2939, ExitValid)
+400  8 60:  D@510:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2945, ExitInvalid)
+401  8 60:  D@371:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2945, ExitInvalid)
+402  8 60:  D@279:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2952, ExitInvalid)
+403  8 60:  D@382:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2952, ExitInvalid)
+404  8 60:  D@395:<!0:->	LoopHint(MustGen, W:SideState, bc#2959, ExitValid)
+405  8 60:  D@282:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#2961, ExitValid)
+406  8 60:  D@408:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#2961, ExitInvalid)
+407  8 60:  D@285:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#2968, ExitValid)
+408  8 60:  D@413:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#2968, ExitInvalid)
+409  8 60:  D@422:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#2979, ExitValid)
+410  8 60:  D@427:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#2979, ExitValid)
+411  8 60:  D@624:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2985, ExitInvalid)
+412  8 60:  D@432:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2985, ExitInvalid)
+413  8 60:  D@286:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#2992, ExitInvalid)
+414  8 60:  D@446:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#2992, ExitInvalid)
+415  8 60:  D@455:<!0:->	LoopHint(MustGen, W:SideState, bc#2999, ExitValid)
+416  8 60:  D@772:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#3001, ExitValid)
+417  8 60:  D@469:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#3001, ExitInvalid)
+418  8 60:  D@622:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#3008, ExitValid)
+419  8 60:  D@478:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#3008, ExitInvalid)
+420  8 60:  D@484:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#3019, ExitValid)
+421  8 60:  D@487:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#3019, ExitValid)
+422  8 60:  D@289:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#3025, ExitInvalid)
+423  8 60:  D@493:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#3025, ExitInvalid)
+424  8 60:  D@291:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#3032, ExitInvalid)
+425  8 60:  D@509:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#3032, ExitInvalid)
+426  8 60:  D@520:<!0:->	LoopHint(MustGen, W:SideState, bc#3039, ExitValid)
+427  8 60:  D@293:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#3041, ExitValid)
+428  8 60:  D@527:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#3041, ExitInvalid)
+429  8 60:  D@294:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#3048, ExitValid)
+430  8 60:  D@535:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#3048, ExitInvalid)
+431  8 60:  D@539:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#3059, ExitValid)
+432  8 60:  D@540:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#3059, ExitValid)
+433  8 60:  D@297:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#3065, ExitInvalid)
+434  8 60:  D@545:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#3065, ExitInvalid)
+435  8 60:  D@298:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#3072, ExitInvalid)
+436  8 60:  D@553:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#3072, ExitInvalid)
+437  8 60:  D@565:<!0:->	LoopHint(MustGen, W:SideState, bc#3079, ExitValid)
+438  8 60:  D@299:<!0:->	KillStack(MustGen, loc8, W:Stack(loc8), ClobbersExit, bc#3081, ExitValid)
+439  8 60:  D@572:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc8, W:SideState, ClobbersExit, bc#3081, ExitInvalid)
+440  8 60:  D@301:<!0:->	KillStack(MustGen, loc9, W:Stack(loc9), ClobbersExit, bc#3088, ExitValid)
+441  8 60:  D@578:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc9, W:SideState, ClobbersExit, bc#3088, ExitInvalid)
+442  8 60:  D@583:<!0:->	FilterPutByStatus(Check:Untyped:D@79, MustGen, (<id='uid:(guard_p1)', Replace: [0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]], offset = 0, >), W:SideState, bc#3099, ExitValid)
+443  8 60:  D@585:<!0:->	PutByOffset(KnownCell:Kill:D@79, KnownCell:D@79, Check:Untyped:Kill:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#3099, ExitValid)
+444  8 60:  D@518:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#3105, ExitInvalid)
+445  8 60:  D@590:<!0:->	ZombieHint(Check:Untyped:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#3105, ExitInvalid)
+446  8 60:  D@517:<!0:->	KillStack(MustGen, loc6, W:Stack(loc6), ClobbersExit, bc#3112, ExitInvalid)
+447  8 60:  D@593:<!0:->	ZombieHint(Check:Untyped:Kill:D@1, MustGen, loc6, W:SideState, ClobbersExit, bc#3112, ExitInvalid)
+448  8 60:  D@595:<!0:->	Return(Check:Untyped:Kill:D@3, MustGen, W:SideState, Exits, bc#3115, ExitValid)
+     8 60:   States: InvalidBranchDirection, StructuresAreWatched, CFAInvalidated
+     8 60:   Live: 
+     8 60:   Values: 
+
+       60: GC Values:
+       60:     Weak:Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424
+       60:     Weak:Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752
+       60:     Weak:Object: 0x1110903c8 with butterfly 0x700a004668(base=0x700a004640) (Structure %Cq:Array,ArrayWithDouble), StructureID: 42880
+       60:     Weak:Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336
+       60:     Weak:Object: 0x1334f4160 with butterfly 0x700a0027e8(base=0x700a0027c0) (Structure %BP:Object), StructureID: 44112
+       60:     Weak:Object: 0x1334f4150 with butterfly 0x700a0027c8(base=0x700a0027a0) (Structure %DK:Object), StructureID: 43776
+       60:     Weak:Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920
+       60:     Weak:Object: 0x13344e780 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %D6:Function), StructureID: 22464
+       60: Desired watchpoints:
+       60:     Watchpoint sets: 0x111083a00, 0x1110839a0, 0x1110839e0, 0x111083a20, 0x111083ca0, 0x111083d40, 0x1110839c0, 0x111083920
+       60:     Inline watchpoint sets: 0x3000041d8, 0x300004868, 0x3000042b8, 0x30000acb8, 0x30000ad98, 0x30000a7e8, 0x300009f98, 0x300005dd8, 0x30000a238
+       60:     SymbolTables: 0x1335201c0
+       60:     FunctionExecutables: 0x13345e300
+       60:     Buffer views: Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure %Am:Uint32Array), StructureID: 41424, Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752
+       60:     Object property conditions: <Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %C6:Object), StructureID: 44336: Replacement of guard_p1 at 0 with attributes 0>, <Object: 0x133444200 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %EU:Object), StructureID: 43328: Absence of uo with prototype Object: 0x11100cdc8 with butterfly 0x700a0082a8(base=0x700a008220) (Structure %Em:Object), StructureID: 23696>, <Object: 0x11100cdc8 with butterfly 0x700a0082a8(base=0x700a008220) (Structure %Em:Object), StructureID: 23696: Absence of uo with prototype <JSValue()>>
+       60: Structures:
+       60:     %Aj:Float64Array          = 0x300009f30:[0x9f30/40752, Float64Array, (0/0, 0/0){}, NonArray, Proto:0x1334e4270, Leaf (Watched)]
+       60:     %Am:Uint32Array           = 0x30000a1d0:[0xa1d0/41424, Uint32Array, (0/0, 0/0){}, NonArray, Proto:0x1334e4280, Leaf (Watched)]
+       60:     %Av:Object                = 0x30000ab00:[0xab00/43776, Object, (0/0, 2/4){p1:64}, NonArray, Proto:0x133444200]
+       60:     %BP:Object                = 0x30000ac50:[0xac50/44112, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200, Leaf (Watched)]
+       60:     %By:JSLexicalEnvironment  = 0x300005d70:[0x5d70/23920, JSLexicalEnvironment, (0/0, 0/0){}, NonArray, Leaf (Watched)]
+       60:     %C6:Object                = 0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]
+       60:     %Cq:Array,ArrayWithDouble = 0x30000a780:[0xa780/42880, Array, (0/0, 1/4){ho:64}, ArrayWithDouble, Proto:0x11100d0e8, Leaf (Watched)]
+       60:     %D6:Function              = 0x3000057c0:[0x57c0/22464, Function, (0/0, 0/0){}, NonArray, Proto:0x11102c4e8]
+       60:     %DK:Object                = 0x30000aa90:[0xaa90/43664, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200]
+       60:     %EU:Object                = 0x30000a940:[0xa940/43328, Object, (1/6, 0/0){constructor:0}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]
+       60:     %Em:Object                = 0x300005c90:[0x5c90/23696, Object, (0/0, 12/16){toString:64, toLocaleString:65, valueOf:66, hasOwnProperty:67, propertyIsEnumerable:68, isPrototypeOf:69, __defineGetter__:70, __defineSetter__:71, __lookupGetter__:72, __lookupSetter__:73, __proto__:74, constructor:75}, NonArray, Leaf (Watched)]
+
+FTL Unwind info for trigger#DdQKmo:[0x1334fc5e0->0x1334fc310->0x13345e300, FTLFunctionCall, 3117 (DidTryToEnterInLoop) (StrictMode)]: 
+FTL localsOffset = 0 for stack slot: stack0 at 0x11121fe20
+Generated FTLMode code for trigger#DdQKmo:[0x1334fc5e0->0x1334fc310->0x13345e300, FTLFunctionCall, 3117 (DidTryToEnterInLoop) (StrictMode)], instructions size = 3117:
+Air BB#0: ; frequency = 1.000000
+asm                          <0> 0x11306c000:    stp      fp, lr, [sp, #-16]!
+asm                          <4> 0x11306c004:    mov      fp, sp
+asm                          <8> 0x11306c008:    sub      sp, sp, #32
+b3            Int64 b@14 = Const64(5150605312)
+Air               Move $0x133000000, %x0
+asm                         <12> 0x11306c00c:    movz     x0, #0x3300, lsl #16
+asm                         <16> 0x11306c010:    movk     x0, #0x1, lsl #32 -> 0x133000000 vm
+b3            Int64 b@13 = FramePointer()
+b3            Void b@17 = Patchpoint(b@13:SomeRegister, $5150605312(b@14):SomeRegister, generator = 0x11121fe40, resultConstraints = WarmAny, numGPScratchRegisters = 1, ExitsSideways|ControlDependent|WritesPinned|ReadsPinned|Fence|Writes:Top|Reads:Top)
+Air               Patch &Patchpoint0, %fp, %x0, %x1
+asm                         <20> 0x11306c014:    sub      x1, fp, #112; Patchpoint body start, with arg value reps: Register(%fp), Register(%x0)
+asm                         <24> 0x11306c018:    ldur     x17, [x0, #32]
+asm                         <28> 0x11306c01c:    cmp      x17, x1
+asm                         <32> 0x11306c020:    b.hi     0x11306c164 -> <356>
+b3            Int64 b@13 = FramePointer()
+b3            Int64 b@20 = Load(b@13, offset = 56, ControlDependent|Reads:158)
+Air               Move 56(%fp), %x0
+asm                         <36> 0x11306c024:    ldur     x0, [fp, #56]
+b3            Int64 b@21 = Const64(6)
+b3            Int64 b@22 = BitXor(b@20, $6(b@21))
+Air               Xor64 $0x6, %x0, %x1
+asm                         <40> 0x11306c028:    eor      x1, x0, #0x6
+b3            Int64 b@23 = Const64(-2)
+b3            Int64 b@24 = BitAnd(b@22, $-2(b@23))
+b3            Void b@26 = Check(b@24:WarmAny, b@20:ColdAny, generator = 0x1113f0720, ExitsSideways|Reads:Top)
+Air               Patch &BranchTest64(3,SameAsRep)1, NonZero, %x1, $0xfffffffffffffffe, %x0
+asm                         <44> 0x11306c02c:    tst      x1, #0xfffffffffffffffe
+asm                         <48> 0x11306c030:    b.ne     0x11306c1e8 -> <488>
+DFG      D@576:< 1:->	GetStack(JS|PureInt, BoolInt32|Bool, arg1, machine:arg1, FlushedJSValue, R:Stack(arg1), bc#0, ExitValid)
+b3            Int64 b@13 = FramePointer()
+b3            Int64 b@40 = Load(b@13, offset = 48, ControlDependent|Reads:159, D@576)
+Air               Move 48(%fp), %x1
+asm                         <52> 0x11306c034:    ldur     x1, [fp, #48]
+DFG       D@18:<!0:->	InvalidationPoint(MustGen, W:SideState, Exits, bc#0, ExitValid)
+b3            Void b@44 = Patchpoint(generator = 0x111210d80, resultConstraints = WarmAny, ExitsSideways|WritesPinned|ReadsPinned|Fence|Reads:Top, D@18)
+Air               Patch &Patchpoint0
+DFG      D@574:< 1:->	GetStack(JS|PureInt, Bool, arg2, machine:arg2, FlushedBoolean, R:Stack(arg2), bc#0, ExitValid)
+DFG       D@28:<!0:->	Branch(Boolean:Kill:D@574, MustGen, T:#1/w:1.000000, F:#2/w:1.000000, W:SideState, bc#10, ExitValid)
+b3            Int64 b@45 = Const64(1, D@28)
+b3            Int64 b@46 = BitAnd(b@20, $1(b@45), D@28)
+b3            Void b@48 = Branch(b@46, Terminal, D@28)
+Air               BranchTest32 NonZero, %x0, $1
+asm                         <56> 0x11306c038:    tbnz     x0, #0, 0x11306c154 -> <340>; Patchpoint body start, with arg value reps: ?; InvalidationPoint
+Air   Successors: #8, #1
+Air BB#1: ; frequency = 1.000000
+Air   Predecessors: #0
+DFG      D@610:< 2:->	BooleanToNumber(Check:Untyped:Kill:D@576, JS|PureInt, Int32, Exits, bc#36, ExitValid)
+b3            Int64 b@21 = Const64(6)
+b3            Int64 b@53 = BitXor(b@40, $6(b@21), D@610)
+Air               Xor64 $0x6, %x1, %x0
+asm                         <60> 0x11306c03c:    eor      x0, x1, #0x6
+b3            Int64 b@15 = Const64(-562949953421312)
+Air               Move $0xfffe000000000000, %x2
+asm                         <64> 0x11306c040:    mov      x2, #0xfffe000000000000
+b3            Int64 b@23 = Const64(-2)
+b3            Int64 b@55 = BitAnd(b@53, $-2(b@23), D@610)
+b3            Void b@58 = Branch(b@55, Terminal, D@610)
+Air               BranchTest64 NonZero, %x0, $0xfffffffffffffffe
+asm                         <68> 0x11306c044:    tst      x0, #0xfffffffffffffffe
+asm                         <72> 0x11306c048:    b.ne     0x11306c05c -> <92>
+Air   Successors: #3, #2
+Air BB#2: ; frequency = 1.000000
+Air   Predecessors: #1
+b3            Int64 b@45 = Const64(1, D@28)
+b3            Int64 b@60 = BitAnd(b@40, $1(b@45), D@610)
+Air               And64 $0x1, %x1, %x0
+asm                         <76> 0x11306c04c:    and      x0, x1, #0x1
+b3            Int64 b@2 = Const64(0)
+b3            Int32 b@61 = NotEqual(b@60, $0(b@2), D@610)
+Air               Compare64 NotEqual, %x0, $0, %x0
+asm                         <80> 0x11306c050:    tst      x0, x0
+asm                         <84> 0x11306c054:    cset     w0, ne
+b3            Int64 b@62 = ZExt32(b@61, D@610)
+b3            Int64 b@63 = BitOr(b@62, $-562949953421312(b@15), D@610)
+Air               Or64 $0xfffe000000000000, %x0, %x1
+asm                         <88> 0x11306c058:    orr      x1, x0, #0xfffe000000000000
+b3            Void b@65 = Jump(Terminal, D@610)
+Air               Jump 
+Air   Successors: #3
+Air BB#3: ; frequency = 1.000000
+Air   Predecessors: #1, #2
+DFG       D@47:<!0:->	Branch(Check:Int32:D@610, MustGen, T:#3/w:1.000000, F:#4/w:1.000000, W:SideState, Exits, bc#36, ExitValid)
+b3            Int64 b@66 = Phi(ReadsLocalState, D@610)
+b3            Int32 b@67 = Below(b@66, $-562949953421312(b@15), D@47)
+b3            Void b@68 = Check(b@67:WarmAny, b@66:ColdAny, generator = 0x1113f08b0, ExitsSideways|Reads:Top, D@47)
+Air               Patch &Branch64(3,SameAsRep)2, Below, %x1, %x2, %x1
+asm                         <92> 0x11306c05c:    cmp      x1, x2
+asm                         <96> 0x11306c060:    b.lo     0x11306c210 -> <528>
+b3            Int64 b@66 = Phi(ReadsLocalState, D@610)
+b3            Int32 b@69 = Trunc(b@66, D@47)
+b3            Void b@71 = Branch(b@69, Terminal, D@47)
+Air               BranchTest32 NonZero, %x1, %x1
+asm                        <100> 0x11306c064:    cbnz     w1, 0x11306c138 -> <312>
+Air   Successors: #7, #4
+Air BB#4: ; frequency = 1.000000
+Air   Predecessors: #3
+DFG       D@68:< 76:->	JSConstant(JS|PureNum|NeedsNaNOrInfinity|UseAsOther, BoolInt32, Int32: 1, bc#0, ExitValid)
+b3            Int64 b@468 = Const64(-562949953421311, D@68)
+Air               Add64 $1, %x2, %x1
+asm                        <104> 0x11306c068:    add      x1, x2, #1
+DFG       D@79:< 216:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Final, Weak:Object: 0x133528160 with butterfly 0x0(base=0xfffffffffffffff8) (Structure 0x30000ad30:[0xad30/44336, Object, (2/2, 0/0){guard_p1:0, p1:1}, NonArray, Proto:0x11100cdc8, Leaf (Watched)]), StructureID: 44336, bc#0, ExitValid)
+b3            Int64 b@464 = Const64(5156012400, D@79)
+Air               Move $0x133528170, %x0
+asm                        <108> 0x11306c06c:    movz     x0, #0x8170
+asm                        <112> 0x11306c070:    movk     x0, #0x3352, lsl #16
+asm                        <116> 0x11306c074:    movk     x0, #0x1, lsl #32 -> 0x133528170
+DFG      D@907:<!0:->	PutByOffset(KnownCell:D@79, KnownCell:D@79, Check:Untyped:D@68, MustGen, id3{guard_p1}, 0, W:NamedProperties(3), ClobbersExit, bc#1493, ExitValid)
+b3            Void b@219 = Store($-562949953421311(b@468), $5156012400(b@464), ControlDependent|Writes:6, D@907)
+Air               Move %x1, (%x0)
+asm                        <120> 0x11306c078:    stur     x1, [x0]
+DFG       D@40:< 7:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Final, Weak:Object: 0x1334f4150 with butterfly 0x700a0027c8(base=0x700a0027a0) (Structure 0x30000aa90:[0xaa90/43664, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200]), StructureID: 43776, bc#0, ExitValid)
+b3            Int64 b@460 = Const64(5155799376, D@40)
+Air               Move $0x1334f4150, %x2
+asm                        <124> 0x11306c07c:    movz     x2, #0x4150
+asm                        <128> 0x11306c080:    movk     x2, #0x334f, lsl #16
+asm                        <132> 0x11306c084:    movk     x2, #0x1, lsl #32 -> 0x1334f4150
+DFG      D@758:<!0:->	CheckStructure(Cell:D@40, MustGen, [0x30000aa90:[0xaa90/43664, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200], 0x30000ac50:[0xac50/44112, Object, (0/0, 2/4){p1:64, p2:65}, NonArray, Proto:0x133444200, Leaf (Watched)]], R:JSCell_structureID, Exits, bc#1509, ExitValid)
+b3            Int32 b@221 = Load($5155799376(b@460), ControlDependent|Reads:1, D@758)
+Air               Move32 (%x2), %x0
+asm                        <136> 0x11306c088:    ldur     w0, [x2]
+b3            Int32 b@456 = Const32(43664, D@758)
+Air               Move $0xaa90, %x1
+asm                        <140> 0x11306c08c:    movz     x1, #0xaa90 -> 43664
+b3            Int32 b@223 = Equal(b@221, $43664(b@456), D@758)
+b3            Void b@224 = Branch(b@223, Terminal, D@758)
+Air               Branch32 Equal, %x0, %x1
+asm                        <144> 0x11306c090:    cmp      w0, w1
+asm                        <148> 0x11306c094:    b.eq     0x11306c0a4 -> <164>
+Air   Successors: #6, #5
+Air BB#5: ; frequency = 1.000000
+Air   Predecessors: #4
+b3            Int32 b@452 = Const32(44112, D@758)
+Air               Add64 $448, %x1, %x1
+asm                        <152> 0x11306c098:    add      x1, x1, #448
+b3            Int32 b@226 = NotEqual(b@221, $44112(b@452), D@758)
+b3            Void b@227 = Check(b@226:WarmAny, $5155799376(b@460):ColdAny, generator = 0x1113f14e0, ExitsSideways|Reads:Top, D@758)
+Air               Patch &Branch32(3,SameAsRep)3, NotEqual, %x0, %x1, $0x1334f4150
+asm                        <156> 0x11306c09c:    cmp      w0, w1
+asm                        <160> 0x11306c0a0:    b.ne     0x11306c224 -> <548>
+b3            Void b@228 = Jump(Terminal, D@758)
+Air               Jump 
+Air   Successors: #6
+Air BB#6: ; frequency = 1.000000
+Air   Predecessors: #4, #5
+DFG      D@899:< 1:->	GetButterfly(Cell:D@40, Storage|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Other, R:JSObject_butterfly, bc#1513, ExitValid)
+b3            Int64 b@232 = Load($5155799376(b@460), offset = 8, ControlDependent|Reads:72, D@899)
+Air               Move 8(%x2), %x0
+asm                        <164> 0x11306c0a4:    ldur     x0, [x2, #8]
+DFG      D@898:< 2:->	GetByOffset(Check:Untyped:Kill:D@899, KnownCell:Kill:D@40, JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Array|NonBoolInt32, id5{p1}, 64, R:NamedProperties(5), bc#1513, ExitValid)  predicting Array|NonBoolInt32
+b3            Int64 b@236 = Load(b@232, offset = -16, ControlDependent|Reads:7, D@898)
+Air               Move -16(%x0), %x1
+asm                        <168> 0x11306c0a8:    ldur     x1, [x0, #-16]
+b3            Void b@237 = Patchpoint($5155799376(b@460):ColdAny, generator = 0x1113fec00, resultConstraints = WarmAny, WritesLocalState|Reads:Top, D@898)
+Air               Patch &Patchpoint0, $0x1334f4150
+b3            Int64 b@16 = Const64(-562949953421310)
+Air               Move $0xfffe000000000002, %x0
+asm                        <172> 0x11306c0ac:    movz     x0, #0x2; Patchpoint body start, with arg value reps: Constant(5155799376)
+asm                        <176> 0x11306c0b0:    movk     x0, #0xfffe, lsl #48 -> 0xfffe000000000002
+DFG      D@569:< 8:->	Phi(JS|PureInt, Array|NonBoolInt32, W:SideState, bc#1543, ExitInvalid)
+DFG      D@614:<!0:->	CheckArray(Check:Cell:D@569, MustGen, Double+Array+InBounds+AsIs+Read, R:JSCell_indexingType,JSCell_structureID, Exits, bc#1567, ExitValid)
+b3            Int64 b@243 = BitAnd(b@236, $-562949953421310(b@16), D@614)
+b3            Void b@245 = Check(b@243:WarmAny, b@236:ColdAny, b@236:ColdAny, generator = 0x1113f15d0, ExitsSideways|Reads:Top, D@614)
+Air               Patch &BranchTest64(3,SameAsRep)1, NonZero, %x1, %x0, %x1, %x1
+asm                        <180> 0x11306c0b4:    tst      x1, x0
+asm                        <184> 0x11306c0b8:    b.ne     0x11306c238 -> <568>
+b3            Int32 b@248 = Load8Z(b@236, offset = 4, ControlDependent|Reads:2, D@614)
+Air               Load8 4(%x1), %x2
+asm                        <188> 0x11306c0bc:    ldurb    w2, [x1, #4]
+b3            Int32 b@436 = Const32(15, D@614)
+b3            Int32 b@250 = BitAnd(b@248, $15(b@436), D@614)
+Air               And32 $15, %x2, %x0
+asm                        <192> 0x11306c0c0:    and      w0, w2, #0xf
+b3            Int32 b@432 = Const32(7, D@614)
+b3            Int32 b@479 = NotEqual(b@250, $7(b@432), D@614)
+b3            Void b@254 = Check(b@479:WarmAny, b@236:ColdAny, b@236:ColdAny, generator = 0x1113f1670, ExitsSideways|Reads:Top, D@614)
+Air               Patch &Branch32(3,SameAsRep)3, NotEqual, %x0, $7, %x1, %x1
+asm                        <196> 0x11306c0c4:    cmp      w0, #7
+asm                        <200> 0x11306c0c8:    b.ne     0x11306c24c -> <588>
+DFG      D@569:< 8:->	Phi(JS|PureInt, Array|NonBoolInt32, W:SideState, bc#1543, ExitInvalid)
+DFG      D@618:< 3:->	GetButterfly(Cell:D@569, Storage|PureInt, R:JSObject_butterfly, bc#1567, ExitValid)
+b3            Int64 b@257 = Load(b@236, offset = 8, ControlDependent|Reads:72, D@618)
+Air               Move 8(%x1), %x0
+asm                        <204> 0x11306c0cc:    ldur     x0, [x1, #8]
+DFG      D@569:< 8:->	Phi(JS|PureInt, Array|NonBoolInt32, W:SideState, bc#1543, ExitInvalid)
+DFG      D@597:< 1:->	GetArrayLength(KnownCell:D@569, Check:Untyped:D@618, Int32|PureInt, Int32, Double+Array+InBounds+AsIs+Read, R:Butterfly_publicLength, Exits, bc#1567, ExitValid)
+b3            Int32 b@260 = Load(b@257, offset = -8, ControlDependent|Reads:11, D@597)
+Air               Move32 -8(%x0), %x3
+asm                        <208> 0x11306c0d0:    ldur     w3, [x0, #-8]
+DFG      D@606:<!1:->	CheckInBounds(Int32:D@68, KnownInt32:Kill:D@597, JS|MustGen|PureInt, Int32, Exits, bc#1567, ExitValid)
+b3            Int32 b@1 = Const32(1)
+b3            Int32 b@412 = BelowEqual(b@260, $1(b@1), D@606)
+b3            Void b@263 = Check(b@412:WarmAny, b@236:ColdAny, generator = 0x1113f1760, ExitsSideways|Reads:Top, D@606)
+Air               Patch &Branch32(3,SameAsRep)3, BelowOrEqual, %x3, $1, %x1
+asm                        <212> 0x11306c0d4:    cmp      w3, #1
+asm                        <216> 0x11306c0d8:    b.ls     0x11306c260 -> <608>
+DFG      D@569:< 8:->	Phi(JS|PureInt, Array|NonBoolInt32, W:SideState, bc#1543, ExitInvalid)
+DFG      D@880:<!2:->	GetByVal(KnownCell:D@569, Int32:D@68, Check:Untyped:D@618, Check:Untyped:Kill:D@606, Double|MustGen|VarArgs|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, AnyIntAsDouble|NonIntAsDouble, Double+Array+InBounds+AsIs+Read, R:Butterfly_publicLength,IndexedDoubleProperties, Exits, bc#1567, ExitValid)  predicting NonIntAsDouble
+b3            Double b@268 = Load(b@257, offset = 8, ControlDependent|Reads:153, D@880<Double>)
+Air               MoveDouble 8(%x0), %q0
+asm                        <220> 0x11306c0dc:    ldur     Q0, [x0, #8]
+b3            Int32 b@269 = NotEqual(b@268, b@268, D@880<Double>)
+b3            Void b@270 = Check(b@269:WarmAny, b@236:ColdAny, generator = 0x1113f1800, ExitsSideways|Reads:Top, D@880<Double>)
+Air               Patch &BranchDouble(3,SameAsRep)4, DoubleNotEqualOrUnordered, %q0, %q0, %x1
+asm                        <224> 0x11306c0e0:    fcmp     d0, d0
+asm                        <228> 0x11306c0e4:    b.ne     0x11306c274 -> <628>
+DFG      D@619:< 4:->	ConstantStoragePointer(Storage|PureInt, 0x78340000c0, bc#1573, ExitValid)
+b3            Int64 b@404 = Const64(516268490944, D@619)
+Air               Move $0x78340000c0, %x3
+asm                        <232> 0x11306c0e8:    movz     x3, #0xc0
+asm                        <236> 0x11306c0ec:    movk     x3, #0x3400, lsl #16
+asm                        <240> 0x11306c0f0:    movk     x3, #0x78, lsl #32 -> 0x78340000c0
+DFG      D@885:< 4:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Float64Array, Weak:Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure 0x300009f30:[0x9f30/40752, Float64Array, (0/0, 0/0){}, NonArray, Proto:0x1334e4270, Leaf (Watched)]), StructureID: 40752, bc#0, ExitValid)
+DFG       D@60:< 11:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther|UseAsInt|ReallyWantsInt, BoolInt32, Int32: 0, bc#0, ExitValid)
+DFG      D@877:<!0:->	PutByVal(KnownCell:D@885, Int32:D@60, DoubleRep:Kill:D@880<Double>, Check:Untyped:D@619, Check:Untyped:D@60, MustGen|VarArgs, Float64Array+OriginalNonArray+InBounds+AsIs+Write, R:MiscFields, W:TypedArrayProperties, Exits, ClobbersExit, bc#1573, ExitValid)
+b3            Void b@279 = Store(b@268, $516268490944(b@404), ControlDependent|Writes:0, D@877)
+Air               MoveDouble %q0, (%x3)
+asm                        <244> 0x11306c0f4:    stur     d0, [x3]
+b3            Int64 b@408 = Const64(4580369704, D@885)
+b3            Void b@280 = Patchpoint($4580369704(b@408):ColdAny, generator = 0x1113fec10, resultConstraints = WarmAny, WritesLocalState|Reads:Top, D@877)
+Air               Patch &Patchpoint0, $0x11102e528
+DFG      D@875:< 4:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Uint32Array, Weak:Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure 0x30000a1d0:[0xa1d0/41424, Uint32Array, (0/0, 0/0){}, NonArray, Proto:0x1334e4280, Leaf (Watched)]), StructureID: 41424, bc#0, ExitValid)
+DFG       D@60:< 11:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther|UseAsInt|ReallyWantsInt, BoolInt32, Int32: 0, bc#0, ExitValid)
+DFG      D@866:<!2:->	GetByVal(KnownCell:D@875, Int32:D@60, Check:Untyped:D@619, Check:Untyped:D@60, Int52|MustGen|VarArgs|PureNum|NeedsNaNOrInfinity|UseAsOther, Int52Any, Uint32Array+OriginalNonArray+InBounds+AsIs+Read, R:TypedArrayProperties,MiscFields, Exits, bc#1621, ExitValid)  predicting AnyIntAsDouble
+b3            Int64 b@400 = Const64(4580369512, D@875)
+b3            Void b@289 = Patchpoint($4580369512(b@400):ColdAny, generator = 0x1113fec20, resultConstraints = WarmAny, WritesLocalState|Reads:Top, D@866<Int52>)
+Air               Patch &Patchpoint0, $0x11102e468
+b3            Int32 b@288 = Load($516268490944(b@404), ControlDependent|Reads:0, D@866<Int52>)
+b3            Int64 b@290 = ZExt32(b@288, D@866<Int52>)
+Air               Move32 (%x3), %x5
+asm                        <248> 0x11306c0f8:    ldur     w5, [x3]; Patchpoint body start, with arg value reps: Constant(4580369704)?; Patchpoint body start, with arg value reps: Constant(4580369512)
+DFG      D@699:< 1:->	Int52Constant(Int52|PureInt, Int52Any, Int32: 16, bc#0, ExitValid)
+b3            Int64 b@36 = Const64(65536, D@699<Int52>)
+Air               Move $65536, %x4
+asm                        <252> 0x11306c0fc:    mov      x4, #0x10000
+DFG      D@862:<!2:->	ArithAdd(Int52Rep:Kill:D@866<Int52>, Int52Rep:Kill:D@699<Int52>, Int52|MustGen|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther|MayHaveDoubleResult, Int52Any, CheckOverflow, Exits, bc#1627, ExitValid)
+b3            Int32 b@396 = Const32(12, D@862<Int52>)
+b3            Int64 b@293 = Shl(b@290, $12(b@396), D@862<Int52>)
+b3            Int64 b@392 = Add(b@293, $65536(b@36), D@862<Int52>)
+Air               AddLeftShift64 %x4, %x5, $12, %x4
+asm                        <256> 0x11306c100:    add      x4, x4, x5, lsl #12
+DFG      D@875:< 4:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Uint32Array, Weak:Object: 0x11102e468 with butterfly 0x700a018178(base=0x700a018170) (Structure 0x30000a1d0:[0xa1d0/41424, Uint32Array, (0/0, 0/0){}, NonArray, Proto:0x1334e4280, Leaf (Watched)]), StructureID: 41424, bc#0, ExitValid)
+DFG       D@60:< 11:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther|UseAsInt|ReallyWantsInt, BoolInt32, Int32: 0, bc#0, ExitValid)
+DFG      D@859:<!0:->	PutByVal(KnownCell:Kill:D@875, Int32:D@60, Int52Rep:Kill:D@862<Int52>, Check:Untyped:D@619, Check:Untyped:D@60, MustGen|VarArgs, Uint32Array+OriginalNonArray+InBounds+AsIs+Write, R:MiscFields, W:TypedArrayProperties, Exits, ClobbersExit, bc#1633, ExitValid)
+b3            Int32 b@396 = Const32(12, D@862<Int52>)
+b3            Int64 b@304 = SShr(b@392, $12(b@396), D@859)
+Air               Rshift64 %x4, $12, %x4
+asm                        <260> 0x11306c104:    asr      x4, x4, #12
+b3            Int32 b@305 = Trunc(b@304, D@859)
+b3            Void b@307 = Store(b@305, $516268490944(b@404), ControlDependent|Writes:0, D@859)
+Air               Move32 %x4, (%x3)
+asm                        <264> 0x11306c108:    stur     w4, [x3]
+b3            Int64 b@400 = Const64(4580369512, D@875)
+b3            Void b@308 = Patchpoint($4580369512(b@400):ColdAny, generator = 0x1113fec30, resultConstraints = WarmAny, WritesLocalState|Reads:Top, D@859)
+Air               Patch &Patchpoint0, $0x11102e468
+DFG      D@885:< 4:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, Float64Array, Weak:Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure 0x300009f30:[0x9f30/40752, Float64Array, (0/0, 0/0){}, NonArray, Proto:0x1334e4270, Leaf (Watched)]), StructureID: 40752, bc#0, ExitValid)
+DFG       D@60:< 11:->	JSConstant(JS|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther|UseAsInt|ReallyWantsInt, BoolInt32, Int32: 0, bc#0, ExitValid)
+DFG      D@853:<!2:->	GetByVal(KnownCell:Kill:D@885, Int32:Kill:D@60, Check:Untyped:Kill:D@619, Check:Untyped:D@60, Double|MustGen|VarArgs|PureNum|NeedsNegZero|NeedsNaNOrInfinity|UseAsOther, BytecodeDouble|DoubleImpureNaN, Float64Array+OriginalNonArray+InBounds+AsIs+Read, R:TypedArrayProperties,MiscFields, Exits, bc#1663, ExitValid)  predicting NonIntAsDouble
+b3            Double b@316 = Load($516268490944(b@404), ControlDependent|Reads:0, D@853<Double>)
+Air               MoveDouble (%x3), %q0
+asm                        <268> 0x11306c10c:    ldur     Q0, [x3]; Patchpoint body start, with arg value reps: Constant(4580369512)
+b3            Int64 b@408 = Const64(4580369704, D@885)
+b3            Void b@317 = Patchpoint($4580369704(b@408):ColdAny, generator = 0x1113fec40, resultConstraints = WarmAny, WritesLocalState|Reads:Top, D@853<Double>)
+Air               Patch &Patchpoint0, $0x11102e528
+DFG      D@569:< 8:->	Phi(JS|PureInt, Array|NonBoolInt32, W:SideState, bc#1543, ExitInvalid)
+DFG      D@621:<!0:->	CheckArray(Cell:D@569, MustGen, Double+Array+InBounds+AsIs+Write, R:JSCell_indexingType,JSCell_structureID, Exits, bc#1669, ExitValid)
+b3            Int32 b@388 = Const32(31, D@621)
+b3            Int32 b@322 = BitAnd(b@248, $31(b@388), D@621)
+Air               And32 $31, %x2, %x2
+asm                        <272> 0x11306c110:    and      w2, w2, #0x1f; Patchpoint body start, with arg value reps: Constant(4580369704)
+b3            Int32 b@432 = Const32(7, D@614)
+b3            Int32 b@477 = NotEqual(b@322, $7(b@432), D@621)
+b3            Void b@326 = Check(b@477:WarmAny, b@236:ColdAny, b@236:ColdAny, b@316:ColdAny, generator = 0x1113f1a30, ExitsSideways|Reads:Top, D@621)
+Air               Patch &Branch32(3,SameAsRep)3, NotEqual, %x2, $7, %x1, %x1, %q0
+asm                        <276> 0x11306c114:    cmp      w2, #7
+asm                        <280> 0x11306c118:    b.ne     0x11306c288 -> <648>
+DFG      D@569:< 8:->	Phi(JS|PureInt, Array|NonBoolInt32, W:SideState, bc#1543, ExitInvalid)
+DFG      D@851:<!0:->	PutByValAlias(KnownCell:Kill:D@569, Int32:D@68, Check:DoubleRepReal:Kill:D@853<Double>, Check:Untyped:Kill:D@618, MustGen|VarArgs, Double+Array+InBounds+AsIs+Write, R:Butterfly_publicLength,Butterfly_vectorLength,IndexedDoubleProperties, W:IndexedDoubleProperties, Exits, ClobbersExit, bc#1669, ExitValid)
+b3            Int32 b@328 = NotEqual(b@316, b@316, D@851)
+b3            Void b@329 = Check(b@328:WarmAny, b@316:ColdAny, b@236:ColdAny, b@316:ColdAny, generator = 0x1113f1a80, ExitsSideways|Reads:Top, D@851)
+Air               Patch &BranchDouble(3,SameAsRep)4, DoubleNotEqualOrUnordered, %q0, %q0, %q0, %x1, %q0
+asm                        <284> 0x11306c11c:    fcmp     d0, d0
+asm                        <288> 0x11306c120:    b.ne     0x11306c29c -> <668>
+b3            Void b@333 = Store(b@316, b@257, offset = 8, ControlDependent|Writes:153, D@851)
+Air               MoveDouble %q0, 8(%x0)
+asm                        <292> 0x11306c124:    stur     d0, [x0, #8]
+DFG        D@3:< 2:->	JSConstant(JS|PureInt, Other, Undefined, bc#0, ExitValid)
+DFG      D@595:<!0:->	Return(Check:Untyped:Kill:D@3, MustGen, W:SideState, Exits, bc#3115, ExitValid)
+b3            Int64 b@376 = Const64(10, D@3)
+b3            Void b@480 = Return($10(b@376), Terminal, D@595)
+Air               Move $10, %x0
+asm                        <296> 0x11306c128:    movz     x0, #0xa -> 10
+Air               Ret64 %x0
+asm                        <300> 0x11306c12c:    mov      sp, fp
+asm                        <304> 0x11306c130:    ldp      fp, lr, [sp], #16
+asm                        <308> 0x11306c134:    ret      lr
+Air BB#7: ; frequency = 1.000000
+Air   Predecessors: #3
+DFG      D@611:<!0:->	ForceOSRExit(MustGen, W:SideState, Exits, bc#60, ExitValid)
+b3            Void b@368 = Patchpoint(generator = 0x1113f0900, resultConstraints = WarmAny, ExitsSideways|Reads:Top, D@611)
+Air               Patch &Patchpoint0
+asm                        <312> 0x11306c138:    stp      x16, x16, [sp, #-16]!; Patchpoint body start, with arg value reps: 
+asm                        <316> 0x11306c13c:    mov      w16, #0x1
+asm                        <320> 0x11306c140:    stur     x16, [sp]
+asm                        <324> 0x11306c144:    ldur     x16, [sp, #8]
+asm                        <328> 0x11306c148:    b        0x11306c148 -> <328>
+b3            Void b@74 = Oops(Terminal, D@611)
+Air               Oops 
+asm                        <332> 0x11306c14c:    movz     w16, #0x9b -> 155
+asm                        <336> 0x11306c150:    brk      #0xc471
+Air BB#8: ; frequency = 1.000000
+Air   Predecessors: #0
+DFG        D@3:< 2:->	JSConstant(JS|PureInt, Other, Undefined, bc#0, ExitValid)
+DFG       D@30:<!0:->	Return(Check:Untyped:Kill:D@3, MustGen, W:SideState, Exits, bc#13, ExitValid)
+b3            Int64 b@376 = Const64(10, D@3)
+b3            Void b@50 = Return($10(b@376), Terminal, D@30)
+Air               Move $10, %x0
+asm                        <340> 0x11306c154:    movz     x0, #0xa -> 10
+Air               Ret64 %x0
+asm                        <344> 0x11306c158:    mov      sp, fp
+asm                        <348> 0x11306c15c:    ldp      fp, lr, [sp], #16
+asm                        <352> 0x11306c160:    ret      lr
+Air # Late paths
+asm                        <356> 0x11306c164:    stur     wzr, [fp, #36]
+asm                        <360> 0x11306c168:    movz     x17, #0x9ed8
+asm                        <364> 0x11306c16c:    movk     x17, #0x3300, lsl #16
+asm                        <368> 0x11306c170:    movk     x17, #0x1, lsl #32 -> 0x133009ed8 vm +40664: vm.topEntryFrame
+asm                        <372> 0x11306c174:    ldr      x0, [x17]
+asm                        <376> 0x11306c178:    sub      x0, x0, #144; copyCalleeSavesToEntryFrameCalleeSavesBufferImpl %x0
+asm                        <380> 0x11306c17c:    stp      x19, x20, [x0, #0]
+asm                        <384> 0x11306c180:    stp      x21, x22, [x0, #16]
+asm                        <388> 0x11306c184:    stp      x23, x24, [x0, #32]
+asm                        <392> 0x11306c188:    stp      x25, x26, [x0, #48]
+asm                        <396> 0x11306c18c:    stp      x27, x28, [x0, #64]
+asm                        <400> 0x11306c190:    stp      d8, d9, [x0, #80]
+asm                        <404> 0x11306c194:    stp      d10, d11, [x0, #96]
+asm                        <408> 0x11306c198:    stp      d12, d13, [x0, #112]
+asm                        <412> 0x11306c19c:    stp      d14, d15, [x0, #128]
+asm                        <416> 0x11306c1a0:    movz     x0, #0xc5e0
+asm                        <420> 0x11306c1a4:    movk     x0, #0x334f, lsl #16
+asm                        <424> 0x11306c1a8:    movk     x0, #0x1, lsl #32 -> 0x1334fc5e0
+asm                        <428> 0x11306c1ac:    movz     x16, #0x0
+asm                        <432> 0x11306c1b0:    movk     x16, #0x0, lsl #16
+asm                        <436> 0x11306c1b4:    movk     x16, #0x0, lsl #32
+asm                        <440> 0x11306c1b8:    blr      x16
+asm                        <444> 0x11306c1bc:    movz     x0, #0x3300, lsl #16
+asm                        <448> 0x11306c1c0:    movk     x0, #0x1, lsl #32 -> 0x133000000 vm
+asm                        <452> 0x11306c1c4:    movz     x16, #0x0
+asm                        <456> 0x11306c1c8:    movk     x16, #0x0, lsl #16
+asm                        <460> 0x11306c1cc:    movk     x16, #0x0, lsl #32
+asm                        <464> 0x11306c1d0:    blr      x16
+asm                        <468> 0x11306c1d4:    movz     x17, #0x2668
+asm                        <472> 0x11306c1d8:    movk     x17, #0x3301, lsl #16
+asm                        <476> 0x11306c1dc:    movk     x17, #0x1, lsl #32 -> 0x133012668 vm +75368: vm.targetMachinePCForThrow
+asm                        <480> 0x11306c1e0:    ldr      x1, [x17]
+asm                        <484> 0x11306c1e4:    br       x1
+asm                        <488> 0x11306c1e8:    stp      x16, x16, [sp, #-16]!
+asm                        <492> 0x11306c1ec:    mov      w16, #0x2
+asm                        <496> 0x11306c1f0:    stur     x16, [sp]
+asm                        <500> 0x11306c1f4:    ldur     x16, [sp, #8]
+asm                        <504> 0x11306c1f8:    b        0x11306c1f8 -> <504>
+asm                        <508> 0x11306c1fc:    stp      x16, x16, [sp, #-16]!
+asm                        <512> 0x11306c200:    movz     w16, #0x0
+asm                        <516> 0x11306c204:    stur     x16, [sp]
+asm                        <520> 0x11306c208:    ldur     x16, [sp, #8]
+asm                        <524> 0x11306c20c:    b        0x11306c20c -> <524>
+asm                        <528> 0x11306c210:    stp      x16, x16, [sp, #-16]!
+asm                        <532> 0x11306c214:    mov      w16, #0x3
+asm                        <536> 0x11306c218:    stur     x16, [sp]
+asm                        <540> 0x11306c21c:    ldur     x16, [sp, #8]
+asm                        <544> 0x11306c220:    b        0x11306c220 -> <544>
+asm                        <548> 0x11306c224:    stp      x16, x16, [sp, #-16]!
+asm                        <552> 0x11306c228:    mov      w16, #0x4
+asm                        <556> 0x11306c22c:    stur     x16, [sp]
+asm                        <560> 0x11306c230:    ldur     x16, [sp, #8]
+asm                        <564> 0x11306c234:    b        0x11306c234 -> <564>
+asm                        <568> 0x11306c238:    stp      x16, x16, [sp, #-16]!
+asm                        <572> 0x11306c23c:    movz     w16, #0x5 -> 5
+asm                        <576> 0x11306c240:    stur     x16, [sp]
+asm                        <580> 0x11306c244:    ldur     x16, [sp, #8]
+asm                        <584> 0x11306c248:    b        0x11306c248 -> <584>
+asm                        <588> 0x11306c24c:    stp      x16, x16, [sp, #-16]!
+asm                        <592> 0x11306c250:    mov      w16, #0x6
+asm                        <596> 0x11306c254:    stur     x16, [sp]
+asm                        <600> 0x11306c258:    ldur     x16, [sp, #8]
+asm                        <604> 0x11306c25c:    b        0x11306c25c -> <604>
+asm                        <608> 0x11306c260:    stp      x16, x16, [sp, #-16]!
+asm                        <612> 0x11306c264:    mov      w16, #0x7
+asm                        <616> 0x11306c268:    stur     x16, [sp]
+asm                        <620> 0x11306c26c:    ldur     x16, [sp, #8]
+asm                        <624> 0x11306c270:    b        0x11306c270 -> <624>
+asm                        <628> 0x11306c274:    stp      x16, x16, [sp, #-16]!
+asm                        <632> 0x11306c278:    mov      w16, #0x8
+asm                        <636> 0x11306c27c:    stur     x16, [sp]
+asm                        <640> 0x11306c280:    ldur     x16, [sp, #8]
+asm                        <644> 0x11306c284:    b        0x11306c284 -> <644>
+asm                        <648> 0x11306c288:    stp      x16, x16, [sp, #-16]!
+asm                        <652> 0x11306c28c:    movz     w16, #0x9 -> 9
+asm                        <656> 0x11306c290:    stur     x16, [sp]
+asm                        <660> 0x11306c294:    ldur     x16, [sp, #8]
+asm                        <664> 0x11306c298:    b        0x11306c298 -> <664>
+asm                        <668> 0x11306c29c:    stp      x16, x16, [sp, #-16]!
+asm                        <672> 0x11306c2a0:    movz     w16, #0xa -> 10
+asm                        <676> 0x11306c2a4:    stur     x16, [sp]
+asm                        <680> 0x11306c2a8:    ldur     x16, [sp, #8]
+asm                        <684> 0x11306c2ac:    b        0x11306c2ac -> <684>
+Generated JIT code for FTL entrypoint thunk for trigger#DdQKmo:[0x1334fc5e0->0x1334fc310->0x13345e300, FTLFunctionCall, 3117 (DidTryToEnterInLoop) (StrictMode)] with B3 generated code at 0x11306c000: [0x113070000, 0x1130700c0) 192 bytes:
+             <0> 0x113070000:    ldur     w1, [sp, #16]
+             <4> 0x113070004:    cmp      w1, #3
+             <8> 0x113070008:    b.hs     0x11306c000 -> JIT PC
+            <12> 0x11307000c:    nop      
+            <16> 0x113070010:    mov      w0, #0x3
+            <20> 0x113070014:    sub      w0, w0, w1
+            <24> 0x113070018:    add      w2, w0, #1
+            <28> 0x11307001c:    and      w2, w2, #0xfffffffe
+            <32> 0x113070020:    lsl      x2, x2, #3
+            <36> 0x113070024:    sub      x3, fp, x2
+            <40> 0x113070028:    movz     x17, #0x20
+            <44> 0x11307002c:    movk     x17, #0x3300, lsl #16
+            <48> 0x113070030:    movk     x17, #0x1, lsl #32 -> 0x133000020 vm +32: vm.m_softStackLimit
+            <52> 0x113070034:    ldr      x16, [x17]
+            <56> 0x113070038:    cmp      x16, x3
+            <60> 0x11307003c:    b.hi     0x113070058 -> <88>
+            <64> 0x113070040:    stp      fp, lr, [sp, #-16]!
+            <68> 0x113070044:    mov      fp, sp
+            <72> 0x113070048:    bl       0x113024080 -> JIT PC
+            <76> 0x11307004c:    mov      sp, fp
+            <80> 0x113070050:    ldp      fp, lr, [sp], #16
+            <84> 0x113070054:    b        0x11306c000 -> JIT PC
+            <88> 0x113070058:    stp      fp, lr, [sp, #-16]!
+            <92> 0x11307005c:    mov      fp, sp
+            <96> 0x113070060:    movz     x0, #0xc5e0
+           <100> 0x113070064:    movk     x0, #0x334f, lsl #16
+           <104> 0x113070068:    movk     x0, #0x1, lsl #32 -> 0x1334fc5e0
+           <108> 0x11307006c:    movz     x17, #0x9ee0
+           <112> 0x113070070:    movk     x17, #0x3300, lsl #16
+           <116> 0x113070074:    movk     x17, #0x1, lsl #32 -> 0x133009ee0 vm +40672: vm.topCallFrame
+           <120> 0x113070078:    str      fp, [x17]
+           <124> 0x11307007c:    movz     x16, #0xabc0
+           <128> 0x113070080:    movk     x16, #0x32a, lsl #16
+           <132> 0x113070084:    movk     x16, #0x1, lsl #32 -> 0x1032aabc0
+           <136> 0x113070088:    blr      x16
+           <140> 0x11307008c:    b        0x113024100 -> JIT PC
+           <144> 0x113070090:    brk      #0xc471
+           <148> 0x113070094:    brk      #0xc471
+           <152> 0x113070098:    brk      #0xc471
+Compiling OSR exit with exitID = 6
+    Owning block: trigger#DdQKmo:[0x1334fc5e0->0x1334fc310->0x13345e300, FTLFunctionCall, 3117 (DidTryToEnterInLoop) (StrictMode)]
+    Origin: bc#1567
+    Current call site index: 4294836224
+    Exit is exception handler: false
+    Is unwind handler: false
+    Exit values: arg2:InJSStack:arg2 arg1:InJSStack:arg1 arg0:InJSStack:this loc0:Dead loc1:Dead loc2:Dead loc3:Dead loc4:Constant(Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure 0x300005d70:[0x5d70/23920, JSLexicalEnvironment, (0/0, 0/0){}, NonArray, Leaf (Watched)]), StructureID: 23920) loc5:Argument(#1 as JS) loc6:Constant(Int32: 0) loc7:Dead loc8:Constant(Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure 0x300009f30:[0x9f30/40752, Float64Array, (0/0, 0/0){}, NonArray, Proto:0x1334e4270, Leaf (Watched)]), StructureID: 40752) loc9:Constant(Int32: 0) loc10:Dead loc11:Dead loc12:Dead loc13:Dead
+    Value reps: Register(%x1), Register(%x1)
+Generated JIT code for FTL OSR exit #6 (D@614, bc#1567, BadIndexingType) from trigger#DdQKmo:[0x1334fc5e0->0x1334fc310->0x13345e300, FTLFunctionCall, 3117 (DidTryToEnterInLoop) (StrictMode)], with operands = arg2:InJSStack:arg2 arg1:InJSStack:arg1 arg0:InJSStack:this loc0:Dead loc1:Dead loc2:Dead loc3:Dead loc4:Constant(Object: 0x133524130 with butterfly 0x0(base=0xfffffffffffffff8) (Structure %By:JSLexicalEnvironment), StructureID: 23920) loc5:Argument(#1 as JS) loc6:Constant(Int32: 0) loc7:Dead loc8:Constant(Object: 0x11102e528 with butterfly 0x700a018188(base=0x700a018180) (Structure %Aj:Float64Array), StructureID: 40752) loc9:Constant(Int32: 0) loc10:Dead loc11:Dead loc12:Dead loc13:Dead: [0x113084000, 0x113084440) 1088 bytes:
+             <0> 0x113084000:    stur     x0, [sp]
+             <4> 0x113084004:    movz     x0, #0x9850
+             <8> 0x113084008:    movk     x0, #0x1141, lsl #16
+            <12> 0x11308400c:    movk     x0, #0x1, lsl #32 -> 0x111419850
+            <16> 0x113084010:    stp      x2, x3, [x0, #16]
+            <20> 0x113084014:    stp      x4, x5, [x0, #32]
+            <24> 0x113084018:    stp      x6, x7, [x0, #48]
+            <28> 0x11308401c:    stp      x8, x9, [x0, #64]
+            <32> 0x113084020:    stp      x10, x11, [x0, #80]
+            <36> 0x113084024:    stp      x12, x13, [x0, #96]
+            <40> 0x113084028:    stp      x14, x15, [x0, #112]
+            <44> 0x11308402c:    stp      x16, x17, [x0, #128]
+            <48> 0x113084030:    stp      x19, x20, [x0, #152]
+            <52> 0x113084034:    stp      x21, x22, [x0, #168]
+            <56> 0x113084038:    stp      x23, x24, [x0, #184]
+            <60> 0x11308403c:    stp      x25, x26, [x0, #200]
+            <64> 0x113084040:    stp      x27, x28, [x0, #216]
+            <68> 0x113084044:    ldur     x2, [sp]
+            <72> 0x113084048:    stp      x2, x1, [x0, #0]
+            <76> 0x11308404c:    stp      d0, d1, [x0, #256]
+            <80> 0x113084050:    stp      d2, d3, [x0, #272]
+            <84> 0x113084054:    stp      d4, d5, [x0, #288]
+            <88> 0x113084058:    stp      d6, d7, [x0, #304]
+            <92> 0x11308405c:    stp      d8, d9, [x0, #320]
+            <96> 0x113084060:    stp      d10, d11, [x0, #336]
+           <100> 0x113084064:    stp      d12, d13, [x0, #352]
+           <104> 0x113084068:    stp      d14, d15, [x0, #368]
+           <108> 0x11308406c:    stp      d16, d17, [x0, #384]
+           <112> 0x113084070:    stp      d18, d19, [x0, #400]
+           <116> 0x113084074:    stp      d20, d21, [x0, #416]
+           <120> 0x113084078:    stp      d22, d23, [x0, #432]
+           <124> 0x11308407c:    stp      d24, d25, [x0, #448]
+           <128> 0x113084080:    stp      d26, d27, [x0, #464]
+           <132> 0x113084084:    stp      d28, d29, [x0, #480]
+           <136> 0x113084088:    stp      d30, d31, [x0, #496]
+           <140> 0x11308408c:    ldr      x0, [sp], #16
+           <144> 0x113084090:    mov      x27, #0xfffe000000000000
+           <148> 0x113084094:    orr      x28, x27, #0x2
+           <152> 0x113084098:    movz     x17, #0x9858
+           <156> 0x11308409c:    movk     x17, #0x1141, lsl #16
+           <160> 0x1130840a0:    movk     x17, #0x1, lsl #32 -> 0x111419858
+           <164> 0x1130840a4:    ldr      x0, [x17]
+           <168> 0x1130840a8:    ldur     w1, [x0]
+           <172> 0x1130840ac:    movz     x17, #0x32f0
+           <176> 0x1130840b0:    movk     x17, #0x334a, lsl #16
+           <180> 0x1130840b4:    movk     x17, #0x1, lsl #32 -> 0x1334a32f0
+           <184> 0x1130840b8:    str      w1, [x17]
+           <188> 0x1130840bc:    ldurb    w2, [x0, #5]
+           <192> 0x1130840c0:    sub      w2, w2, #39
+           <196> 0x1130840c4:    cmp      w2, #11
+           <200> 0x1130840c8:    b.hs     0x1130840e0 -> <224>
+           <204> 0x1130840cc:    movz     x1, #0x6d8
+           <208> 0x1130840d0:    movk     x1, #0x3ca, lsl #16
+           <212> 0x1130840d4:    movk     x1, #0x1, lsl #32 -> 0x103ca06d8
+           <216> 0x1130840d8:    ldr      w2, [x1, x2, lsl #2]
+           <220> 0x1130840dc:    b        0x1130840f0 -> <240>
+           <224> 0x1130840e0:    ldurb    w1, [x0, #4]
+           <228> 0x1130840e4:    and      w1, w1, #0x1f
+           <232> 0x1130840e8:    mov      w2, #0x1
+           <236> 0x1130840ec:    lsl      w2, w2, w1
+           <240> 0x1130840f0:    movz     x17, #0x32f8
+           <244> 0x1130840f4:    movk     x17, #0x334a, lsl #16
+           <248> 0x1130840f8:    movk     x17, #0x1, lsl #32 -> 0x1334a32f8
+           <252> 0x1130840fc:    ldr      w16, [x17]
+           <256> 0x113084100:    orr      w16, w16, w2
+           <260> 0x113084104:    stur     w16, [x17]
+           <264> 0x113084108:    movz     x3, #0x97c8
+           <268> 0x11308410c:    movk     x3, #0x1141, lsl #16
+           <272> 0x113084110:    movk     x3, #0x1, lsl #32 -> 0x1114197c8 vm scratchBuffer.m_buffer
+           <276> 0x113084114:    movz     x4, #0xa -> 10
+           <280> 0x113084118:    stp      x4, x4, [x3, #120]
+           <284> 0x11308411c:    stp      x4, x4, [x3, #104]
+           <288> 0x113084120:    mov      x0, #0xfffe000000000000
+           <292> 0x113084124:    movz     x1, #0xe528
+           <296> 0x113084128:    movk     x1, #0x1102, lsl #16
+           <300> 0x11308412c:    movk     x1, #0x1, lsl #32 -> 0x11102e528
+           <304> 0x113084130:    stp      x1, x0, [x3, #88]
+           <308> 0x113084134:    mov      x1, #0xfffe000000000000
+           <312> 0x113084138:    stp      x1, x4, [x3, #72]
+           <316> 0x11308413c:    movz     x17, #0x9858
+           <320> 0x113084140:    movk     x17, #0x1141, lsl #16
+           <324> 0x113084144:    movk     x17, #0x1, lsl #32 -> 0x111419858
+           <328> 0x113084148:    ldr      x0, [x17]
+           <332> 0x11308414c:    stur     x0, [x3, #64]
+           <336> 0x113084150:    movz     x0, #0x4130
+           <340> 0x113084154:    movk     x0, #0x3352, lsl #16
+           <344> 0x113084158:    movk     x0, #0x1, lsl #32 -> 0x133524130
+           <348> 0x11308415c:    stp      x4, x0, [x3, #48]
+           <352> 0x113084160:    stp      x4, x4, [x3, #32]
+           <356> 0x113084164:    ldur     x1, [fp, #56]
+           <360> 0x113084168:    stp      x1, x4, [x3, #16]
+           <364> 0x11308416c:    ldp      x1, x0, [fp, #40]
+           <368> 0x113084170:    stp      x1, x0, [x3, #0]
+           <372> 0x113084174:    mov      x2, fp
+           <376> 0x113084178:    movz     x3, #0x9a50
+           <380> 0x11308417c:    movk     x3, #0x1141, lsl #16
+           <384> 0x113084180:    movk     x3, #0x1, lsl #32 -> 0x111419a50
+           <388> 0x113084184:    sub      sp, fp, #144
+           <392> 0x113084188:    movz     x3, #0x9850
+           <396> 0x11308418c:    movk     x3, #0x1141, lsl #16
+           <400> 0x113084190:    movk     x3, #0x1, lsl #32 -> 0x111419850
+           <404> 0x113084194:    ldp      x19, x20, [x3, #152]
+           <408> 0x113084198:    ldp      x21, x22, [x3, #168]
+           <412> 0x11308419c:    ldp      x23, x24, [x3, #184]
+           <416> 0x1130841a0:    ldp      d8, d9, [x3, #320]
+           <420> 0x1130841a4:    ldp      d10, d11, [x3, #336]
+           <424> 0x1130841a8:    ldp      d12, d13, [x3, #352]
+           <428> 0x1130841ac:    ldp      d14, d15, [x3, #368]
+           <432> 0x1130841b0:    ldp      x0, x1, [x3, #200]
+           <436> 0x1130841b4:    stp      x0, x1, [fp, #-32]
+           <440> 0x1130841b8:    ldp      x0, x1, [x3, #216]
+           <444> 0x1130841bc:    stp      x0, x1, [fp, #-16]
+           <448> 0x1130841c0:    add      x3, x3, #512
+           <452> 0x1130841c4:    movz     x2, #0x97c8
+           <456> 0x1130841c8:    movk     x2, #0x1141, lsl #16
+           <460> 0x1130841cc:    movk     x2, #0x1, lsl #32 -> 0x1114197c8 vm scratchBuffer.m_buffer
+           <464> 0x1130841d0:    mov      x3, fp
+           <468> 0x1130841d4:    ldp      x1, x0, [x2, #120]
+           <472> 0x1130841d8:    stp      x0, x1, [x3, #-112]
+           <476> 0x1130841dc:    ldp      x1, x0, [x2, #104]
+           <480> 0x1130841e0:    stp      x0, x1, [x3, #-96]
+           <484> 0x1130841e4:    ldp      x1, x0, [x2, #88]
+           <488> 0x1130841e8:    stp      x0, x1, [x3, #-80]
+           <492> 0x1130841ec:    ldp      x1, x0, [x2, #72]
+           <496> 0x1130841f0:    stp      x0, x1, [x3, #-64]
+           <500> 0x1130841f4:    ldp      x1, x0, [x2, #56]
+           <504> 0x1130841f8:    stp      x0, x1, [x3, #-48]
+           <508> 0x1130841fc:    ldp      x1, x0, [x2, #8]
+           <512> 0x113084200:    stp      x1, x0, [x3, #48]
+           <516> 0x113084204:    ldur     x0, [x2]
+           <520> 0x113084208:    stur     x0, [x3, #40]
+           <524> 0x11308420c:    movz     x17, #0xb210
+           <528> 0x113084210:    movk     x17, #0x1105, lsl #16
+           <532> 0x113084214:    movk     x17, #0x1, lsl #32 -> 0x11105b210
+           <536> 0x113084218:    ldr      w16, [x17]
+           <540> 0x11308421c:    add      w16, w16, #1
+           <544> 0x113084220:    stur     w16, [x17]
+           <548> 0x113084224:    movz     x3, #0xc5e0
+           <552> 0x113084228:    movk     x3, #0x334f, lsl #16
+           <556> 0x11308422c:    movk     x3, #0x1, lsl #32 -> 0x1334fc5e0
+           <560> 0x113084230:    ldur     w2, [x3, #36]
+           <564> 0x113084234:    add      w2, w2, #1
+           <568> 0x113084238:    stur     w2, [x3, #36]
+           <572> 0x11308423c:    movz     x0, #0xc310
+           <576> 0x113084240:    movk     x0, #0x334f, lsl #16
+           <580> 0x113084244:    movk     x0, #0x1, lsl #32 -> 0x1334fc310
+           <584> 0x113084248:    ldur     w17, [x0, #200]
+           <588> 0x11308424c:    tst      w17, w17
+           <592> 0x113084250:    b.pl     0x113084260 -> <608>
+           <596> 0x113084254:    movz     w1, #0x64 -> 100
+           <600> 0x113084258:    cmp      w2, w1
+           <604> 0x11308425c:    b.ls     0x113084284 -> <644>
+           <608> 0x113084260:    mov      x1, x3
+           <612> 0x113084264:    movz     x2, #0xb210
+           <616> 0x113084268:    movk     x2, #0x1105, lsl #16
+           <620> 0x11308426c:    movk     x2, #0x1, lsl #32 -> 0x11105b210
+           <624> 0x113084270:    movz     x8, #0xbcdc
+           <628> 0x113084274:    movk     x8, #0x2f2, lsl #16
+           <632> 0x113084278:    movk     x8, #0x1, lsl #32 -> 0x102f2bcdc
+           <636> 0x11308427c:    blr      x8
+           <640> 0x113084280:    b        0x1130842a0 -> <672>
+           <644> 0x113084284:    mov      w16, #-4261 -> 0xffffffffffffef5b
+           <648> 0x113084288:    stur     w16, [x0, #200]
+           <652> 0x11308428c:    movz     w16, #0x10a4 -> 4260
+           <656> 0x113084290:    stur     w16, [x0, #208]
+           <660> 0x113084294:    movk     w16, #0x4585, lsl #16
+           <664> 0x113084298:    movk     w16, #0x2800 -> 0x45852800
+           <668> 0x11308429c:    stur     w16, [x0, #204]
+           <672> 0x1130842a0:    movz     x16, #0xc310
+           <676> 0x1130842a4:    movk     x16, #0x334f, lsl #16
+           <680> 0x1130842a8:    movk     x16, #0x1, lsl #32 -> 0x1334fc310
+           <684> 0x1130842ac:    stur     x16, [fp, #16]
+           <688> 0x1130842b0:    movz     w16, #0x61f -> 1567
+           <692> 0x1130842b4:    stur     w16, [fp, #36]
+           <696> 0x1130842b8:    dmb      ish
+           <700> 0x1130842bc:    movz     x1, #0xc310
+           <704> 0x1130842c0:    movk     x1, #0x334f, lsl #16
+           <708> 0x1130842c4:    movk     x1, #0x1, lsl #32 -> 0x1334fc310
+           <712> 0x1130842c8:    ldurb    w17, [x1, #7]
+           <716> 0x1130842cc:    cmp      w17, #0
+           <720> 0x1130842d0:    b.hi     0x1130842ec -> <748>
+           <724> 0x1130842d4:    movz     x0, #0x3300, lsl #16
+           <728> 0x1130842d8:    movk     x0, #0x1, lsl #32 -> 0x133000000 vm
+           <732> 0x1130842dc:    movz     x8, #0xf330
+           <736> 0x1130842e0:    movk     x8, #0x32d, lsl #16
+           <740> 0x1130842e4:    movk     x8, #0x1, lsl #32 -> 0x1032df330
+           <744> 0x1130842e8:    blr      x8
+           <748> 0x1130842ec:    movz     x25, #0x1f50
+           <752> 0x1130842f0:    movk     x25, #0x334a, lsl #16
+           <756> 0x1130842f4:    movk     x25, #0x1, lsl #32 -> 0x1334a1f50
+           <760> 0x1130842f8:    movz     x26, #0x9a80
+           <764> 0x1130842fc:    movk     x26, #0x1105, lsl #16
+           <768> 0x113084300:    movk     x26, #0x1, lsl #32 -> 0x111059a80
+           <772> 0x113084304:    sub      sp, fp, #112
+           <776> 0x113084308:    movz     x2, #0x3474
+           <780> 0x11308430c:    movk     x2, #0x1304, lsl #16
+           <784> 0x113084310:    movk     x2, #0x1, lsl #32 -> 0x113043474 JIT PC
+           <788> 0x113084314:    br       x2
+           <792> 0x113084318:    brk      #0xc471
+           <796> 0x11308431c:    brk      #0xc471
+           <800> 0x113084320:    brk      #0xc471
+           <804> 0x113084324:    brk      #0xc471
+           <808> 0x113084328:    brk      #0xc471
+           <812> 0x11308432c:    brk      #0xc471
+═══ TGCP ring (16 events, image_base=0x102a28000) ═══
+  [   0] tsc=27846048082698 mode=2 result=0x111090328 phase=control flow analysis            OK
+  [   1] tsc=27846048085085 mode=2 result=0x111090328 phase=constant folding                 OK
+  [   2] tsc=27846048147316 mode=4 result=0x0 phase=control flow analysis            STRUCT-MISS
+  [   3] tsc=27846048149488 mode=4 result=0x0 phase=constant folding                 STRUCT-MISS
+  [   4] tsc=27846048157988 mode=4 result=0x0 phase=control flow analysis            STRUCT-MISS
+  [   5] tsc=27846048170002 mode=4 result=0x0 phase=control flow analysis            STRUCT-MISS
+  [   6] tsc=27846048170569 mode=4 result=0x0 phase=constant folding                 STRUCT-MISS
+  [   7] tsc=27846048171212 mode=4 result=0x0 phase=constant folding                 STRUCT-MISS
+  [   8] tsc=27846048175035 mode=4 result=0x0 phase=control flow analysis            STRUCT-MISS
+  [   9] tsc=27846048175454 mode=4 result=0x0 phase=constant folding                 STRUCT-MISS
+  [  10] tsc=27846048175842 mode=4 result=0x0 phase=control flow analysis            STRUCT-MISS
+  [  11] tsc=27846048178300 mode=4 result=0x0 phase=control flow analysis            STRUCT-MISS
+  [  12] tsc=27846048178916 mode=4 result=0x0 phase=global store barrier insertion   STRUCT-MISS
+  [  13] tsc=27846048179722 mode=4 result=0x0 phase=global store barrier insertion   STRUCT-MISS
+  [  14] tsc=27846048180426 mode=4 result=0x0 phase=global store barrier insertion   STRUCT-MISS
+  [  15] tsc=27846049261874 mode=4 result=0x0 phase=OSR availability analysis        STRUCT-MISS
+═══ main-thread markers (8) ═══
+  marker[0] tsc=27846048145200 tag=10
+  marker[1] tsc=27846048145220 tag=11
+  marker[2] tsc=27846051606275 tag=1
+  marker[3] tsc=27846051606313 tag=2
+  marker[4] tsc=27846051606338 tag=3
+  marker[5] tsc=27846051606340 tag=4
+  marker[6] tsc=27846051606413 tag=5
+  marker[7] tsc=27846051628204 tag=6
