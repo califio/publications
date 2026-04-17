@@ -17,4 +17,4 @@ Between now and the end of April 2026, we’ll be dropping what we find in this 
 * 2026-04-10: [Claude + Humans vs nginx: CVE-2026-27654](nginx-CVE-2026-27654)
 * 2026-04-13: [Codex Hacked a Samsung TV](samsung-tv)
 * 2026-04-14: [Learning to Jailbreak an iPhone with Claude (Part 1)](coruna)
-* 2026-04-16: [qmail-remote RCE via DNS MX Hostname Shell Injection](qmail)
+* 2026-04-16: [qmail-remote RCE via DNS MX Hostname Shell Injection (CVE-2026-41113)](qmail)
