@@ -93,7 +93,9 @@ This one took real work. Building the gadget, hand-writing an SSL-wrapped JRMP r
 
 This affects every Ghidra release ≥ 9.1. The fix is the obvious one: install the same serial filter on the client that already ships for the server. We've sent a patch.
 
-And yes, we're aware we just dropped a 0-day on an NSA product (again!). Relax, disclosure cops. If they're half as good at this as everyone says, they already knew. We're just bringing the rest of you up to speed.
+And yes, we're aware we just dropped a 0-day on an NSA product (again!). Relax, disclosure cops. taviso is in the house.
+
+Also, if the NSA is half as good at this as everyone says, they already knew. We're just bringing the rest of you up to speed.
 
 ---
 
