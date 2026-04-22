@@ -24,3 +24,4 @@ Between now and the end of April 2026, we’ll be dropping what we find in this 
   * [radare2 RCE via PDB Section Header Command Injection](radare2-pdb-section-rce)
   * IDA Pro — *embargoed*
   * Binary Ninja — *embargoed*
+* 2026-04-22: [An Apple Kernel Bug, Brought to You by Microsoft (CVE-2026-28825)](CVE-2026-28825)
