@@ -12,6 +12,8 @@ Bruce pointed it at the source tree and had it popping calc within a few hours. 
 
 PoC video: https://www.youtube.com/watch?v=NQxvMRqS_9o
 
+>**Update, April 24:** We were not the first after all. [tsune](https://x.com/e65537) found this same bug a few days before we did, reported it, got a fix landed in [`d8aee7f1e6`](https://github.com/LadybirdBrowser/ladybird/commit/d8aee7f1e6d59b958833425067086defa00b7f4c), and published [a full exploit writeup](https://blog.reg.rip/exploiting-the-ladybird-browser.html) while we were still poking at the source tree. That patch turned out to be incomplete (it refreshes the stale pointer on the first `grow()` but loses track of the old buffer's views on the second), which is the variant Claude landed on. tsune's [response](https://x.com/e65537/status/2047626391001419866) to this post was more gracious than we deserve: *"damm, my patch was incomplete. They exploited much more smartly than I did."*
+
 ## What it says about AI
 
 The first reason this worked, on an engine Claude had never seen anyone hack, is that AI needs prior art on the *problem class*, not on the target. Browser-engine exploitation is engine-shaped rather than codebase-shaped: a model that has internalised the JSC and V8 literature already knows how to attack any spec-compliant engine.
