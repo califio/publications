@@ -101,7 +101,7 @@ Everything lives in [`/qemu/`](qemu) in the repo:
 
 ## Conclusion
 
-One thing we do not know is how Claude arrived at the bug. Our first prompt asked it to diff UTM's QEMU against upstream, and the fix commit was already public; it is possible the model spotted `c035d5ea` and worked backward, and equally possible it audited `virtio-gpu.c` cold and rediscovered the overflow on its own. We cannot tell from the transcript, and either answer is uncomfortable: one means a frontier model can mine patch diffs into working escapes faster than downstreams can ship the patch, the other means it can find the same bug ZDI paid for without being pointed at it.
+One thing we do not know is how Claude arrived at the bug. Our first prompt asked it to diff UTM's QEMU against upstream, and the fix commit was already public; it is possible the model spotted `c035d5ea` and worked backward, and equally possible it audited `virtio-gpu.c` cold and rediscovered the overflow on its own. We cannot tell from the transcript, and either answer is kinda cool: one means a frontier model can mine patch diffs into working escapes faster than downstreams can ship the patch, the other means it can find the same bug ZDI paid for without being pointed at it.
 
 While the bug is a simple integer overflow, the exploit is, as far as we know, the first documented case of AI doing creative *exploit primitive design*: wiring three unrelated QEMU subsystems (virtio-gpu, the VNC server, SLIRP loopback) into a leak nobody had published before.
 
