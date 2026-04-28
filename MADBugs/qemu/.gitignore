@@ -1,0 +1,14 @@
+# Compiled exploit binaries (built by `make`)
+exploit
+exploit_linux
+exploit_utm
+
+# Build artifacts pulled by run_poc_*.sh
+vmlinuz
+vmlinuz-virt
+vmlinuz-alpine
+initramfs.gz
+initramfs-virt
+initramfs-alpine
+initramfs-exploit.gz
+initramfs_mod/

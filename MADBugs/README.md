@@ -26,3 +26,4 @@ Between now and the end of April 2026, we’ll be dropping what we find in this 
   * Binary Ninja — *embargoed*
 * 2026-04-22: [An Apple Kernel Bug, Brought to You by Microsoft (CVE-2026-28825)](CVE-2026-28825)
 * 2026-04-24: [Ladybird Browser RCE via WebAssembly Shared Memory UAF](ladybird)
+* 2026-04-27: [QEMU and UTM Escape via virtio-gpu (ZDI-CAN-27578)](qemu)
