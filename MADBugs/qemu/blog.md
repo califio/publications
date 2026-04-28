@@ -72,7 +72,7 @@ A `FramebufferUpdateRequest` returns `width × height × 4` bytes, so reads are 
 
 From the read primitive it's a fairly textbook macOS arm64 chain. Scan forward 16 KB at a time looking for Mach-O headers; identify pixman by `sizeofcmds`; read `GOT[free]` to derive the shared cache slide; compute `system()`. Plant a fake `pixman_implementation_t` whose `fast_paths` array has a wildcard entry whose `func` is `system()`. The implementation pointer is the first argument to `func` on arm64, so we put the command string at offset 0 of the same struct and let it serve double duty. Two more OOB writes neutralise pixman's TLS fast-path cache and overwrite `_global_implementation`. A final `RESOURCE_FLUSH` triggers a VNC composite, pixman walks our fake chain, the wildcard matches, `system()` runs.
 
-The command string has to fit in 15 bytes (the `fast_paths` pointer lives at offset `0x10`), so `open -a Calculator` is too long. `open /*/*/Calc*` is exactly 15, and `/bin/sh` expands the glob to `/System/Applications/Calculator.app`. (Our first attempt, `/S*/A*/Ca*`, also matched `Calendar.app`, which made for a less convincing demo.) Self-contained, no host-side files, no network egress, just a guest VM and the patience to wait through three Phase outputs.
+The command string has to fit in 15 bytes (the `fast_paths` pointer lives at offset `0x10`), so `open -a Calculator` is too long. `open /*/*/Calc*` is exactly 15, and `/bin/sh` expands the glob to `/System/Applications/Calculator.app`. (Our first attempt, `/S*/A*/Ca*`, also matched `Calendar.app`, which made for a less convincing demo.)
 
 UTM adds one more twist. Its QEMU allocates virtio-gpu pixel buffers through `qemu_pixman_image_new_shareable`, which is `memfd` + `mmap` rather than `malloc`, so the exploit buffer lands in an address-space hole between UTM's twenty-odd bundled frameworks instead of out in the large-object heap. dyld shuffles those frameworks on every launch, and on a meaningful fraction of boots pixman (2.4 MB, one of the smallest) ends up at a *lower* address than the first hole big enough for our buffer. The OOB write only reaches forward, so pixman's `_global_implementation` is then physically behind us and the hijack above cannot land.
 
@@ -109,4 +109,4 @@ From there it ported the chain to Linux aarch64, rebuilt it as a SPICE-safe UTM 
 
 However, Claude hasn't (re)discovered fancy tricks such as KMART or MHST[^1] for this exploit, so the superhumans among us still have some edge over it. At least for now.
 
-[^1]: Kortchinsky-Midturi ARM ROP Technique and Midturi Heap Spray Technique. Legendary exploitation techniques invented by the MSRC and SWI Pentest team fifteen or so years ago. CC [@crypt0ad](https://x.com/crypt0ad)
+[^1]: Kortchinsky-Midturi ARM ROP Technique and Midturi Heap Spray Technique. These are legendary exploitation techniques invented by the MSRC and SWI Pentest team fifteen or so years ago. CC [@crypt0ad](https://x.com/crypt0ad)
