@@ -152,6 +152,8 @@ Vulnerability 1 is the root cause — the integer overflow that creates the size
 
 ## Exploitation Strategy
 
+![Exploit chain diagram](chain.svg)
+
 The exploit chains all three vulnerabilities to achieve guest-to-host code execution in five phases. The three vulnerabilities are not independently exploitable in isolation — Vulnerability 1 (the integer overflow) creates the size/dimension mismatch that makes Vulnerabilities 2 and 3 (the OOB read and write) reachable. All three are manifestations of the same root cause: `calc_image_hostmem` computes a small allocation while the rest of virtio-gpu trusts the large logical dimensions.
 
 ### Driving virtio-gpu from Userspace

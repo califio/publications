@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 800" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13">
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#111"/>
+    </marker>
+    <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#c0392b"/>
+    </marker>
+    <marker id="arrB" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1f6feb"/>
+    </marker>
+    <marker id="arrG" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#1a7f37"/>
+    </marker>
+  </defs>
+
+  <style>
+    .box   { fill:#fff; stroke:#111; stroke-width:1.5; }
+    .gbox  { fill:#f6f8fa; stroke:#111; stroke-width:1.5; }
+    .lab   { fill:#111; }
+    .mut   { fill:#666; font-size:11px; }
+    .stepN { fill:#fff; font-size:11px; font-weight:bold; }
+    .leak  { stroke:#1f6feb; stroke-width:2; fill:none; }
+    .write { stroke:#c0392b; stroke-width:2; fill:none; }
+    .ctrl  { stroke:#111; stroke-width:1.5; fill:none; }
+    .trig  { stroke:#1a7f37; stroke-width:2; fill:none; }
+  </style>
+
+  <!-- ========== Guest VM ========== -->
+  <rect x="40" y="30" width="880" height="140" rx="8" class="gbox"/>
+  <text x="56" y="52" class="lab" font-weight="bold">guest VM</text>
+
+  <rect x="70" y="70" width="380" height="80" rx="6" class="box"/>
+  <text x="86" y="90" class="lab" font-weight="bold">exploit (static aarch64, userspace)</text>
+  <text x="86" y="110" class="mut">RESOURCE_CREATE_2D  w=0x40000001  → stride=4, buf=512B</text>
+  <text x="86" y="126" class="mut">SET_SCANOUT(x=OOB)   TRANSFER_TO_HOST_2D(x=OOB)</text>
+
+  <rect x="500" y="70" width="170" height="40" rx="6" class="box"/>
+  <text x="516" y="95" class="lab">virtio-gpu PCI</text>
+
+  <rect x="720" y="70" width="170" height="40" rx="6" class="box"/>
+  <text x="736" y="88" class="lab">eth0 (virtio-net)</text>
+  <text x="736" y="104" class="mut">TCP → 10.0.2.2:5900</text>
+
+  <path d="M450,90 L500,90" class="ctrl" marker-end="url(#arr)"/>
+  <path d="M450,130 H700 Q720,130 720,110 V100" class="leak" marker-end="url(#arrB)"/>
+
+  <!-- guest/host boundary -->
+  <line x1="40" y1="195" x2="920" y2="195" stroke="#111" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="56" y="190" class="mut">guest / host boundary</text>
+
+  <!-- ========== QEMU process ========== -->
+  <rect x="40" y="210" width="880" height="510" rx="8" class="gbox"/>
+  <text x="56" y="232" class="lab" font-weight="bold">QEMU process (host, macOS arm64)</text>
+
+  <!-- virtio-gpu handler -->
+  <rect x="70" y="250" width="270" height="70" rx="6" class="box"/>
+  <text x="86" y="270" class="lab">hw/display/virtio-gpu.c</text>
+  <text x="86" y="288" class="mut">calc_image_hostmem: int overflow</text>
+  <text x="86" y="304" class="mut">res-&gt;width = 0x40000001 (lie)</text>
+
+  <!-- SLIRP -->
+  <rect x="560" y="250" width="150" height="50" rx="6" class="box"/>
+  <text x="576" y="270" class="lab">SLIRP</text>
+  <text x="576" y="288" class="mut">10.0.2.2 → host lo</text>
+
+  <!-- VNC server -->
+  <rect x="750" y="250" width="150" height="50" rx="6" class="box"/>
+  <text x="766" y="270" class="lab">VNC :5900</text>
+  <text x="766" y="288" class="mut">FramebufferUpdate</text>
+
+  <!-- step 1: guest virtio-gpu PCI → handler -->
+  <path d="M585,110 V216 Q585,236 565,236 H280 Q260,236 260,248 V250" class="ctrl" marker-end="url(#arr)"/>
+  <circle cx="430" cy="236" r="9" fill="#111"/><text x="430" y="240" text-anchor="middle" class="stepN">1</text>
+
+  <!-- guest eth0 → SLIRP → VNC -->
+  <path d="M805,110 V216 Q805,236 785,236 H655 Q635,236 635,248 V250" class="leak" marker-end="url(#arrB)"/>
+  <path d="M710,275 L750,275" class="leak" marker-end="url(#arrB)"/>
+
+  <!-- step 4: OOB write (above the bar) -->
+  <text x="216" y="350" class="mut" fill="#c0392b">TRANSFER_TO_HOST_2D: OOB write → _global_impl  (dashed: g_free fallback)</text>
+  <path d="M95,415 V374 H410 V413" class="write" marker-end="url(#arrR)"/>
+  <path d="M95,415 V360 H595 V413" class="write" marker-end="url(#arrR)" stroke-dasharray="5 4"/>
+  <circle cx="200" cy="360" r="9" fill="#c0392b"/><text x="200" y="364" text-anchor="middle" class="stepN">4</text>
+
+  <!-- ========== address space bar ========== -->
+  <text x="710" y="408" class="mut">forward-only OOB, ~4 GB reach →</text>
+
+  <rect x="70"  y="415" width="50"  height="60" fill="#ffe9b3" stroke="#111"/>
+  <rect x="120" y="415" width="220" height="60" fill="#eef" stroke="#111"/>
+  <rect x="340" y="415" width="150" height="60" fill="#dff7df" stroke="#111"/>
+  <rect x="490" y="415" width="210" height="60" fill="#dff7df" stroke="#111"/>
+  <rect x="700" y="415" width="200" height="60" fill="#f4f4f4" stroke="#111"/>
+
+  <text x="76"  y="439" class="lab">pixbuf</text>
+  <text x="76"  y="455" class="mut">512 B</text>
+  <text x="130" y="439" class="lab">spray / fillers</text>
+  <text x="130" y="455" class="mut">~250 MB mapped zeros</text>
+  <text x="350" y="433" class="lab">pixman</text>
+  <text x="350" y="449" class="mut">__TEXT / __DATA</text>
+  <text x="350" y="465" class="mut">_global_impl</text>
+  <text x="500" y="433" class="lab">QEMU image</text>
+  <text x="500" y="449" class="mut">__TEXT / __DATA</text>
+  <text x="500" y="465" class="mut">la_ptr[g_free]</text>
+  <text x="710" y="439" class="lab">guest RAM</text>
+  <text x="710" y="455" class="mut">512 MB SHM</text>
+
+  <!-- step 2: set_scanout pointer (below the bar, first row) -->
+  <path d="M95,475 V500 H435 V477" class="ctrl" marker-end="url(#arr)"/>
+  <circle cx="160" cy="500" r="9" fill="#111"/><text x="160" y="504" text-anchor="middle" class="stepN">2</text>
+  <text x="176" y="520" class="mut">SET_SCANOUT(x): surface = pixbuf + x·4  (points into pixman/QEMU)</text>
+
+  <!-- step 3: VNC reads surface (routed around the bar), bytes back to guest -->
+  <path d="M895,300 H908 V530 H470 V477" class="leak" marker-end="url(#arrB)"/>
+  <path d="M895,260 H908 V150 Q908,140 898,140 H470 Q452,140 452,128 V112" class="leak" marker-end="url(#arrB)"/>
+  <circle cx="660" cy="530" r="9" fill="#1f6feb"/><text x="660" y="534" text-anchor="middle" class="stepN">3</text>
+  <text x="176" y="548" class="mut" fill="#1f6feb">VNC serialises surface → pixel bytes back to guest over SLIRP (the leak)</text>
+
+  <!-- step 5: trigger (third row) -->
+  <path d="M410,477 V570 H120 V610" class="trig" marker-end="url(#arrG)"/>
+  <circle cx="300" cy="570" r="9" fill="#1a7f37"/><text x="300" y="574" text-anchor="middle" class="stepN">5</text>
+  <text x="176" y="590" class="mut" fill="#1a7f37">RESOURCE_FLUSH → pixman composite dereferences hijacked pointer</text>
+
+  <rect x="70" y="610" width="500" height="92" rx="6" class="box"/>
+  <text x="86" y="632" class="lab" font-weight="bold">pixman_image_composite32()</text>
+  <text x="86" y="652" class="mut">_global_implementation = &amp;fake → wildcard fast_path match</text>
+  <text x="86" y="668" class="mut">fast_path.func(impl,…) = system("open /*/*/Calc*")</text>
+  <text x="86" y="684" class="mut">UTM fallback: g_free(ents) = system("open -a Calculator")</text>
+
+  <path d="M570,656 H700" class="trig" marker-end="url(#arrG)"/>
+  <rect x="710" y="631" width="180" height="50" rx="6" fill="#dff7df" stroke="#1a7f37" stroke-width="2"/>
+  <text x="730" y="654" class="lab" font-weight="bold">Calculator.app</text>
+  <text x="730" y="670" class="mut">opens on host</text>
+
+  <!-- legend -->
+  <path d="M56,740 H90"  class="ctrl"  marker-end="url(#arr)"/>
+  <text x="100" y="744" class="mut">virtio control</text>
+  <path d="M226,740 H260" class="leak"  marker-end="url(#arrB)"/>
+  <text x="270" y="744" class="mut">leak path (SLIRP→VNC→pixels)</text>
+  <path d="M496,740 H530" class="write" marker-end="url(#arrR)"/>
+  <text x="540" y="744" class="mut">OOB write</text>
+  <path d="M626,740 H660" class="write" marker-end="url(#arrR)" stroke-dasharray="5 4"/>
+  <text x="670" y="744" class="mut">g_free fallback</text>
+  <path d="M796,740 H830" class="trig"  marker-end="url(#arrG)"/>
+  <text x="840" y="744" class="mut">trigger / result</text>
+
+  <circle cx="64" cy="764" r="8" fill="#111"/><text x="64" y="768" text-anchor="middle" class="stepN">1</text>
+  <text x="78" y="768" class="mut">overflow resource</text>
+  <circle cx="220" cy="764" r="8" fill="#111"/><text x="220" y="768" text-anchor="middle" class="stepN">2</text>
+  <text x="234" y="768" class="mut">scanout→OOB</text>
+  <circle cx="340" cy="764" r="8" fill="#1f6feb"/><text x="340" y="768" text-anchor="middle" class="stepN">3</text>
+  <text x="354" y="768" class="mut">VNC reads host mem as pixels</text>
+  <circle cx="566" cy="764" r="8" fill="#c0392b"/><text x="566" y="768" text-anchor="middle" class="stepN">4</text>
+  <text x="580" y="768" class="mut">OOB write hijack</text>
+  <circle cx="716" cy="764" r="8" fill="#1a7f37"/><text x="716" y="768" text-anchor="middle" class="stepN">5</text>
+  <text x="730" y="768" class="mut">composite → system()</text>
+</svg>

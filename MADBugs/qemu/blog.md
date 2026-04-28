@@ -58,7 +58,9 @@ Pixman dropped its overflow check because the API contract said it could, the sa
 
 ## The chain
 
-The bug gives an OOB *write* directly: `transfer_to_host_2d` will happily copy guest-controlled bytes to `pixbuf + x * bpp` for any `x < 0x40000001`. What it does not give you, on its own, is an OOB *read*, which means no ASLR bypass, which means the write is mostly useful for kernel-panicking the host.
+![Exploit chain: guest → virtio-gpu overflow → SLIRP/VNC leak → OOB write → system()](chain.svg)
+
+The bug gives an OOB *write* directly: `transfer_to_host_2d` will happily copy guest-controlled bytes to `pixbuf + x * bpp` for any `x < 0x40000001`. What it does not give you, on its own, is an OOB *read*, which means no ASLR bypass, which means the write is mostly useful for crashing the host process.
 
 The way Claude solved the read-primitive problem is, we think, the prettiest part of this exploit, and we want to walk through it because it took us a minute to believe.
 

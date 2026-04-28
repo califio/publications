@@ -20,6 +20,7 @@ PoC video: https://www.youtube.com/watch?v=WWfxGyWoXrc
 |---|---|
 | [`blog.md`](blog.md) | the [MAD Bugs blog post](https://blog.calif.io/t/madbugs) |
 | [`WRITEUP.md`](WRITEUP.md) | full technical advisory: vuln details, five-phase chain, UTM SPICE-safe variant, memfd-layout `g_free` fallback, offsets, prompt log |
+| [`chain.svg`](chain.svg) | annotated diagram of the five-phase chain |
 | [`exploit.c`](exploit.c) | standalone QEMU PoC (homebrew pixman, no SPICE) |
 | [`exploit_utm.c`](exploit_utm.c) | UTM.app PoC (SPICE-safe, pixman + QEMU fingerprints, `g_free` fallback) |
 | [`exploit_linux.c`](exploit_linux.c) | Linux aarch64 host variant |
