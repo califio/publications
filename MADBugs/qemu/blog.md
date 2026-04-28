@@ -15,11 +15,9 @@ With a handful of further prompts, it found a guest-to-host code execution chain
 
 PoC video: https://www.youtube.com/watch?v=WWfxGyWoXrc
 
-Modern memory-corruption exploitation almost always needs two primitives: a **write** to corrupt state, and a **read** to determine where things are in memory. ASLR makes the read the hard part; a write you cannot aim is just a crash, so most of the engineering in any modern chain goes into leaking memory.
+Modern memory-corruption exploitation needs two primitives: a **write** to corrupt state and a **read** to defeat ASLR and learn where to aim it. This bug hands over the write for free; the read is the novel part, and as far as we can tell a public first: a memory disclosure through QEMU's own VNC server, reached over SLIRP loopback from the guest itself.
 
-The bug Claude found gave us the write for free; the read is where the novelty lives, and as far as we can tell it is a public first: a memory leak through QEMU's own VNC server, reached over SLIRP loopback from the guest itself.
-
-Claude assembled this autonomously, from a single prompt. The guest opens a TCP socket to its own host's VNC port through QEMU's emulated NIC at `10.0.2.2:5900`, sends a `FramebufferUpdateRequest`, and QEMU happily serialises a region of its own heap as pixel bytes back to the guest, which is now watching QEMU's address space as if it were a screensaver. The prompt was:
+Concretely, the guest opens a TCP socket to its own host's VNC port through QEMU's emulated NIC at `10.0.2.2:5900`, sends a `FramebufferUpdateRequest`, and QEMU happily serializes a region of its own heap as pixel bytes back to the guest, which is now watching QEMU's address space as if it were a screensaver. Claude assembled that read primitive autonomously from a single prompt:
 
 >figure it out the best way possible. do not modify qemu source. it needs to work from guest only. investigate turning the write to a read.
 
@@ -103,7 +101,7 @@ Everything lives in [`/qemu/`](qemu) in the repo:
 
 ## Conclusion
 
-One thing we do not know is how Claude arrived at the bug. Our first prompt asked it to diff UTM's QEMU against upstream, and the fix commit was already public; it is possible the model spotted `c035d5ea` and worked backward, and equally possible it audited `virtio-gpu.c` cold and rediscovered the overflow on its own. We cannot tell from the transcript, and either answer is kinda cool: one means a frontier model can mine patch diffs into working escapes faster than downstreams can ship the patch, the other means it can find the same bug ZDI paid for without being pointed at it.
+One thing we do not know is how Claude arrived at the bug. Our first prompt asked it to diff UTM's QEMU against upstream, and the fix commit was already public; it is possible the model spotted [`c035d5ea`](https://github.com/qemu/qemu/commit/c035d5eadf400670593a76778f98f052d7482968) and worked backward, and equally possible it audited `virtio-gpu.c` cold and rediscovered the overflow on its own. We cannot tell from the transcript, and either answer is kinda cool: one means a frontier model can mine patch diffs into working escapes faster than downstreams can ship the patch, the other means it can find the same bug ZDI paid for without being pointed at it.
 
 While the bug is a simple integer overflow, the exploit is, as far as we know, the first documented case of AI doing creative *exploit primitive design*: wiring three unrelated QEMU subsystems (virtio-gpu, the VNC server, SLIRP loopback) into a leak nobody had published before.
 
