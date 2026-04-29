@@ -91,6 +91,12 @@ Not weaponized. No PAC bypass, sandbox escape, or kernel stage. The PoC
 demonstrates `read64`/`write64` against your own JSC build and stops there.
 The bug was patched in January 2024 and has been public since.
 
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.
+
+`Stage1-writeup.md` is the one exception in this directory: it is joint work by humans and AI.
+
 ## Acknowledgments
 
 Builds on RE work by Huy Nguyen, wh1te4ever, Duy Tran, Nathan, hrtowii,

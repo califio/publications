@@ -43,3 +43,7 @@ UTM.app (requires `-vnc :0` in the VM's QEMU arguments):
 ./run_poc_utm.sh          # build exploit, provision 'exploit-test' VM
 ./run_poc_utm.sh run      # start via utmctl; watch the serial console in UTM
 ```
+
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.

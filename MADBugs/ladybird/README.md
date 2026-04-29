@@ -170,3 +170,8 @@ Independently, Ladybird should gate `WebAssembly.Memory({shared: true})` and `Sh
 - 2026-04-21: Reported to the Ladybird maintainers with PoCs
 - 2026-04-23: Filed publicly at maintainers' request as [ladybird#9062](https://github.com/LadybirdBrowser/ladybird/issues/9062)
 - 2026-04-24: Published as part of MAD Bugs
+
+
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.

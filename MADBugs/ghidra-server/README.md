@@ -276,3 +276,8 @@ if (sigBytes == null) {
 * 2026-04-08 15:40: Blog post published
 * 2026-04-08 16:03: [PR](https://github.com/NationalSecurityAgency/ghidra/pull/9109) opened, issue reported
 * 2026-04-09 22:00: Fix [merged](https://github.com/NationalSecurityAgency/ghidra/commit/8ca0226f11e547fabc46566905c8951fe6db4344) into ghidra 12.1
+
+
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.

@@ -36,3 +36,8 @@ python3 exploit.py  # run the end-to-end PoC
 ```
 
 Successful exploitation creates `/tmp/qmail_rce_proof` inside the container containing the output of `id` as the `qmailr` user.
+
+
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.

@@ -77,3 +77,8 @@ Hung Nguyen (mov) of Calif.io
 - 2026-04-08 03:28 UTC: Reported as [radare2#25752](https://github.com/radareorg/radare2/issues/25752)
 - 2026-04-08 13:54 UTC: Maintainer (@trufae) acknowledged — *"yeah as said the previous fix was wrong and incomplete, i just fixed it in a PR."*
 - 2026-04-08 (same day): Fix merged upstream
+
+
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.

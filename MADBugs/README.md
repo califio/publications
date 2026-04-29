@@ -6,6 +6,10 @@ We’re here to uncover the most interesting security bugs and exploits with AI,
 
 Between now and the end of April 2026, we’ll be dropping what we find in this repo and on [our blog](https://blog.calif.io/t/madbugs).
 
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.
+
 ## Bugs and Exploits
 
 * 2026-03-30: [Vim tabpanel modeline RCE affects Vim < 9.2.0272](vim-vs-emacs-vs-claude)

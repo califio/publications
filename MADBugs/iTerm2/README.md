@@ -27,3 +27,8 @@ python3 genpoc.py
 unzip poc.zip
 cat readme.txt
 ```
+
+
+## A note on the artifacts
+
+The write-ups and PoCs in this series are AI-generated and human-verified. We keep human editing to a minimum so the artifacts document the current state of the art, which means we don't edit out hallucinations or slop. We do verify that the PoCs work. The blog posts are written by humans.
