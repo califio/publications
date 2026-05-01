@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480" font-family="ui-monospace, Menlo, monospace">
+  <style>
+    .h1   { font-size: 16px; font-weight: 700; fill: #222; }
+    .sub  { font-size: 12px; fill: #666; }
+    .h2   { font-size: 13px; font-weight: 600; fill: #333; }
+    .lbl  { font-size: 11px; fill: #666; }
+    .fld  { font-size: 12px; font-weight: 600; fill: #333; }
+    .note { font-size: 12px; fill: #b71c1c; }
+    .dim  { fill: #888; }
+  </style>
+
+  <text x="450" y="25" text-anchor="middle" class="h1">The Mega-String Trick</text>
+  <text x="450" y="44" text-anchor="middle" class="sub">A fake zend_string with base at chunk - 0x10 reads the entire 2 MB ZendMM chunk in one UAF</text>
+
+  <!-- Row 1: real memory -->
+  <text x="60" y="85" class="h2">Real memory:</text>
+
+  <rect x="60" y="100" width="120" height="55" fill="#fafafa" stroke="#999" stroke-dasharray="4 3"/>
+  <text x="120" y="124" text-anchor="middle" class="fld dim">unmapped /</text>
+  <text x="120" y="141" text-anchor="middle" class="fld dim">other allocator</text>
+  <text x="60"  y="172" class="lbl">chunk - 0x10</text>
+
+  <rect x="180" y="100" width="60" height="55" fill="#ffe0b2" stroke="#444"/>
+  <text x="210" y="124" text-anchor="middle" class="fld">heap *</text>
+  <text x="210" y="141" text-anchor="middle" class="lbl">(huge)</text>
+  <text x="180" y="172" class="lbl">chunk</text>
+
+  <rect x="240" y="100" width="540" height="55" fill="#fff3e0" stroke="#444"/>
+  <text x="510" y="135" text-anchor="middle" class="fld">2 MB usable chunk content</text>
+  <text x="240" y="172" class="lbl">chunk + 0x08</text>
+  <text x="780" y="172" text-anchor="end" class="lbl">chunk + 0x1FFFF8</text>
+
+  <rect x="780" y="100" width="60" height="55" fill="#fafafa" stroke="#999" stroke-dasharray="4 3"/>
+  <text x="810" y="124" text-anchor="middle" class="fld dim">next</text>
+  <text x="810" y="141" text-anchor="middle" class="fld dim">page</text>
+
+  <!-- Connector lines -->
+  <g stroke="#7b1fa2" stroke-width="1.4" stroke-dasharray="3 3" fill="none">
+    <line x1="60"  y1="178" x2="60"  y2="258"/>
+    <line x1="180" y1="178" x2="180" y2="258"/>
+    <line x1="240" y1="178" x2="240" y2="258"/>
+    <line x1="780" y1="178" x2="780" y2="258"/>
+  </g>
+
+  <!-- Row 2: forged zend_string -->
+  <text x="60" y="275" class="h2">Forged zend_string (base at chunk - 0x10):</text>
+
+  <rect x="60"  y="290" width="60"  height="55" fill="#f3e5f5" stroke="#7b1fa2" stroke-dasharray="4 2"/>
+  <text x="90"  y="325" text-anchor="middle" class="fld">gc</text>
+  <text x="60"  y="362" class="lbl">+0x00</text>
+
+  <rect x="120" y="290" width="60"  height="55" fill="#f3e5f5" stroke="#7b1fa2" stroke-dasharray="4 2"/>
+  <text x="150" y="325" text-anchor="middle" class="fld">h</text>
+  <text x="120" y="362" class="lbl">+0x08</text>
+
+  <rect x="180" y="290" width="60"  height="55" fill="#ce93d8" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="210" y="325" text-anchor="middle" class="fld">len</text>
+  <text x="180" y="362" class="lbl">+0x10</text>
+
+  <rect x="240" y="290" width="540" height="55" fill="#ce93d8" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="510" y="325" text-anchor="middle" class="fld">val[ ]</text>
+  <text x="240" y="362" class="lbl">+0x18</text>
+
+  <!-- Outcomes -->
+  <text x="60" y="410" class="note">strlen($fake) reads len at chunk + 0x00 → heap pointer ≈ 140 TB</text>
+  <text x="60" y="430" class="note">$fake[$i] reads val[$i] = *(chunk + 0x08 + $i) → real bytes inside the chunk</text>
+  <text x="60" y="450" class="note">past chunk + 0x200000 segfaults: not our mapped memory</text>
+</svg>

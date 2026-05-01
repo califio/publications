@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 620" font-family="ui-monospace, Menlo, monospace">
+  <style>
+    .title { font-size: 16px; font-weight: 700; fill: #222; }
+    .stage { font-size: 13px; font-weight: 600; fill: #5e35b1; }
+    .h2    { font-size: 12px; font-weight: 600; fill: #333; }
+    .lbl   { font-size: 11px; fill: #555; }
+    .fld   { font-size: 11px; fill: #333; }
+    .note  { font-size: 12px; fill: #b71c1c; }
+    .empty { font-size: 11px; fill: #999; font-style: italic; }
+  </style>
+
+  <text x="480" y="25" text-anchor="middle" class="title">Step 1: heap leak via dangling var_hash slots</text>
+
+  <!-- ============================================================ -->
+  <!-- Stage A: after inner parse                                    -->
+  <!-- ============================================================ -->
+  <text x="20" y="62" class="stage">A. After the inner parse: slots 4..11 point into the 320-byte arData (bin-320)</text>
+
+  <!-- var_hash -->
+  <rect x="20" y="78" width="240" height="148" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="30" y="96" class="h2">outer var_hash</text>
+  <text x="30" y="114" class="fld">slot 1: outer array</text>
+  <text x="30" y="129" class="fld">slot 2: CachedData</text>
+  <text x="30" y="144" class="fld">slot 3: stdClass</text>
+  <text x="30" y="165" class="fld" fill="#1565c0">slot 4  ──→ p0 zval</text>
+  <text x="30" y="180" class="fld" fill="#1565c0">slot 5  ──→ p1 zval</text>
+  <text x="30" y="195" class="fld" fill="#1565c0" xml:space="preserve">     ⋮</text>
+  <text x="30" y="215" class="fld" fill="#1565c0">slot 11 ──→ p7 zval</text>
+
+  <!-- arData -->
+  <text x="290" y="96" class="h2">stdClass property arData (320 B = 64-B hash index + 8 × 32-B buckets, bin-320)</text>
+  <g transform="translate(290, 110)">
+    <rect x="0"   y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <rect x="80"  y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <rect x="160" y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <rect x="240" y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <rect x="320" y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <rect x="400" y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <rect x="480" y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <rect x="560" y="0" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+    <text x="40"  y="28" text-anchor="middle" class="fld">p0</text>
+    <text x="120" y="28" text-anchor="middle" class="fld">p1</text>
+    <text x="200" y="28" text-anchor="middle" class="fld">p2</text>
+    <text x="280" y="28" text-anchor="middle" class="fld">p3</text>
+    <text x="360" y="28" text-anchor="middle" class="fld">p4</text>
+    <text x="440" y="28" text-anchor="middle" class="fld">p5</text>
+    <text x="520" y="28" text-anchor="middle" class="fld">p6</text>
+    <text x="600" y="28" text-anchor="middle" class="fld">p7</text>
+    <text x="40"  y="48" text-anchor="middle" class="lbl">bkt 0</text>
+    <text x="120" y="48" text-anchor="middle" class="lbl">bkt 1</text>
+    <text x="200" y="48" text-anchor="middle" class="lbl">bkt 2</text>
+    <text x="280" y="48" text-anchor="middle" class="lbl">bkt 3</text>
+    <text x="360" y="48" text-anchor="middle" class="lbl">bkt 4</text>
+    <text x="440" y="48" text-anchor="middle" class="lbl">bkt 5</text>
+    <text x="520" y="48" text-anchor="middle" class="lbl">bkt 6</text>
+    <text x="600" y="48" text-anchor="middle" class="lbl">bkt 7</text>
+  </g>
+
+  <!-- arrows: slot 4 → bkt 0 (p0); slot 11 → bkt 7 -->
+  <g stroke="#1565c0" stroke-width="1" stroke-dasharray="3 2" fill="none" opacity="0.6">
+    <path d="M 260,162 Q 290,150 325,140"/>
+    <path d="M 260,212 Q 700,212 885,170"/>
+  </g>
+
+  <text x="290" y="232" class="empty">buckets are placed in insertion order: p0 → bkt 0, p1 → bkt 1, ..., p7 → bkt 7</text>
+
+  <!-- ============================================================ -->
+  <!-- Stage B: after gadget body's $row->x = 0                      -->
+  <!-- ============================================================ -->
+  <text x="20" y="270" class="stage">B. Gadget body runs $row->x = 0 (the 9th HT insert) → resize 8→16, old arData is efree'd</text>
+
+  <rect x="20" y="285" width="240" height="96" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="30" y="303" class="h2">outer var_hash (unchanged)</text>
+  <text x="30" y="324" class="fld">slot 3: stdClass</text>
+  <text x="30" y="345" class="fld" fill="#c62828">slots 4..11 still point</text>
+  <text x="30" y="361" class="fld" fill="#c62828">at the freed bytes</text>
+
+  <g transform="translate(290, 295)">
+    <rect x="0" y="0" width="640" height="60" fill="#ffebee" stroke="#c62828" stroke-dasharray="4 3"/>
+    <text x="320" y="35" text-anchor="middle" class="fld" fill="#c62828">320 B FREED (returned to bin-320 free list)</text>
+  </g>
+
+  <!-- ============================================================ -->
+  <!-- Stage C: spray reclaims, R:4 writes                           -->
+  <!-- ============================================================ -->
+  <text x="20" y="405" class="stage">C. One of the 32 sprays reclaims the bin-320 slot; the parser's R:4 dereferences slot 4</text>
+  <text x="20" y="421" class="stage" xml:space="preserve">   (which points at bkt 0 = p0's old position) and ZVAL_MAKE_REF writes a zend_reference* there</text>
+
+  <rect x="20" y="436" width="240" height="100" fill="#e3f2fd" stroke="#1565c0"/>
+  <text x="30" y="454" class="h2">outer var_hash (unchanged)</text>
+  <text x="30" y="474" class="fld" fill="#1565c0">slot 4 ──→ same address...</text>
+  <text x="30" y="490" class="fld" fill="#1b5e20">...which is now spray[k]+0x28</text>
+  <text x="30" y="516" class="fld">$result[k] = this spray string</text>
+
+  <text x="290" y="454" class="h2" fill="#2e7d32">spray[k] now occupies the freed slot (val offsets shown)</text>
+  <g transform="translate(290, 466)">
+    <rect x="0"   y="0" width="80" height="60" fill="#a5d6a7" stroke="#2e7d32" stroke-width="2"/>
+    <rect x="80"  y="0" width="80" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect x="160" y="0" width="80" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect x="240" y="0" width="80" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect x="320" y="0" width="80" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect x="400" y="0" width="80" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect x="480" y="0" width="80" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+    <rect x="560" y="0" width="80" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+
+    <text x="40"  y="28" text-anchor="middle" class="fld" fill="#1b5e20" font-weight="bold">zend_ref*</text>
+    <text x="40"  y="48" text-anchor="middle" class="lbl">+0x28</text>
+
+    <text x="120" y="28" text-anchor="middle" class="fld">marker</text>
+    <text x="200" y="28" text-anchor="middle" class="fld">marker</text>
+    <text x="280" y="28" text-anchor="middle" class="fld">marker</text>
+    <text x="360" y="28" text-anchor="middle" class="fld">marker</text>
+    <text x="440" y="28" text-anchor="middle" class="fld">marker</text>
+    <text x="520" y="28" text-anchor="middle" class="fld">marker</text>
+    <text x="600" y="28" text-anchor="middle" class="fld">marker</text>
+    <text x="120" y="48" text-anchor="middle" class="lbl">+0x48</text>
+    <text x="200" y="48" text-anchor="middle" class="lbl">+0x68</text>
+    <text x="280" y="48" text-anchor="middle" class="lbl">+0x88</text>
+    <text x="360" y="48" text-anchor="middle" class="lbl">+0xA8</text>
+    <text x="440" y="48" text-anchor="middle" class="lbl">+0xC8</text>
+    <text x="520" y="48" text-anchor="middle" class="lbl">+0xE8</text>
+    <text x="600" y="48" text-anchor="middle" class="lbl">+0x108</text>
+  </g>
+
+  <!-- arrow: slot 4 → spray cell 0 -->
+  <g stroke="#1565c0" stroke-width="1" stroke-dasharray="3 2" fill="none" opacity="0.6">
+    <path d="M 260,476 Q 282,480 300,490"/>
+  </g>
+
+  <text x="20" y="561" class="note">leaked address = 8 bytes at $result[k] + 0x28</text>
+  <text x="20" y="581" class="note">chunk = addr &amp; ~0x1FFFFF</text>
+</svg>

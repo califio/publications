@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 740" font-family="ui-monospace, Menlo, monospace">
+  <style>
+    .ttl   { font-size: 13px; font-weight: 700; fill: #222; }
+    .lbl   { font-size: 12px; fill: #333; }
+    .small { font-size: 11px; fill: #555; }
+    .off   { font-size: 10px; fill: #666; }
+    .tag   { font-size: 10px; font-weight: 600; fill: #5e35b1; }
+    .self  { font-size: 10px; fill: #b71c1c; font-style: italic; }
+  </style>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+    <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b71c1c"/>
+    </marker>
+  </defs>
+
+  <text x="480" y="24" text-anchor="middle" class="ttl">Step 3 (remote): building the fake stdClass inside the trigger spray</text>
+  <text x="480" y="42" text-anchor="middle" class="small">handlers points back into the same spray, so the spray is also the vtable; serialize() calls vtable[0xC8] = system()</text>
+
+  <!-- ========== Layer 0: the spray buffer being assembled ========== -->
+  <text x="920" y="86" text-anchor="end" class="ttl">spray[k] val[ ]  (280 B, base = S)</text>
+
+  <g transform="translate(40, 92)">
+    <!-- whole spray outline -->
+    <rect x="0" y="0" width="880" height="64" fill="#e8f5e9" stroke="#2e7d32" rx="2"/>
+
+    <!-- region: fake vtable base (S+0 .. ) -->
+    <text x="8" y="16" class="small" fill="#2e7d32">fake vtable base = S</text>
+
+    <!-- fake zend_object at S+104 -->
+    <rect x="280" y="8" width="100" height="48" fill="#ffe0b2" stroke="#444"/>
+    <text x="330" y="28" text-anchor="middle" class="lbl" font-weight="bold">cmd</text>
+    <text x="330" y="42" text-anchor="middle" class="off">+0x00 (gc)</text>
+
+    <rect x="380" y="8" width="70" height="48" fill="#fff3e0" stroke="#444"/>
+    <text x="415" y="28" text-anchor="middle" class="lbl" font-weight="bold">ce</text>
+    <text x="415" y="42" text-anchor="middle" class="off">+0x10</text>
+
+    <rect x="450" y="8" width="80" height="48" fill="#fff3e0" stroke="#444"/>
+    <text x="490" y="28" text-anchor="middle" class="lbl" font-weight="bold">handlers</text>
+    <text x="490" y="42" text-anchor="middle" class="off">+0x18</text>
+
+    <rect x="530" y="8" width="70" height="48" fill="#fff3e0" stroke="#444"/>
+    <text x="565" y="28" text-anchor="middle" class="lbl">props</text>
+    <text x="565" y="42" text-anchor="middle" class="off">+0x20 = 1</text>
+
+    <!-- vtable[0xC8] = system at S+200 -->
+    <rect x="700" y="8" width="120" height="48" fill="#a5d6a7" stroke="#2e7d32" stroke-width="2"/>
+    <text x="760" y="28" text-anchor="middle" class="lbl" font-weight="bold">system()</text>
+    <text x="760" y="42" text-anchor="middle" class="off">S+0xC8</text>
+
+    <!-- region brackets below the strip -->
+    <line x1="280" y1="70" x2="600" y2="70" stroke="#777"/>
+    <line x1="280" y1="64" x2="280" y2="70" stroke="#777"/>
+    <line x1="600" y1="64" x2="600" y2="70" stroke="#777"/>
+    <text x="440" y="84" text-anchor="middle" class="tag">fake zend_object @ S+104</text>
+
+    <line x1="700" y1="70" x2="820" y2="70" stroke="#777"/>
+    <line x1="700" y1="64" x2="700" y2="70" stroke="#777"/>
+    <line x1="820" y1="64" x2="820" y2="70" stroke="#777"/>
+    <text x="760" y="84" text-anchor="middle" class="tag">vtable[0xC8]</text>
+
+    <!-- self-reference arrow: handlers → S -->
+    <path d="M 490,8 Q 490,-22 250,-22 Q 10,-22 10,4"
+          fill="none" stroke="#b71c1c" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrR)"/>
+  </g>
+
+  <!-- ========== Layer 1: three values to discover ========== -->
+  <rect x="60"  y="230" width="240" height="50" fill="#fff3e0" stroke="#444" rx="4"/>
+  <text x="180" y="250" text-anchor="middle" class="lbl"><tspan font-weight="bold">ce</tspan> = zend_standard_class_def</text>
+  <text x="180" y="266" text-anchor="middle" class="small">brk-heap address</text>
+
+  <rect x="360" y="230" width="240" height="50" fill="#fff3e0" stroke="#444" rx="4"/>
+  <text x="480" y="250" text-anchor="middle" class="lbl"><tspan font-weight="bold">S</tspan> = spray's heap address</text>
+  <text x="480" y="266" text-anchor="middle" class="small">handlers value + obj base</text>
+
+  <rect x="660" y="230" width="240" height="50" fill="#fff3e0" stroke="#444" rx="4"/>
+  <text x="780" y="250" text-anchor="middle" class="lbl"><tspan font-weight="bold">system()</tspan> = libc address</text>
+  <text x="780" y="266" text-anchor="middle" class="small">written at S+0xC8</text>
+
+  <!-- value boxes feed upward into buffer fields -->
+  <path d="M 240,230 L 455,186" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <path d="M 480,230 L 530,186" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <path d="M 780,230 L 800,186" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <!-- ========== Layer 2: per-value discovery (R-5 / R-6 / R-4) ========== -->
+  <rect x="60"  y="316" width="240" height="56" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="72"  y="332" class="tag">R-5</text>
+  <text x="180" y="338" text-anchor="middle" class="ttl">class_table lookup</text>
+  <text x="180" y="356" text-anchor="middle" class="small">EG.class_table["stdclass"]</text>
+
+  <rect x="360" y="316" width="240" height="56" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="372" y="332" class="tag">R-6</text>
+  <text x="480" y="338" text-anchor="middle" class="ttl">spray slot discovery</text>
+  <text x="480" y="356" text-anchor="middle" class="small">walk ZendMM bin-320 metadata</text>
+
+  <rect x="660" y="316" width="240" height="72" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="672" y="332" class="tag">R-4</text>
+  <text x="780" y="338" text-anchor="middle" class="ttl">GOT dump → libc</text>
+  <text x="780" y="356" text-anchor="middle" class="small">DT_PLTRELSZ fake-string read,</text>
+  <text x="780" y="371" text-anchor="middle" class="small">cluster ptrs, gnu_hash "system"</text>
+
+  <path d="M 180,316 L 180,280" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <path d="M 480,316 L 480,280" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <path d="M 780,316 L 780,280" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <!-- ========== Layer 3: R-3 (feeds R-5 and R-4) ========== -->
+  <rect x="320" y="430" width="320" height="56" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="332" y="446" class="tag">R-3</text>
+  <text x="480" y="452" text-anchor="middle" class="ttl">.gnu_hash on libphp</text>
+  <text x="480" y="470" text-anchor="middle" class="small">resolves executor_globals + PLTGOT</text>
+
+  <path d="M 360,430 Q 180,420 180,372" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="190" y="408" text-anchor="end" class="small">EG</text>
+  <path d="M 600,430 Q 780,420 780,388" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="790" y="412" class="small">PLTGOT</text>
+
+  <!-- ========== Layer 4: R-2 ========== -->
+  <rect x="320" y="520" width="320" height="46" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="332" y="536" class="tag">R-2</text>
+  <text x="480" y="542" text-anchor="middle" class="ttl">ELF scan for libphp.so</text>
+  <text x="480" y="558" text-anchor="middle" class="small">2 MB / 1 MB sweeps for \x7fELF</text>
+
+  <path d="M 480,520 L 480,486" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <!-- ========== Layer 5: primitives ========== -->
+  <rect x="200" y="600" width="560" height="50" fill="#fff9c4" stroke="#f57c00" stroke-width="2" rx="4"/>
+  <text x="480" y="622" text-anchor="middle" class="ttl">Heap leak (R-1)  +  uaf_read primitive (Step 2)</text>
+  <text x="480" y="640" text-anchor="middle" class="small">every box above is a sequence of uaf_read HTTP requests</text>
+
+  <path d="M 480,600 L 480,566" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- R-1 feeds R-6 directly with the chunk address, routed left of R-3/R-2 -->
+  <path d="M 280,600 Q 240,560 240,470 Q 240,400 360,376" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <text x="232" y="470" text-anchor="end" class="small">chunk addr</text>
+
+  <text x="40" y="720" class="small">request budget:  R-2 ≈ 50–120,  R-3 ≈ 10,  R-4 ≈ 1500–2000,  R-5 ≈ 55,  R-6 ≈ 10</text>
+</svg>

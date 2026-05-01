@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 440" font-family="ui-monospace, Menlo, monospace">
+  <style>
+    .h1   { font-size: 16px; font-weight: 700; fill: #222; }
+    .sub  { font-size: 12px; fill: #666; }
+    .h2   { font-size: 13px; font-weight: 600; fill: #333; }
+    .sect { font-size: 12px; font-weight: 600; fill: #555; }
+    .lbl  { font-size: 11px; fill: #666; }
+    .fld  { font-size: 12px; font-weight: 600; fill: #333; }
+    .sm   { font-size: 11px; fill: #333; }
+    .note { font-size: 12px; fill: #b71c1c; }
+    .dim  { fill: #888; }
+  </style>
+
+  <text x="480" y="25" text-anchor="middle" class="h1">Step 3c (R-4): Reading the GOT via a fake zend_string</text>
+  <text x="480" y="44" text-anchor="middle" class="sub">Base the fake string at &amp;d_val - 0x10 so len overlaps DT_PLTRELSZ and val[] spans into .got.plt</text>
+
+  <!-- Section brackets -->
+  <text x="250" y="78" text-anchor="middle" class="sect">.dynamic</text>
+  <line x1="40"  y1="84" x2="460" y2="84" stroke="#999" stroke-width="1"/>
+  <line x1="40"  y1="84" x2="40"  y2="90" stroke="#999" stroke-width="1"/>
+  <line x1="460" y1="84" x2="460" y2="90" stroke="#999" stroke-width="1"/>
+
+  <text x="690" y="78" text-anchor="middle" class="sect">.got.plt</text>
+  <line x1="460" y1="84" x2="920" y2="84" stroke="#999" stroke-width="1"/>
+  <line x1="920" y1="84" x2="920" y2="90" stroke="#999" stroke-width="1"/>
+
+  <!-- Row 1: libphp memory -->
+  <text x="40" y="110" class="h2">libphp memory:</text>
+
+  <rect x="40"  y="122" width="80"  height="60" fill="#fafafa" stroke="#999" stroke-dasharray="4 3"/>
+  <text x="80"  y="148" text-anchor="middle" class="sm dim">prev</text>
+  <text x="80"  y="163" text-anchor="middle" class="sm dim">d_val</text>
+
+  <rect x="120" y="122" width="80"  height="60" fill="#fff3e0" stroke="#444"/>
+  <text x="160" y="148" text-anchor="middle" class="fld">d_tag</text>
+  <text x="160" y="163" text-anchor="middle" class="lbl">= 2</text>
+
+  <rect x="200" y="122" width="80"  height="60" fill="#ffe0b2" stroke="#444" stroke-width="2"/>
+  <text x="240" y="148" text-anchor="middle" class="fld">d_val</text>
+  <text x="240" y="163" text-anchor="middle" class="lbl">= 82872</text>
+
+  <rect x="280" y="122" width="180" height="60" fill="#fff8f0" stroke="#444"/>
+  <text x="370" y="148" text-anchor="middle" class="sm">later</text>
+  <text x="370" y="163" text-anchor="middle" class="sm">Elf64_Dyn entries</text>
+
+  <rect x="460" y="122" width="460" height="60" fill="#e8f5e9" stroke="#2e7d32"/>
+  <text x="690" y="142" text-anchor="middle" class="sm">resolved external pointers</text>
+  <text x="690" y="160" text-anchor="middle" class="sm" xml:space="preserve">strlen  malloc  free  ...  <tspan font-weight="bold" fill="#1b5e20">system</tspan>  popen  ...</text>
+
+  <!-- DT_PLTRELSZ bracket -->
+  <line x1="120" y1="190" x2="280" y2="190" stroke="#777" stroke-width="1"/>
+  <line x1="120" y1="184" x2="120" y2="190" stroke="#777" stroke-width="1"/>
+  <line x1="280" y1="184" x2="280" y2="190" stroke="#777" stroke-width="1"/>
+  <text x="200" y="204" text-anchor="middle" class="lbl">DT_PLTRELSZ entry</text>
+
+  <!-- Connector lines -->
+  <g stroke="#7b1fa2" stroke-width="1.4" stroke-dasharray="3 3" fill="none">
+    <line x1="40"  y1="212" x2="40"  y2="268"/>
+    <line x1="120" y1="212" x2="120" y2="268"/>
+    <line x1="200" y1="212" x2="200" y2="268"/>
+    <line x1="280" y1="212" x2="280" y2="268"/>
+    <line x1="920" y1="190" x2="920" y2="268"/>
+  </g>
+
+  <!-- Row 2: forged zend_string -->
+  <text x="40" y="285" class="h2">Forged zend_string (base = &amp;d_val - 0x10):</text>
+
+  <rect x="40"  y="298" width="80"  height="55" fill="#f3e5f5" stroke="#7b1fa2" stroke-dasharray="4 2"/>
+  <text x="80"  y="331" text-anchor="middle" class="fld">gc</text>
+  <text x="40"  y="370" class="lbl">+0x00</text>
+
+  <rect x="120" y="298" width="80"  height="55" fill="#f3e5f5" stroke="#7b1fa2" stroke-dasharray="4 2"/>
+  <text x="160" y="331" text-anchor="middle" class="fld">h</text>
+  <text x="120" y="370" class="lbl">+0x08</text>
+
+  <rect x="200" y="298" width="80"  height="55" fill="#ce93d8" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="240" y="324" text-anchor="middle" class="fld">len</text>
+  <text x="240" y="340" text-anchor="middle" class="lbl">= 82872</text>
+  <text x="200" y="370" class="lbl">+0x10</text>
+
+  <rect x="280" y="298" width="640" height="55" fill="#ce93d8" stroke="#7b1fa2" stroke-width="2"/>
+  <text x="600" y="331" text-anchor="middle" class="fld">val[ ]  (82872-byte read window)</text>
+  <text x="280" y="370" class="lbl">+0x18</text>
+
+  <!-- Outcomes -->
+  <text x="40" y="405" class="note">strlen($fake) = DT_PLTRELSZ d_val = 82872</text>
+  <text x="40" y="425" class="note">$fake[$i] walks .dynamic into .got.plt → dump every resolved libc pointer, including system()</text>
+</svg>

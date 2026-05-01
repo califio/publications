@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 700" font-family="ui-monospace, Menlo, monospace">
+  <style>
+    .ttl     { font-size: 13px; font-weight: 700; fill: #222; }
+    .lbl     { font-size: 12px; fill: #333; }
+    .small   { font-size: 11px; fill: #555; }
+    .tiny    { font-size: 10px; fill: #666; }
+    .off     { font-size: 10px; fill: #5e35b1; font-weight: 600; }
+    .fld     { font-size: 12px; font-weight: 700; fill: #333; }
+    .val     { font-size: 10px; fill: #b71c1c; }
+    .reuse   { font-size: 10px; fill: #b71c1c; font-style: italic; }
+    .dim     { font-size: 11px; fill: #999; }
+  </style>
+
+  <defs>
+    <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    </marker>
+    <marker id="arrR" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b71c1c"/>
+    </marker>
+  </defs>
+
+  <text x="460" y="24" text-anchor="middle" class="ttl">Step 3: assembling the fake Closure in $GLOBALS["_xfc"]</text>
+  <text x="460" y="42" text-anchor="middle" class="small">three runtime addresses must be discovered, then written into the byte buffer at fixed offsets</text>
+
+  <!-- ============ The buffer being built ============ -->
+  <text x="70" y="64" class="lbl"><tspan font-weight="700">$fc</tspan> = str_repeat("\x00", 512)  <tspan class="tiny">(a plain PHP string; bytes laid out as zend_closure)</tspan></text>
+
+  <!-- offsets above -->
+  <text x="70"  y="82" class="off">+0x00</text>
+  <text x="130" y="82" class="off">+0x10</text>
+  <text x="260" y="82" class="off">+0x18</text>
+  <text x="410" y="82" class="off">+0x20</text>
+  <text x="550" y="82" class="off">+0x90</text>
+  <text x="850" y="82" text-anchor="end" class="off">+0x200</text>
+
+  <!-- outer frame -->
+  <rect x="70" y="88" width="780" height="54" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="2" rx="3"/>
+
+  <!-- segments -->
+  <!-- gc header -->
+  <rect x="70"  y="88" width="60"  height="54" fill="#fafafa" stroke="#7b1fa2" stroke-width="1"/>
+  <text x="100" y="112" text-anchor="middle" class="dim">gc</text>
+  <text x="100" y="126" text-anchor="middle" class="tiny">any</text>
+
+  <!-- ce -->
+  <rect x="130" y="88" width="130" height="54" fill="#fff3e0" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="195" y="110" text-anchor="middle" class="fld">ce</text>
+  <text x="195" y="126" text-anchor="middle" class="val">zend_ce_closure</text>
+
+  <!-- handlers -->
+  <rect x="260" y="88" width="150" height="54" fill="#fff3e0" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="335" y="110" text-anchor="middle" class="fld">handlers</text>
+  <text x="335" y="126" text-anchor="middle" class="val">closure_handlers</text>
+
+  <!-- func gap -->
+  <rect x="410" y="88" width="140" height="54" fill="#fafafa" stroke="#7b1fa2" stroke-width="1"/>
+  <text x="480" y="112" text-anchor="middle" class="dim">func.{type,</text>
+  <text x="480" y="126" text-anchor="middle" class="dim">name, ...}</text>
+
+  <!-- func.handler -->
+  <rect x="550" y="88" width="160" height="54" fill="#fff3e0" stroke="#7b1fa2" stroke-width="1.5"/>
+  <text x="630" y="110" text-anchor="middle" class="fld">func.handler</text>
+  <text x="630" y="126" text-anchor="middle" class="val">zif_system</text>
+
+  <!-- tail -->
+  <rect x="710" y="88" width="140" height="54" fill="#fafafa" stroke="#7b1fa2" stroke-width="1"/>
+  <text x="780" y="119" text-anchor="middle" class="dim">... zeros ...</text>
+
+  <!-- write_u64 hint -->
+  <text x="850" y="158" text-anchor="end" class="tiny">orange = the three write_u64()</text>
+
+  <!-- ============ Arrows feeding INTO the slots ============ -->
+  <!-- ce slot <- closure cluster -->
+  <path d="M 195,210 L 195,142" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- handlers slot <- closure cluster -->
+  <path d="M 335,210 L 335,142" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <!-- func.handler slot <- function_table walk -->
+  <path d="M 630,210 L 630,142" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <!-- ============ Discovery layer 1 ============ -->
+  <!-- Closure cluster scan (produces ce + handlers) -->
+  <rect x="70" y="210" width="370" height="60" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="255" y="228" text-anchor="middle" class="ttl">Closure-cluster scan</text>
+  <text x="255" y="245" text-anchor="middle" class="small">group zend_objects in the 2 MB dump by handlers;</text>
+  <text x="255" y="260" text-anchor="middle" class="small">largest cluster (256 sprayed) yields ce and handlers</text>
+
+  <!-- function_table walk (produces zif_system) -->
+  <rect x="500" y="210" width="350" height="78" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="675" y="228" text-anchor="middle" class="ttl">function_table walk</text>
+  <text x="675" y="245" text-anchor="middle" class="small">hash_find("var_dump") → its module entry</text>
+  <text x="675" y="260" text-anchor="middle" class="small">→ static zend_function_entry[] in .data.rel.ro</text>
+  <text x="675" y="275" text-anchor="middle" class="small">→ linear scan for "system" → handler ptr</text>
+
+  <!-- ============ Discovery layer 2 ============ -->
+  <rect x="70" y="310" width="370" height="60" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="255" y="328" text-anchor="middle" class="ttl">Mega-string read</text>
+  <text x="255" y="345" text-anchor="middle" class="small">forge zend_string at chunk - 0x10; chunk header</text>
+  <text x="255" y="360" text-anchor="middle" class="small">becomes len, val[] spans the whole 2 MB chunk</text>
+
+  <path d="M 255,310 L 255,270" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <rect x="500" y="320" width="350" height="46" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="675" y="340" text-anchor="middle" class="ttl">EG.function_table</text>
+  <text x="675" y="357" text-anchor="middle" class="small">field at EG + 0x1b0 (8.0-8.4) / + 0x1c8 (8.5+)</text>
+
+  <path d="M 675,320 L 675,288" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <!-- ============ Discovery layer 3 ============ -->
+  <rect x="500" y="398" width="350" height="46" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="675" y="418" text-anchor="middle" class="ttl">EG (executor_globals)</text>
+  <text x="675" y="435" text-anchor="middle" class="small">.bss address</text>
+
+  <path d="M 675,398 L 675,366" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <!-- ============ Discovery layer 4 ============ -->
+  <rect x="500" y="476" width="350" height="60" fill="#f3e5f5" stroke="#7b1fa2" stroke-width="1.5" rx="4"/>
+  <text x="675" y="494" text-anchor="middle" class="ttl">Triplet walk</text>
+  <text x="675" y="511" text-anchor="middle" class="small">step +8 from closure_handlers, uaf_read 3 words,</text>
+  <text x="675" y="526" text-anchor="middle" class="small">match (function_table, class_table, constants)</text>
+
+  <path d="M 675,476 L 675,444" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <!-- red dashed: triplet walk consumes closure_handlers (already found via cluster scan) -->
+  <path d="M 440,240 L 470,240 L 470,506 L 500,506"
+        fill="none" stroke="#b71c1c" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#arrR)"/>
+  <text x="459" y="376" text-anchor="middle" class="reuse" transform="rotate(90 459 376)">reuses closure_handlers as start</text>
+
+  <!-- ============ Base layer ============ -->
+  <rect x="160" y="590" width="600" height="56" fill="#fff9c4" stroke="#f57c00" stroke-width="2" rx="4"/>
+  <text x="460" y="612" text-anchor="middle" class="ttl">Heap anchor (Step 1)  +  uaf_read primitive (Step 2)</text>
+  <text x="460" y="630" text-anchor="middle" class="small">every discovery box is a sequence of uaf_read calls anchored to the leaked heap pointer</text>
+
+  <path d="M 300,590 L 255,370" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+  <path d="M 600,590 L 660,536" fill="none" stroke="#444" stroke-width="1.4" marker-end="url(#arr)"/>
+
+  <text x="70" y="680" class="tiny">Once all three values are written, $GLOBALS["_xfc"] + 24 is the address handed to Step 4 as the fake object pointer.</text>
+</svg>

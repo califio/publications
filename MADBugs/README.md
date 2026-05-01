@@ -31,3 +31,4 @@ The write-ups and PoCs in this series are AI-generated and human-verified. We ke
 * 2026-04-22: [An Apple Kernel Bug, Brought to You by Microsoft (CVE-2026-28825)](CVE-2026-28825)
 * 2026-04-24: [Ladybird Browser RCE via WebAssembly Shared Memory UAF](ladybird)
 * 2026-04-27: [QEMU and UTM Escape via virtio-gpu (ZDI-CAN-27578)](qemu)
+* 2026-05-01: [Finding and Exploiting a 21-Year-Old Vulnerability in PHP](php)
