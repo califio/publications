@@ -6,7 +6,7 @@ When this bug shipped, the dinosaurs had just gone extinct, only 64.999979 milli
 
 > Before we dive in, one piece of news. **Stefan Esser** is joining Calif. Stefan was "the PHP security guy" twenty years ago, so we thought it'd be fun to mark his arrival with a fresh unserialize UAF.
 
-PHP's `unserialize()` function has been a literal vulnerability factory for years. This is the story of how we found a new unserialize use-after-free in a code path that has been vulnerable since PHP 5.1, built a local exploit that bypasses `disable_functions` with no `/proc` access and no hardcoded offsets, then turned it into a remote exploit. The remote takes ~2,000 HTTP requests to shell, against the latest release PHP 8.5.5. As far as we can tell these are the first public UAF exploits against PHP 8.x.
+PHP's `unserialize()` function has been a literal vulnerability factory for years. This is the story of how we found a new unserialize use-after-free in a code path that has been vulnerable since PHP 5.1, built a local exploit that bypasses `disable_functions` with no `/proc` access and no hardcoded offsets, then turned it into a remote exploit. The remote takes ~2,000 HTTP requests to shell, against the latest release PHP 8.5.5. As far as we can tell this is the first public remote UAF exploit against PHP 8.x.
 
 > **Caveat up front.** The remote chain has a strong precondition on the target: it must have a class loaded that implements `Serializable`, calls `unserialize()` recursively on inner data inside its own `unserialize()` method, and then grows the inner object's property table. The PoC ships such a class. Real-world code matching this pattern is uncommon, so this remote PoC has limited practical reach. The local exploit does not have these caveats.
 
