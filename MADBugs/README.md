@@ -32,3 +32,4 @@ The write-ups and PoCs in this series are AI-generated and human-verified. We ke
 * 2026-04-24: [Ladybird Browser RCE via WebAssembly Shared Memory UAF](ladybird)
 * 2026-04-27: [QEMU and UTM Escape via virtio-gpu (ZDI-CAN-27578)](qemu)
 * 2026-05-01: [Finding and Exploiting a 21-Year-Old Vulnerability in PHP](php)
+* 2026-05-07: [CVE-2026-7270: FreeBSD Local Privilege Escalation via execve](freebsd-CVE-2026-7270)
