@@ -26,7 +26,7 @@ The write-ups and PoCs in this series are AI-generated and human-verified. We ke
 * 2026-04-21: [All Your Reverse Engineering Tools Are Belong to US](security-tools-rce)
   * [Ghidra Client RCE via Unfiltered RMI Deserialisation](ghidra-rmi-rce)
   * [radare2 RCE via PDB Section Header Command Injection](radare2-pdb-section-rce)
-  * IDA Pro — *embargoed*
+  * [IDA Pro RCE via Clang Argument Injection](ida-pro)
   * Binary Ninja — *embargoed*
 * 2026-04-22: [An Apple Kernel Bug, Brought to You by Microsoft (CVE-2026-28825)](CVE-2026-28825)
 * 2026-04-24: [Ladybird Browser RCE via WebAssembly Shared Memory UAF](ladybird)
