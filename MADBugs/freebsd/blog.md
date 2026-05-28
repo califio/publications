@@ -47,15 +47,15 @@ A MAD Bugs post must include some warez drops, so today we are publishing exploi
 
 - **[setcred (CVE-2026-45250)](https://github.com/califio/publications/tree/main/MADBugs/freebsd/setcred-CVE-2026-45250)**: a one-character `sizeof` confusion in `kern_setcred_copyin_supp_groups` turns into a stack overflow in `user_setcred`'s frame and then a local root shell. Only FreeBSD 14.4 is exploitable, despite the same source bug being present in 14.3 and 15.0.
 
-[setcred demo](nocred.gif)
+![setcred demo](nocred.gif)
 
 - **[ptrace (CVE-2026-45253)](https://github.com/califio/publications/tree/main/MADBugs/freebsd/ptrace-CVE-2026-45253)**: `ptrace(PT_SC_REMOTE)` skips a bounds check on the redirected syscall number, giving out-of-bounds indexing into the sysent table that we chain into LPE.
 
-[ptrace demo](ptrace.gif)
+![ptrace demo](ptrace.gif)
 
 - **[procdesc (CVE-2026-45251)](https://github.com/califio/publications/tree/main/MADBugs/freebsd/file-CVE-2026-45251)**: `procdesc_free()` frees a `struct procdesc` with an embedded `pd_selinfo` without draining poll waiters. We reclaim the slot with `SCM_RIGHTS` filedescents, fire two stale `TAILQ_REMOVE`s, and get arbitrary kernel-pointer writes.
 
-[procdesc demo](procdesc.gif)
+![procdesc demo](procdesc.gif)
 
 The exploits and the writeups were written by AI. We have decided to keep the AI text as-is, as a historical artifact showing what AI vulnerability research looked like in 2026. The exploits, on the other hand, are all verified by us, and they work. By publishing them, we hope more people can learn from these techniques and bring more help to FreeBSD. The remaining bugs from the audit will be released as the FreeBSD team ships the fixes.
 
