@@ -1,0 +1,25 @@
+services:
+  pingora:
+    build:
+      context: .
+      dockerfile: pingora-lab/Dockerfile
+    container_name: pingora_hpack_lab
+    ports:
+      - "0.0.0.0:6145:6145"
+    environment:
+      RUST_LOG: info
+    mem_limit: 6g
+
+  pingora-hardened:
+    profiles: ["hardened"]
+    build:
+      context: .
+      dockerfile: pingora-lab/Dockerfile
+    container_name: pingora_hpack_hardened
+    ports:
+      - "0.0.0.0:6146:6145"
+    environment:
+      RUST_LOG: info
+      PINGORA_H2_MAX_HEADER_LIST_SIZE: "65536"
+      PINGORA_H2_MAX_CONCURRENT_STREAMS: "32"
+    mem_limit: 512m

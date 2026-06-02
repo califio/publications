@@ -34,3 +34,4 @@ The write-ups and PoCs in this series are AI-generated and human-verified. We ke
 * 2026-05-01: [Finding and Exploiting a 21-Year-Old Vulnerability in PHP](php)
 * 2026-05-07: [CVE-2026-7270: FreeBSD Local Privilege Escalation via execve](freebsd-CVE-2026-7270)
 * 2026-05-28: [An AI Audit of FreeBSD: 15 kernel bugs, including 3 RCEs, 5 LPEs, and a bhyve escape](freebsd)
+* 2026-06-02: [Codex Discovered a Hidden HTTP/2 Bomb](http2-bomb)
