@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 452" font-family="sans-serif">
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#b85450"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="480" height="452" fill="#ffffff"/>
+
+  <!-- ===== bfd struct ===== -->
+  <rect x="120" y="24" width="250" height="58" rx="6" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.4"/>
+  <text x="245" y="49" font-size="13" font-weight="700" text-anchor="middle" fill="#1a4a7c">bfd struct (abfd)</text>
+  <text x="245" y="68" font-size="11" font-family="monospace" text-anchor="middle" fill="#33507a">data &#8722;8400</text>
+  <g opacity="0">
+    <rect x="120" y="24" width="250" height="58" rx="6" fill="none" stroke="#dc2626" stroke-width="3"/>
+    <set attributeName="opacity" to="1" begin="4s"/>
+  </g>
+
+  <text x="245" y="104" font-size="16" text-anchor="middle" fill="#cbd5e1">&#8776;</text>
+
+  <!-- ===== data buffer ===== -->
+  <rect x="120" y="120" width="250" height="52" rx="6" fill="#f8cecc" stroke="#b85450" stroke-width="1.4"/>
+  <text x="245" y="142" font-size="13" font-weight="700" text-anchor="middle" fill="#7a2020">.debug_info (data)</text>
+  <text x="245" y="160" font-size="10" font-family="monospace" text-anchor="middle" fill="#b85450">data + 0</text>
+
+  <text x="245" y="194" font-size="16" text-anchor="middle" fill="#cbd5e1">&#8776;</text>
+
+  <!-- ===== arelent[n+1] ===== -->
+  <rect x="90" y="212" width="310" height="178" rx="6" fill="#f3eefb" stroke="#9673a6" stroke-width="1.4"/>
+  <text x="245" y="233" font-size="12" font-weight="700" text-anchor="middle" fill="#5a4488">arelent[n+1] &#183; the next relocation</text>
+  <text x="118" y="259" font-size="11" font-family="monospace" fill="#475569">address (64-bit):</text>
+
+  <!-- high dword cell -->
+  <rect id="hi" x="150" y="268" width="100" height="52" rx="3" fill="#fff2cc" stroke="#d6b656" stroke-width="1.3">
+    <set attributeName="fill" to="#f8cecc" begin="2s"/>
+    <set attributeName="stroke" to="#b85450" begin="2s"/>
+  </rect>
+  <text x="200" y="285" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#6b7280">high 32 &#183; +12</text>
+  <text x="200" y="307" font-size="13" font-family="monospace" font-weight="700" text-anchor="middle" fill="#475569">00000000
+    <set attributeName="opacity" to="0" begin="2s"/>
+  </text>
+  <text x="200" y="307" font-size="13" font-family="monospace" font-weight="700" text-anchor="middle" fill="#dc2626" opacity="0">FFFFFFFF
+    <set attributeName="opacity" to="1" begin="2s"/>
+  </text>
+
+  <!-- low dword cell -->
+  <rect x="250" y="268" width="100" height="52" rx="3" fill="#fff2cc" stroke="#d6b656" stroke-width="1.3"/>
+  <text x="300" y="285" font-size="9.5" font-family="monospace" text-anchor="middle" fill="#6b7280">low 32 &#183; +8</text>
+  <text x="300" y="307" font-size="13" font-family="monospace" font-weight="700" text-anchor="middle" fill="#7a5c00">FFFFDF34</text>
+  <text x="300" y="335" font-size="9" text-anchor="middle" fill="#a16207">from r_offset</text>
+
+  <!-- combined address value + decimal (flips on poison) -->
+  <text x="128" y="364" font-size="11" font-family="monospace" text-anchor="start" fill="#475569">0x00000000FFFFDF34 = +4,294,958,900
+    <set attributeName="opacity" to="0" begin="2s"/>
+  </text>
+  <text x="128" y="364" font-size="11" font-family="monospace" font-weight="700" text-anchor="start" fill="#b85450" opacity="0">0xFFFFFFFFFFFFDF34 = &#8722;8,396
+    <set attributeName="opacity" to="1" begin="2s"/>
+  </text>
+  <text x="128" y="380" font-size="9" text-anchor="start" fill="#9aa3af">interpreted mod 2^64</text>
+
+  <!-- first write: reloc n poisons address_hi (phase 1) -->
+  <g opacity="0">
+    <path d="M 120 146 L 70 146 L 70 294 L 146 294" fill="none" stroke="#b85450" stroke-width="2"
+          stroke-dasharray="6 4" marker-end="url(#ar)"/>
+    <text x="36" y="214" font-size="9.5" font-weight="700" text-anchor="middle" fill="#b85450">1st write</text>
+    <text x="36" y="226" font-size="9.5" font-weight="700" text-anchor="middle" fill="#b85450">+47,484</text>
+    <set attributeName="opacity" to="1" begin="2s"/>
+    <set attributeName="opacity" to="0.4" begin="4s"/>
+  </g>
+
+  <!-- second write: wrapped write data -> bfd (phase 2) -->
+  <g opacity="0">
+    <path d="M 370 138 L 438 138 L 438 54 L 372 54" fill="none" stroke="#b85450" stroke-width="2.2"
+          stroke-dasharray="6 4" marker-end="url(#ar)"/>
+    <text x="404" y="92" font-size="9.5" font-weight="700" text-anchor="middle" fill="#b85450">2nd write</text>
+    <text x="404" y="104" font-size="9.5" font-weight="700" text-anchor="middle" fill="#b85450">&#8722;8,394</text>
+    <set attributeName="opacity" to="1" begin="4s"/>
+  </g>
+
+  <!-- effective-address formula (phase 2) -->
+  <g opacity="0">
+    <text x="240" y="414" font-size="11" font-family="monospace" text-anchor="middle" fill="#1f2937">effective = data + (&#8722;8,396) + 2 = data &#8722;8,394</text>
+    <set attributeName="opacity" to="1" begin="4s"/>
+  </g>
+
+  <!-- ===== captions ===== -->
+  <text x="240" y="436" font-size="13" text-anchor="middle" fill="#374151" font-weight="600">Two relocations target arelent[n+1]
+    <set attributeName="opacity" to="0" begin="2s"/>
+  </text>
+  <text x="240" y="436" font-size="13" text-anchor="middle" fill="#b85450" font-weight="600" opacity="0">First write: reloc n poisons the high dword
+    <set attributeName="opacity" to="1" begin="2s"/>
+    <set attributeName="opacity" to="0" begin="4s"/>
+  </text>
+  <text x="240" y="436" font-size="13" text-anchor="middle" fill="#b85450" font-weight="600" opacity="0">Second write: reloc n+1 wraps to data &#8722;8,394
+    <set attributeName="opacity" to="1" begin="4s"/>
+  </text>
+
+  <!-- master clock: loops every 6s -->
+  <rect x="0" y="0" width="1" height="1" fill="none">
+    <animate attributeName="opacity" from="1" to="1" dur="6s" repeatCount="indefinite"/>
+  </rect>
+</svg>

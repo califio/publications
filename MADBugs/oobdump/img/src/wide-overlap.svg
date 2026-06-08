@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 230" font-family="sans-serif">
+  <rect x="0" y="0" width="720" height="230" fill="#ffffff"/>
+  <text x="20" y="22" font-size="14" font-weight="700" fill="#374151">One slot, two names &#8212; <tspan font-family="monospace">_wide_data</tspan> overlaps the FILE</text>
+  <text x="20" y="40" font-size="10.5" fill="#6b7280">Only <tspan font-family="monospace">_wide_vtable</tspan> (wd+224) reaches into the FILE, landing on <tspan font-family="monospace">_lock</tspan> (fp+136). Not to scale.</text>
+
+  <!-- fp anchor -->
+  <line x1="300" y1="58" x2="300" y2="200" stroke="#d1d5db" stroke-width="1" stroke-dasharray="3 3"/>
+  <text x="300" y="54" font-size="9" fill="#9ca3af" text-anchor="middle" font-family="monospace">fp</text>
+
+  <!-- ===== FILE struct (base fp) ===== -->
+  <text x="292" y="99" font-size="10.5" font-weight="700" fill="#475569" font-family="monospace" text-anchor="end">_IO_FILE</text>
+  <text x="292" y="112" font-size="9" fill="#94a3b8" font-family="monospace" text-anchor="end">(base fp)</text>
+  <g font-family="monospace" font-size="8.5" text-anchor="middle">
+    <rect x="300" y="84" width="92" height="36" fill="#f3f4f6" stroke="#9ca3af"/><text x="346" y="78" fill="#374151">_flags +0</text>
+    <rect x="392" y="84" width="92" height="36" fill="#d5e8d4" stroke="#82b366"/><text x="438" y="78" fill="#2d5a2d">fake vtable +80</text>
+    <rect x="484" y="84" width="92" height="36" fill="#efe7fb" stroke="#8e6fbf" stroke-width="1.6"/><text x="530" y="78" fill="#5a4488" font-weight="700">_lock +136</text>
+    <rect x="576" y="84" width="92" height="36" fill="#f3f4f6" stroke="#9ca3af"/><text x="622" y="78" fill="#374151">_wide_data +160</text>
+  </g>
+
+  <!-- ===== fake _IO_wide_data (base fp-88) ===== -->
+  <text x="60" y="160" font-size="10.5" font-weight="700" fill="#475569" font-family="monospace">fake _IO_wide_data  (base = fp-88)</text>
+  <g font-family="monospace" font-size="8.5" text-anchor="middle">
+    <rect x="60"  y="168" width="75" height="36" fill="#f3f4f6" stroke="#9ca3af"/><text x="97"  y="219" fill="#374151">wd+0</text>
+    <rect x="140" y="168" width="75" height="36" fill="#f3f4f6" stroke="#9ca3af"/><text x="177" y="219" fill="#2d6a2d" font-weight="700">wd+24 = 0</text>
+    <rect x="220" y="168" width="75" height="36" fill="#f3f4f6" stroke="#9ca3af"/><text x="257" y="219" fill="#2d6a2d" font-weight="700">wd+48 = 0</text>
+    <line x1="299" y1="186" x2="482" y2="186" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="4 3"/>
+    <text x="390" y="183" fill="#9ca3af" font-size="11">&#8230;</text>
+    <rect x="484" y="168" width="92" height="36" fill="#efe7fb" stroke="#8e6fbf" stroke-width="1.6"/><text x="530" y="219" fill="#5a4488" font-weight="700">wd+224 _wide_vtable</text>
+  </g>
+
+  <!-- alias connector -->
+  <line x1="530" y1="120" x2="530" y2="168" stroke="#8e6fbf" stroke-width="2"/>
+  <rect x="588" y="128" width="104" height="30" rx="4" fill="#efe7fb" stroke="#8e6fbf"/>
+  <text x="640" y="141" font-size="9.5" text-anchor="middle" fill="#5a4488" font-weight="700">fp+136</text>
+  <text x="640" y="152" font-size="8.5" text-anchor="middle" fill="#5a4488">one slot, two names</text>
+</svg>

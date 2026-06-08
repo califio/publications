@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" font-family="sans-serif">
+  <defs>
+    <marker id="ared" markerWidth="13" markerHeight="9" refX="11" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 13 4.5, 0 9" fill="#b85450"/></marker>
+    <marker id="agrn" markerWidth="13" markerHeight="9" refX="11" refY="4.5" orient="auto" markerUnits="userSpaceOnUse"><polygon points="0 0, 13 4.5, 0 9" fill="#5b8a5b"/></marker>
+  </defs>
+  <rect x="0" y="0" width="760" height="340" fill="#ffffff"/>
+
+  <text x="20" y="22" font-size="14" font-weight="700" fill="#374151">Step 2 &#8212; flipping byte order with a 2-byte write</text>
+  <text x="20" y="42" font-size="11" fill="#6b7280">One 4-byte FR30 write at <tspan font-family="monospace">abfd+6</tspan> rewrites <tspan font-family="monospace">xvec</tspan>'s lower 2 bytes, repointing it at a little-endian target vector.</text>
+
+  <g transform="translate(0,40)">
+  <!-- struct bfd field labels -->
+  <text x="156" y="72" font-family="monospace" font-size="10.5" font-weight="600" fill="#808080" text-anchor="middle">char *filename  (+0)</text>
+  <text x="380" y="71" font-family="monospace" font-size="13" font-weight="700" fill="#334155" text-anchor="middle">bfd_target *xvec  (+8)</text>
+  <text x="604" y="72" font-family="monospace" font-size="10.5" font-weight="600" fill="#808080" text-anchor="middle">FILE *iostream  (+16)</text>
+  <text x="34" y="101" font-size="10" fill="#9ca3af" text-anchor="end">struct</text>
+  <text x="34" y="113" font-size="10" fill="#9ca3af" text-anchor="end">bfd</text>
+
+  <g font-family="monospace" font-size="11" text-anchor="middle">
+    <rect x="44"  y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/>
+    <rect x="72"  y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/>
+    <rect x="100" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/>
+    <rect x="128" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/>
+    <rect x="156" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/>
+    <rect x="184" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/>
+    <!-- filename top 2 bytes: clobbered by the spill (gray -> red 00 00) -->
+    <rect x="212" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af">
+      <set attributeName="fill" to="#f8cecc" begin="2s"/><set attributeName="stroke" to="#b85450" begin="2s"/>
+    </rect>
+    <rect x="240" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af">
+      <set attributeName="fill" to="#f8cecc" begin="2s"/><set attributeName="stroke" to="#b85450" begin="2s"/>
+    </rect>
+    <text x="226" y="104" font-size="11" fill="#7a2020" font-weight="700" opacity="0">00<set attributeName="opacity" to="1" begin="2s"/></text>
+    <text x="254" y="104" font-size="11" fill="#7a2020" font-weight="700" opacity="0">00<set attributeName="opacity" to="1" begin="2s"/></text>
+    <!-- xvec low 2 bytes: 38 44 (=0x4438) -> b0 00 (=0x00b0) -->
+    <rect x="268" y="80" width="28" height="36" fill="#fff2cc" stroke="#d6b656" stroke-width="1.4"/>
+    <rect x="296" y="80" width="28" height="36" fill="#fff2cc" stroke="#d6b656" stroke-width="1.4"/>
+    <text x="282" y="104" font-size="14" fill="#7a5c00" font-weight="700">38<set attributeName="opacity" to="0" begin="2s"/></text>
+    <text x="310" y="104" font-size="14" fill="#7a5c00" font-weight="700">44<set attributeName="opacity" to="0" begin="2s"/></text>
+    <text x="282" y="104" font-size="14" fill="#2d5a2d" font-weight="700" opacity="0">b0<set attributeName="opacity" to="1" begin="2s"/></text>
+    <text x="310" y="104" font-size="14" fill="#2d5a2d" font-weight="700" opacity="0">00<set attributeName="opacity" to="1" begin="2s"/></text>
+    <!-- xvec high 6 bytes: ASLR -->
+    <rect x="324" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/><text x="338" y="104" font-size="13" fill="#94a3b8">??</text>
+    <rect x="352" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/><text x="366" y="104" font-size="13" fill="#94a3b8">??</text>
+    <rect x="380" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/><text x="394" y="104" font-size="13" fill="#94a3b8">??</text>
+    <rect x="408" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/><text x="422" y="104" font-size="13" fill="#94a3b8">??</text>
+    <rect x="436" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/><text x="450" y="104" font-size="13" fill="#94a3b8">??</text>
+    <rect x="464" y="80" width="28" height="36" fill="#eef2f7" stroke="#9ca3af"/><text x="478" y="104" font-size="13" fill="#94a3b8">??</text>
+    <!-- iostream -->
+    <rect x="492" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+    <rect x="520" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+    <rect x="548" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+    <rect x="576" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+    <rect x="604" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+    <rect x="632" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+    <rect x="660" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+    <rect x="688" y="80" width="28" height="36" fill="#f3f4f6" stroke="#d1d5db"/>
+  </g>
+
+  <!-- outline around the whole xvec field (this is the pointer) -->
+  <rect x="266" y="77" width="228" height="42" rx="4" fill="none" stroke="#334155" stroke-width="2"/>
+
+  <!-- write bracket + region labels -->
+  <g opacity="0">
+    <path d="M212,122 L212,127 L324,127 L324,122" fill="none" stroke="#a16207" stroke-width="1.4"/>
+    <text x="268" y="140" font-size="10.5" font-weight="700" fill="#a16207" text-anchor="middle">one 4-byte write at abfd+6</text>
+    <set attributeName="opacity" to="1" begin="1.2s"/>
+  </g>
+  </g>
+  <!-- ===== pointer dereference: elbow arrows from the xvec field ===== -->
+  <!-- elbow to fr30 (before) -->
+  <g>
+    <path d="M 360 159 V 198 H 238 V 250" fill="none" stroke="#b85450" stroke-width="2.2" marker-end="url(#ared)"/>
+    <set attributeName="opacity" to="0.12" begin="2s"/>
+  </g>
+  <!-- elbow to crx (after) -->
+  <g opacity="0">
+    <path d="M 360 159 V 198 H 522 V 250" fill="none" stroke="#5b8a5b" stroke-width="2.4" marker-end="url(#agrn)"/>
+    <set attributeName="opacity" to="1" begin="2s"/>
+  </g>
+
+  <!-- fr30 target box (dims after the switch) -->
+  <g>
+    <rect x="120" y="254" width="232" height="56" rx="6" fill="#f8cecc" stroke="#b85450" stroke-width="1.4"/>
+    <text x="236" y="278" font-family="monospace" font-size="13" font-weight="700" text-anchor="middle" fill="#7a2020">fr30_elf32_vec</text>
+    <text x="236" y="297" font-size="10" text-anchor="middle" fill="#b85450">big-endian  &#183;  low16 = 0x4438</text>
+    <set attributeName="opacity" to="0.4" begin="2s"/>
+  </g>
+  <!-- crx target box (lights up after the switch) -->
+  <g opacity="0.5">
+    <rect x="408" y="254" width="232" height="56" rx="6" fill="#d5e8d4" stroke="#82b366" stroke-width="1.4"/>
+    <text x="524" y="278" font-family="monospace" font-size="13" font-weight="700" text-anchor="middle" fill="#2d5a2d">crx_elf32_vec</text>
+    <text x="524" y="297" font-size="10" text-anchor="middle" fill="#5b8a5b">little-endian  &#183;  low16 = 0x00b0</text>
+    <set attributeName="opacity" to="1" begin="2s"/>
+  </g>
+
+  <text x="380" y="328" font-size="9.5" text-anchor="middle" fill="#9ca3af">both vectors live in the same .data.rel.ro 64KB page</text>
+
+  <!-- master clock: loops every 5s -->
+  <rect x="0" y="0" width="1" height="1" fill="none">
+    <animate attributeName="opacity" from="1" to="1" dur="5s" repeatCount="indefinite"/>
+  </rect>
+</svg>

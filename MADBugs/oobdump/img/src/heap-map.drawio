@@ -1,0 +1,91 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="heap-map" id="heap-map">
+    <mxGraphModel dx="1414" dy="662" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="540" pageHeight="520" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="axis" edge="1" parent="1" style="endArrow=classic;startArrow=none;html=1;strokeColor=#9aa3af;">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="98" y="70" as="sourcePoint" />
+            <mxPoint x="98" y="482" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="axis_lo" parent="1" style="text;html=1;fontSize=9;align=center;verticalAlign=middle;fontColor=#9aa3af;" value="lower&#xa;addr" vertex="1">
+          <mxGeometry height="22" width="40" x="64" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="axis_hi" parent="1" style="text;html=1;fontSize=9;align=center;verticalAlign=middle;fontColor=#9aa3af;" value="higher&#xa;addr" vertex="1">
+          <mxGeometry height="22" width="40" x="64" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="bfd" parent="1" style="swimlane;html=1;startSize=28;fontStyle=1;fontSize=12;rounded=1;fillColor=#dae8fc;strokeColor=#6c8ebf;swimlaneFillColor=#ffffff;" value="bfd struct  (abfd)" vertex="1">
+          <mxGeometry height="80" width="280" x="140" y="72" as="geometry" />
+        </mxCell>
+        <mxCell id="bfd_xvec" parent="bfd" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=16;fontSize=10;fontFamily=monospace;fillColor=#fff2cc;strokeColor=#d6b656;" value="0x08  bfd_target *xvec;" vertex="1">
+          <mxGeometry height="26" width="280" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="bfd_io" parent="bfd" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=16;fontSize=10;fontFamily=monospace;" value="0x10  FILE       *iostream;" vertex="1">
+          <mxGeometry height="26" width="280" y="54" as="geometry" />
+        </mxCell>
+        <mxCell id="bfd_off" parent="1" style="text;html=1;fontSize=10;align=left;verticalAlign=middle;fontFamily=monospace;fontColor=#6c8ebf;" value="data − 8400" vertex="1">
+          <mxGeometry height="22" width="100" x="430" y="101" as="geometry" />
+        </mxCell>
+        <mxCell id="brk1" parent="1" style="text;html=1;fontSize=18;align=center;fontColor=#cbd5e1;verticalAlign=middle;" value="≈" vertex="1">
+          <mxGeometry height="20" width="280" x="140" y="164" as="geometry" />
+        </mxCell>
+        <mxCell id="data" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontSize=12;fontStyle=1;align=center;verticalAlign=middle;fillColor=#f8cecc;strokeColor=#b85450;" value=".debug_info buffer  (char* data)" vertex="1">
+          <mxGeometry height="58" width="280" x="143" y="196" as="geometry" />
+        </mxCell>
+        <mxCell id="data_off" parent="1" style="text;html=1;fontSize=10;align=left;verticalAlign=middle;fontFamily=monospace;fontColor=#b85450;" value="data + 0" vertex="1">
+          <mxGeometry height="22" width="100" x="430" y="214" as="geometry" />
+        </mxCell>
+        <mxCell id="brk2" parent="1" style="text;html=1;fontSize=18;align=center;fontColor=#cbd5e1;verticalAlign=middle;" value="≈" vertex="1">
+          <mxGeometry height="20" width="280" x="140" y="266" as="geometry" />
+        </mxCell>
+        <mxCell id="arr" parent="1" style="swimlane;html=1;startSize=28;fontStyle=1;fontSize=11;rounded=1;fillColor=#e1d5e7;strokeColor=#9673a6;swimlaneFillColor=#ffffff;" value="arelent[] (relocation records)" vertex="1">
+          <mxGeometry height="174" width="280" x="140" y="298" as="geometry">
+            <mxRectangle height="28" width="173" x="140" y="298" as="alternateBounds" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="arr_n" parent="arr" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=10;fontSize=10;fontStyle=1;fillColor=#f3eefb;strokeColor=#9673a6;" value="arelent[n]   (32 bytes)" vertex="1">
+          <mxGeometry height="22" width="280" y="28" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_f0" parent="arr" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=16;fontSize=10;fontFamily=monospace;" value="0x00  asymbol         **sym_ptr_ptr;" vertex="1">
+          <mxGeometry height="26" width="280" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_f1" parent="arr" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=16;fontSize=10;fontFamily=monospace;fillColor=#fff2cc;strokeColor=#d6b656;" value="0x08  bfd_vma           address;" vertex="1">
+          <mxGeometry height="26" width="280" y="76" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_f2" parent="arr" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=16;fontSize=10;fontFamily=monospace;" value="0x10  bfd_vma           addend;" vertex="1">
+          <mxGeometry height="26" width="280" y="102" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_f3" parent="arr" style="text;html=1;align=left;verticalAlign=middle;spacingLeft=16;fontSize=10;fontFamily=monospace;fillColor=#fff2cc;strokeColor=#d6b656;" value="0x18  reloc_howto_type *howto;" vertex="1">
+          <mxGeometry height="26" width="280" y="128" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_more" parent="arr" style="text;html=1;align=center;verticalAlign=middle;fontSize=14;fontColor=#9673a6;" value="⋯" vertex="1">
+          <mxGeometry height="20" width="280" y="154" as="geometry" />
+        </mxCell>
+        <mxCell id="arr_off" parent="1" style="text;html=1;fontSize=10;align=left;verticalAlign=middle;fontFamily=monospace;fontColor=#9673a6;" value="data + 47440" vertex="1">
+          <mxGeometry height="22" width="100" x="430" y="374" as="geometry" />
+        </mxCell>
+        <mxCell id="oob1" edge="1" parent="1" source="data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;strokeColor=#b85450;strokeWidth=1.5;endArrow=classic;startArrow=none;exitX=0;exitY=0.6;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="arr_f1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="231" />
+              <mxPoint x="120" y="387" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oob2" edge="1" parent="1" source="data" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;dashed=1;strokeColor=#b85450;strokeWidth=1.5;endArrow=classic;startArrow=none;exitX=0;exitY=0.85;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="arr_f3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="110" y="245" />
+              <mxPoint x="110" y="439" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="oob_lbl" parent="1" style="text;html=1;fontSize=16;align=left;verticalAlign=middle;fontColor=#b85450;" value="OOB writes" vertex="1">
+          <mxGeometry height="14" width="95" x="124" y="272" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
