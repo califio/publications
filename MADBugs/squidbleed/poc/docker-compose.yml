@@ -1,0 +1,24 @@
+services:
+  login-app:
+    build:
+      context: ./login-app
+    container_name: squid_bleed_login
+    # Exposed on the host for the triager's browser to reach directly.
+    ports:
+      - "0.0.0.0:7777:7777"
+
+  squid:
+    build:
+      context: ./squid
+    container_name: squid_bleed_squid
+    # Proxy port reachable from the triager's browser.
+    ports:
+      - "0.0.0.0:3128:3128"
+    # Lets the squid container resolve `host.docker.internal` to the host
+    # (needed so the attacker's in-host evil FTP server is reachable from
+    # squid). Docker Desktop provides this automatically; this line makes
+    # it work on Linux too.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - login-app

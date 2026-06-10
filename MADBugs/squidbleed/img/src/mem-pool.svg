@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 530 195">
+  <defs>
+    <marker id="a" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#dc2626"/>
+    </marker>
+  </defs>
+
+  <!-- Before: victim request in buffer -->
+  <text x="16" y="16" font-family="sans-serif" font-size="11" font-weight="600" fill="#808080">Victim's request in buffer</text>
+  <rect x="16" y="26" width="498" height="34" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+  <text x="28" y="48" font-family="monospace" font-size="11">
+    <tspan fill="#5c1a1a">GET / HTTP/1.1\r\nAuthorization: </tspan><tspan fill="#5c1a1a" font-weight="600">Basic YWRtaW46UzNjcmV0UEBzc3cwcmQ=</tspan>
+  </text>
+
+  <!-- Transition -->
+  <text x="265" y="82" text-anchor="middle" font-family="sans-serif" font-size="10" fill="#808080">freed, then recycled (not zeroed)</text>
+  <line x1="265" y1="86" x2="265" y2="98" stroke="#808080" stroke-width="1"/>
+  <polygon points="261,98 265,104 269,98" fill="#808080"/>
+
+  <!-- After -->
+  <text x="16" y="115" font-family="sans-serif" font-size="11" font-weight="600" fill="#808080">After attacker's FTP request</text>
+  <rect x="16" y="123" width="498" height="34" rx="4" fill="none" stroke="#808080" stroke-width="0.8" opacity="0.3"/>
+  <rect x="16" y="123" width="232" height="34" rx="4" fill="#fff2cc" stroke="#d6b656" stroke-width="1.2"/>
+  <rect x="248" y="123" width="266" height="34" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="1.2"/>
+  <text x="28" y="150" font-family="monospace" font-size="11">
+    <tspan fill="#5c3a00">drwxr-xr-x 1 u g 0 Jan 01 12:34</tspan><tspan fill="#5c3a00" font-weight="700" font-size="10">\0 </tspan><tspan fill="#5c1a1a" font-weight="600">asic YWRtaW46UzNjcmV0UEBzc3cwcmQ=</tspan>
+  </text>
+
+  <!-- copyFrom arrow -->
+  <text x="175" y="193" font-family="monospace" font-size="10" font-weight="600" fill="#dc2626">copyFrom</text>
+  <line x1="230" y1="187" x2="253" y2="164" stroke="#dc2626" stroke-width="1.5" marker-end="url(#a)"/>
+
+  <!-- Labels -->
+  <text x="125" y="178" font-family="sans-serif" font-size="10" fill="#b8860b" text-anchor="middle">FTP line (31 bytes)</text>
+  <text x="385" y="178" font-family="sans-serif" font-size="10" fill="#dc2626" text-anchor="middle">stale victim data (leaked)</text>
+</svg>

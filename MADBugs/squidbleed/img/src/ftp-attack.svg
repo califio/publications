@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 96">
+  <style>
+    .cell { stroke: #d1d5db; stroke-width: 0.8; }
+    .ch { font-family: monospace; font-size: 12px; text-anchor: middle; }
+    .heading { font-family: sans-serif; font-size: 11px; font-weight: 600; fill: #808080; }
+    .note { font-family: monospace; font-size: 9px; text-anchor: middle; }
+    .region { font-family: sans-serif; font-size: 9px; text-anchor: middle; }
+  </style>
+
+  <text x="16" y="14" class="heading">Attack: no filename after timestamp</text>
+
+  <g transform="translate(16, 24)">
+    <rect x="0" y="-2" width="274" height="30" rx="4" fill="none" stroke="#808080" stroke-width="2"/>
+    <rect x="1" y="0" width="242" height="26" rx="3" fill="#e5e7eb"/>
+    <text x="8" y="17" font-family="monospace" font-size="12" fill="#6b7280">drwxr-xr-x 1 u g 0 Jan 01 12:34</text>
+
+    <rect x="244" y="0" width="28" height="26" rx="3" class="cell" fill="#fff2cc" stroke="#d6b656"/>
+    <text x="258" y="17" class="ch" fill="#a16207" font-weight="700">\0</text>
+
+    <rect x="274" y="-2" width="116" height="30" rx="4" fill="none" stroke="#808080" stroke-width="2"/>
+    <rect x="276" y="0" width="28" height="26" rx="3" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+    <text x="290" y="17" class="ch" fill="#9ca3af">\0</text>
+    <rect x="304" y="0" width="28" height="26" rx="3" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+    <text x="318" y="17" class="ch" fill="#9ca3af">\0</text>
+    <rect x="332" y="0" width="28" height="26" rx="3" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+    <text x="346" y="17" class="ch" fill="#9ca3af">\0</text>
+    <rect x="360" y="0" width="28" height="26" rx="3" fill="#fef2f2" stroke="#fca5a5" stroke-width="0.8"/>
+    <text x="374" y="17" class="ch" fill="#9ca3af">\0</text>
+
+    <rect x="392" y="-2" width="170" height="30" rx="4" fill="#f8cecc" stroke="#b85450" stroke-width="2"/>
+    <text x="402" y="17" font-family="monospace" font-size="12" fill="#991b1b" font-weight="600">GET / HTTP/1.1\r\n</text>
+
+    <text x="137" y="42" class="region" fill="#808080">FTP listing</text>
+    <text x="472" y="42" class="region" fill="#991b1b">stale HTTP request</text>
+
+    <!-- Pointer: 7s loop -->
+    <polygon points="258,30 254,38 262,38" fill="#dc2626" visibility="hidden">
+      <animate attributeName="visibility" dur="7s" repeatCount="indefinite" calcMode="discrete"
+        values="visible;visible;visible;visible;visible;visible;hidden;hidden" keyTimes="0;0.114;0.228;0.342;0.456;0.571;0.857;1"/>
+      <animate attributeName="points" dur="7s" repeatCount="indefinite" calcMode="discrete"
+        values="258,30 254,38 262,38;290,30 286,38 294,38;318,30 314,38 322,38;346,30 342,38 350,38;374,30 370,38 378,38;402,30 398,38 406,38;402,30 398,38 406,38;402,30 398,38 406,38"
+        keyTimes="0;0.114;0.228;0.342;0.456;0.571;0.857;1"/>
+    </polygon>
+    <text x="258" y="48" font-family="monospace" font-size="9" font-weight="600" fill="#dc2626" text-anchor="middle" visibility="hidden">
+      <animate attributeName="visibility" dur="7s" repeatCount="indefinite" calcMode="discrete"
+        values="visible;visible;visible;visible;visible;visible;hidden;hidden" keyTimes="0;0.114;0.228;0.342;0.456;0.571;0.857;1"/>
+      <animate attributeName="x" dur="7s" repeatCount="indefinite" calcMode="discrete"
+        values="258;290;318;346;374;402;402;402" keyTimes="0;0.114;0.228;0.342;0.456;0.571;0.857;1"/>
+      copyFrom
+    </text>
+
+    <text x="374" y="62" class="note" fill="#b8860b" visibility="hidden">
+      <animate attributeName="visibility" dur="7s" repeatCount="indefinite" calcMode="discrete"
+        values="visible;hidden;hidden" keyTimes="0;0.571;1"/>
+      strchr(w_space, '\0') → match! ++
+    </text>
+    <text x="402" y="62" class="note" fill="#dc2626" visibility="hidden">
+      <animate attributeName="visibility" dur="7s" repeatCount="indefinite" calcMode="discrete"
+        values="hidden;visible;hidden;hidden" keyTimes="0;0.571;0.857;1"/>
+      strchr(w_space, 'G') → NULL, stop
+    </text>
+  </g>
+</svg>

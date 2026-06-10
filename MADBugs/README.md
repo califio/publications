@@ -36,3 +36,4 @@ The write-ups and PoCs in this series are AI-generated and human-verified. We ke
 * 2026-05-28: [An AI Audit of FreeBSD: 15 kernel bugs, including 3 RCEs, 5 LPEs, and a bhyve escape](freebsd)
 * 2026-06-02: [Codex Discovered a Hidden HTTP/2 Bomb](http2-bomb)
 * 2026-06-08: [OOBdump: Relocation Oriented Programming](oobdump)
+* 2026-06-10: [Squidbleed: Heartbleed's Ancient Cousin in Squid Proxy (CVE-2026-47729)](squidbleed)

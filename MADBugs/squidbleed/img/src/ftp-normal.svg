@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 96">
+  <style>
+    .cell { stroke: #d1d5db; stroke-width: 0.8; }
+    .ch { font-family: monospace; font-size: 12px; text-anchor: middle; }
+    .heading { font-family: sans-serif; font-size: 11px; font-weight: 600; fill: #808080; }
+    .note { font-family: monospace; font-size: 9px; text-anchor: middle; }
+  </style>
+
+  <text x="16" y="14" class="heading">Normal: NetWare listing (4 spaces before filename)</text>
+
+  <g transform="translate(16, 24)">
+    <rect x="0" y="-2" width="502" height="30" rx="4" fill="none" stroke="#808080" stroke-width="2"/>
+    <rect x="1" y="0" width="242" height="26" rx="3" fill="#e5e7eb"/>
+    <text x="8" y="17" font-family="monospace" font-size="12" fill="#6b7280">drwxr-xr-x 1 u g 0 Jan 01 12:34</text>
+
+    <rect x="244" y="0" width="28" height="26" rx="3" class="cell" fill="#fff2cc"/>
+    <text x="258" y="17" class="ch" fill="#854d0e">␣</text>
+    <rect x="272" y="0" width="28" height="26" rx="3" class="cell" fill="#fff2cc"/>
+    <text x="286" y="17" class="ch" fill="#854d0e">␣</text>
+    <rect x="300" y="0" width="28" height="26" rx="3" class="cell" fill="#fff2cc"/>
+    <text x="314" y="17" class="ch" fill="#854d0e">␣</text>
+    <rect x="328" y="0" width="28" height="26" rx="3" class="cell" fill="#fff2cc"/>
+    <text x="342" y="17" class="ch" fill="#854d0e">␣</text>
+
+    <rect x="360" y="0" width="28" height="26" rx="3" class="cell" fill="#d5e8d4"/>
+    <text x="374" y="17" class="ch" fill="#2d5016" font-weight="600">d</text>
+    <rect x="388" y="0" width="28" height="26" rx="3" class="cell" fill="#d5e8d4"/>
+    <text x="402" y="17" class="ch" fill="#2d5016" font-weight="600">o</text>
+    <rect x="416" y="0" width="28" height="26" rx="3" class="cell" fill="#d5e8d4"/>
+    <text x="430" y="17" class="ch" fill="#2d5016" font-weight="600">c</text>
+    <rect x="444" y="0" width="28" height="26" rx="3" class="cell" fill="#d5e8d4"/>
+    <text x="458" y="17" class="ch" fill="#2d5016" font-weight="600">s</text>
+    <rect x="472" y="0" width="28" height="26" rx="3" class="cell" fill="#f3f4f6"/>
+    <text x="486" y="17" class="ch" fill="#9ca3af">\0</text>
+
+    <!-- Pointer: 5s loop -->
+    <polygon points="258,30 254,38 262,38" fill="#dc2626" visibility="hidden">
+      <animate attributeName="visibility" dur="5s" repeatCount="indefinite" calcMode="discrete"
+        values="visible;visible;visible;visible;visible;hidden" keyTimes="0;0.16;0.32;0.48;0.64;1"/>
+      <animate attributeName="points" dur="5s" repeatCount="indefinite" calcMode="discrete"
+        values="258,30 254,38 262,38;286,30 282,38 290,38;314,30 310,38 318,38;342,30 338,38 346,38;374,30 370,38 378,38;374,30 370,38 378,38"
+        keyTimes="0;0.16;0.32;0.48;0.64;1"/>
+    </polygon>
+    <text x="258" y="48" font-family="monospace" font-size="9" font-weight="600" fill="#dc2626" text-anchor="middle" visibility="hidden">
+      <animate attributeName="visibility" dur="5s" repeatCount="indefinite" calcMode="discrete"
+        values="visible;visible;visible;visible;visible;hidden" keyTimes="0;0.16;0.32;0.48;0.64;1"/>
+      <animate attributeName="x" dur="5s" repeatCount="indefinite" calcMode="discrete"
+        values="258;286;314;342;374;374" keyTimes="0;0.16;0.32;0.48;0.64;1"/>
+      copyFrom
+    </text>
+
+    <text x="344" y="62" class="note" fill="#b8860b" visibility="hidden">
+      <animate attributeName="visibility" dur="5s" repeatCount="indefinite" calcMode="discrete"
+        values="visible;hidden;hidden" keyTimes="0;0.64;1"/>
+      strchr(w_space, '␣') → match, ++
+    </text>
+    <text x="374" y="62" class="note" fill="#16a34a" visibility="hidden">
+      <animate attributeName="visibility" dur="5s" repeatCount="indefinite" calcMode="discrete"
+        values="hidden;visible;hidden" keyTimes="0;0.64;1"/>
+      strchr(w_space, 'd') → NULL ✓
+    </text>
+  </g>
+</svg>
