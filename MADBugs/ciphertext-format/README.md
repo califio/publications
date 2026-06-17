@@ -50,7 +50,7 @@ This is the pattern I want to convince you of. Every parameter you bake into a c
 
 There's a meta-point worth making. CMS exists for one job, to specify how a cryptographic message is laid out, and it still got this wrong. When the document whose entire purpose is formatting the ciphertext ships a footgun this sharp, that tells you both how hard the problem really is and how much the format is overreaching. A whole RFC of optional parameters, algorithm identifiers, and length fields is an enormous amount of surface for something that, done right, is a key id followed by an opaque blob.
 
-CMS is one example. The other canonical disaster is JWT, which puts a whole pile of parameters in the header: the algorithm, the key id, and sometimes a URL pointing at the key. Every one of those has produced real CVEs: the infamous `alg: none`, the RS256-to-HS256 confusion, and more.
+CMS is one example. The other canonical disaster is JWT, which puts a whole pile of parameters in the header: the algorithm, the key id, and sometimes a URL pointing at the key. Every one of those has produced [real CVEs](https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/): the infamous `alg: none`, the RS256-to-HS256 confusion, and more.
 
 ## The most secure format carries nothing
 
@@ -66,7 +66,7 @@ key_id || ciphertext
 
 The `key_id` should be sufficient to look up the raw key material *and every other parameter required for decryption*. The ciphertext itself carries nothing else. All metadata, algorithm, tag length, everything, is derived from the key record the `key_id` points to. The tag-length bug literally cannot exist in this design, because the tag length comes from your key record, not from the wire.
 
-Worth being honest about the cost: a key id breaks semantic security, because it makes ciphertexts distinguishable from random. Usually that's fine. Sometimes it isn't. If you use a distinct key id per user, the key id becomes a user identifier, and leaking it can leak who a message belongs to. In a privacy-sensitive setting that can matter a lot. Know which regime you're in before you pick.
+Note that adding a key id breaks semantic security, because it makes ciphertexts distinguishable from random. Usually that's fine. Sometimes it isn't. If you use a distinct key id per user, the key id becomes a user identifier, and leaking it can leak who a message belongs to. In a privacy-sensitive setting that can matter a lot. Know which regime you're in before you pick.
 
 ## Even key_id || ciphertext can go wrong
 
@@ -80,7 +80,7 @@ This is exactly one of the attacks I found in AWS KMS years ago ([advisory here]
 
 I've seen a JWT implementation that accepted a *URL* as the key id and then fetched the key from that URL. Attacker-controlled key location, fetched server-side, is a textbook SSRF. Worse, point that URL at a server you control and the application fetches *your* key, which is the key-substitution attack from above all over again. So please: never use a URL as a key id. The key id should be an opaque local handle, nothing more.
 
-I'll add one more data point, because it convinced me this isn't niche knowledge that everyone already has. After AWS KMS, I found the identical global-key-id bug in the standard crypto library at a major tech company, one that employed some of the best security engineers and cryptographers in the world. If they missed it, it's not well known enough.
+I'll add one more data point, because it convinced me this knowledge should be far more widely known than it is. After AWS KMS, I found the identical global-key-id bug in the standard crypto library at a major tech company, one that employed some of the best security engineers and cryptographers in the world. If they missed it, it's not well known enough.
 
 ## How to actually do it
 
