@@ -90,8 +90,6 @@ If you're **not** multi-tenant, use a *local* key id. This is what we did in [Go
 
 If you **are** multi-tenant, things get sharp very fast, because now the id space is inherently shared, and a naive global id walks you straight back into the AWS KMS attack. The better approach, I think, is to keep the global namespace out of the ciphertext entirely. Let each tenant create named keysets, the way S3 lets you create named buckets, and have the application reference the keyset by name in its own code or config. The names can be randomized to avoid collisions. The wire format then carries only a *local* key id, scoped to whichever keyset the application already selected. Because that keyset is chosen by trusted code rather than by attacker-controlled bytes, a local id can only ever resolve to a key inside the intended keyset, so the cross-tenant substitution has nowhere to land. You do still pay the aforementioned small semantic security and privacy cost.
 
-As far as I can tell, AWS KMS didn't go that way. It keeps a global key id on the wire and protects it by encrypting that id under another master key. That works, but it is solving a crypto problem with more crypto, at the cost of an extra encryption on every operation and some ciphertext expansion. The wrapping key has to be a single, fixed, global key. And now you have a master key to rotate, which is its own headache, whereas naming the keyset out of band keeps the global id off the wire in the first place.
-
 ## Takeaways
 
 The one-byte tag bug is the same lesson over and over: the ciphertext format is the attack surface. Every parameter you let a ciphertext carry is a parameter an attacker gets to choose, and the history of AWS KMS, CMS, and JWT is a long record of attackers choosing wisely.
