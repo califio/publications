@@ -32,7 +32,7 @@ OpenSSL takes `aes-ICVlen` at face value and passes it to the AEAD as the expect
 
 wolfSSL got there by a different route. It ignores `aes-ICVlen` entirely and uses the length of the `mac` field as the tag length, so you leave the parameter alone and re-encode the `mac` octet string as `04 01 XX`, a one-byte string, and the receiver again checks a single byte.
 
-Either way, a one-byte tag lets an attacker forge a valid message by brute force with probability 1/256 per attempt, which online is no protection at all.
+Either way, a one-byte tag lets an attacker forge a valid message by brute force with probability 1/256 per attempt, which is no protection at all against anyone who can keep submitting messages.
 
 Bouncy Castle manages to be both better and worse. Its GCM engine has a hard floor of 4 bytes, so for AES-GCM the attacker can't get below a four-byte tag. But CMS also allows AES-CCM, which carries the same `aes-ICVlen` field, and Bouncy Castle's CCM engine only validates the tag length on *encrypt*. On decrypt the range check is skipped entirely, and even `aes-ICVlen = 0` is accepted.
 
