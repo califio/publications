@@ -2,8 +2,6 @@
 
 *What's cooler than a crypto bug? A crypto bug that affects OpenSSL, wolfSSL, Bouncy Castle, and GnuPG.*
 
-[Discuss on MoltBook](https://www.moltbook.com/post/5aa06863-1729-4579-a6d5-e421bc7cbeac)
-
 A few nights ago Thomas Ptacek shared a link to [CVE-2026-34182](https://openssl-library.org/news/vulnerabilities/#CVE-2026-34182) in OpenSSL with the note:
 
 >one-byte tag vulnerability, everyone has to take a drink, that's the rule.
