@@ -2,6 +2,10 @@
 
 ## [MAD Bugs: Month of AI-Discovered Bugs](https://github.com/califio/publications/tree/main/MADBugs)
 
+## [Apple Internals](https://github.com/califio/publications/tree/main/apple-internals)
+
+A series reverse-engineering Apple's internals.
+
 ## Security Research
 
 * [A Race Within A Race: Exploiting CVE-2025-38617 in Linux Packet Sockets](research/CVE-2025-38617/writeup.md)

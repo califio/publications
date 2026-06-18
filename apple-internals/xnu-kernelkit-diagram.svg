@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="660" viewBox="0 0 840 660" font-family="-apple-system, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#666"/>
+    </marker>
+  </defs>
+
+  <rect x="0" y="0" width="840" height="660" fill="#ffffff"/>
+  <text x="420" y="34" text-anchor="middle" font-size="22" font-weight="700" fill="#1a1a1a">XNU and where KernelKit fits in</text>
+
+  <!-- User space -->
+  <rect x="30" y="56" width="780" height="58" rx="8" fill="#eceff1" stroke="#90a4ae" stroke-width="1.5"/>
+  <text x="420" y="82" text-anchor="middle" font-size="15" font-weight="600" fill="#37474f">User space</text>
+  <text x="420" y="101" text-anchor="middle" font-size="12" fill="#546e7a">apps, system frameworks, daemons</text>
+
+  <!-- syscall boundary -->
+  <line x1="120" y1="132" x2="120" y2="150" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <line x1="720" y1="150" x2="720" y2="132" stroke="#666" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="420" y="146" text-anchor="middle" font-size="11" fill="#777" font-style="italic">system calls &#183; Mach traps</text>
+
+  <!-- XNU container -->
+  <rect x="30" y="158" width="780" height="408" rx="10" fill="#f7f9fb" stroke="#37474f" stroke-width="2"/>
+  <text x="48" y="184" font-size="16" font-weight="700" fill="#1a1a1a">XNU &#8212; Apple's hybrid kernel</text>
+  <text x="792" y="184" text-anchor="end" font-size="12" fill="#2c5f8a" font-weight="600">core = C / C++</text>
+
+  <!-- Core components row -->
+  <g>
+    <rect x="48" y="200" width="240" height="118" rx="8" fill="#dbe7f3" stroke="#2c5f8a" stroke-width="1.5"/>
+    <text x="168" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="#1c3f5c">BSD layer</text>
+    <text x="168" y="250" text-anchor="middle" font-size="11.5" fill="#26506e">POSIX &#183; processes</text>
+    <text x="168" y="268" text-anchor="middle" font-size="11.5" fill="#26506e">sockets &#183; VFS</text>
+    <text x="168" y="286" text-anchor="middle" font-size="11.5" fill="#26506e">pthread API</text>
+
+    <rect x="300" y="200" width="240" height="118" rx="8" fill="#dbe7f3" stroke="#2c5f8a" stroke-width="1.5"/>
+    <text x="420" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="#1c3f5c">Mach core</text>
+    <text x="420" y="250" text-anchor="middle" font-size="11.5" fill="#26506e">virtual memory</text>
+    <text x="420" y="268" text-anchor="middle" font-size="11.5" fill="#26506e">scheduler</text>
+    <text x="420" y="286" text-anchor="middle" font-size="11.5" fill="#26506e">IPC (ports / messages)</text>
+
+    <rect x="552" y="200" width="240" height="118" rx="8" fill="#dbe7f3" stroke="#2c5f8a" stroke-width="1.5"/>
+    <text x="672" y="226" text-anchor="middle" font-size="15" font-weight="700" fill="#1c3f5c">IOKit</text>
+    <text x="672" y="250" text-anchor="middle" font-size="11.5" fill="#26506e">C++ driver</text>
+    <text x="672" y="268" text-anchor="middle" font-size="11.5" fill="#26506e">framework</text>
+  </g>
+
+  <!-- Kext band -->
+  <rect x="48" y="334" width="744" height="214" rx="8" fill="#ffffff" stroke="#b0bec5" stroke-width="1.5" stroke-dasharray="5 4"/>
+  <text x="62" y="356" font-size="13" font-weight="700" fill="#455a64">Kernel extensions (kexts) &#8212; prelinked into the kernelcache</text>
+
+  <!-- ordinary kexts -->
+  <rect x="62" y="368" width="200" height="60" rx="6" fill="#dbe7f3" stroke="#2c5f8a" stroke-width="1.5"/>
+  <text x="162" y="395" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1c3f5c">AppleAPFS, IONetworking,</text>
+  <text x="162" y="413" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1c3f5c">&#8230; (hundreds, all C/C++)</text>
+
+  <!-- KernelKit group -->
+  <rect x="280" y="368" width="498" height="166" rx="8" fill="#fff3ea" stroke="#e2641e" stroke-width="2"/>
+  <text x="294" y="389" font-size="13" font-weight="700" fill="#b34a12">KernelKit &#8212; new in the 27 train (own SDK + Mach-O platform IDs)</text>
+
+  <rect x="294" y="400" width="222" height="58" rx="6" fill="#ffe0c7" stroke="#e2641e" stroke-width="1.5"/>
+  <text x="405" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="#9c3f0f">pthread.kext</text>
+  <text x="405" y="444" text-anchor="middle" font-size="11" fill="#a8521f">platform 25 (macOS) / 26 (iOS)</text>
+
+  <rect x="532" y="400" width="232" height="58" rx="6" fill="#ffe0c7" stroke="#e2641e" stroke-width="1.5"/>
+  <text x="648" y="424" text-anchor="middle" font-size="13" font-weight="700" fill="#9c3f0f">Libm.kext</text>
+  <text x="648" y="444" text-anchor="middle" font-size="11" fill="#a8521f">math, adopted into KernelKit</text>
+
+  <!-- embedded swift runtime strip -->
+  <rect x="294" y="468" width="470" height="54" rx="6" fill="#ffd0ad" stroke="#c9531a" stroke-width="1.5"/>
+  <text x="529" y="490" text-anchor="middle" font-size="12.5" font-weight="700" fill="#8a3a0c">Embedded Swift runtime &#183; ~2.4 KB &#183; statically linked</text>
+  <text x="529" y="509" text-anchor="middle" font-size="11" fill="#9c3f0f">swift_retain, swift_release, swift_once, etc.</text>
+
+  <!-- Legend -->
+  <rect x="30" y="588" width="780" height="56" rx="8" fill="#fafafa" stroke="#cfd8dc" stroke-width="1"/>
+  <rect x="48" y="606" width="20" height="20" rx="3" fill="#dbe7f3" stroke="#2c5f8a" stroke-width="1.5"/>
+  <text x="76" y="621" font-size="11.5" fill="#37474f">Existing C / C++ (Mach, BSD, IOKit, and the kexts) &#8212; unchanged</text>
+  <rect x="446" y="606" width="20" height="20" rx="3" fill="#ffd0ad" stroke="#c9531a" stroke-width="1.5"/>
+  <text x="474" y="621" font-size="11.5" fill="#37474f">New KernelKit / Embedded Swift &#8212; added at the kext edge only</text>
+</svg>
