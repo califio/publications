@@ -187,6 +187,10 @@ More broadly, this might be a good habit for OSS maintainers in general: every n
 Though FTP parsing might not be the only place where Squid forgot to stop reading. Stay tuned for the next round.
 
 ## Disclosure Timeline
+
+*Update 2026-06-25*: Synced the timeline with the official advisory. Notably, Aisle was omitted from the draft advisory shared by the Squid team on 2026-06-08. The acknowledgement was subsequently added on 2026-06-12.
+
+- 2026-03-04: Initial report by Pavel Kohout of Aisle Research
 - 2026-04-17: Initial report by Lam Jun Rong of Calif.io
 - 2026-04-17: Fix posted
 - 2026-04-19: Fix merged into master/v8
@@ -194,3 +198,6 @@ Though FTP parsing might not be the only place where Squid forgot to stop readin
 - 2026-05-17: Fix merged into v7
 - 2026-06-08: Squid v7.6 released
 - 2026-06-10: This blog post released
+- 2026-06-23: [Official advisory](https://github.com/squid-cache/squid/security/advisories/GHSA-8c37-pxjq-qwrg) released
+
+
