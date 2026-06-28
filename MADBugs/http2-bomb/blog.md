@@ -26,7 +26,7 @@ A home computer on a 100Mbps connection can render a vulnerable server inaccessi
 | Envoy 1.37.2 | ~5,700:1 | ~32 GB in ~10s |
 | Apache httpd 2.4.67 | ~4,000:1 | ~32 GB in ~18s |
 | nginx 1.29.7 | ~70:1 | ~32 GB in ~45s |
-| Microsoft IIS (Windows Server 2025) | ~68:1 | 64 GB in ~45s |
+| Microsoft IIS (Windows Server 2022, 2025) | ~68:1 | 64 GB in ~45s |
 
 ## Credits
 
