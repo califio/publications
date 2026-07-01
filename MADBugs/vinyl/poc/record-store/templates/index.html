@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="gt-hero">
+    <div class="container-xxl">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-7">
+                <p class="gt-eyebrow">Spring catalogue · 2026</p>
+                <h1 class="gt-title">Records you'll keep for a lifetime.</h1>
+                <p class="lead text-muted mb-4">
+                    Carefully sourced first pressings, reissues on 180 g vinyl, and staff
+                    picks from the jazz, soul and electronic corners. Ship worldwide.
+                </p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/store" class="btn gt-btn-primary">Browse the store</a>
+                    <a href="/reviews" class="btn gt-btn-ghost">Read what customers say</a>
+                </div>
+            </div>
+            <div class="col-lg-5 d-none d-lg-block">
+                <div class="gt-hero-disc" aria-hidden="true">
+                    <div class="gt-hero-disc-inner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="container-xxl py-5">
+    <div class="d-flex align-items-baseline justify-content-between mb-4">
+        <h2 class="gt-section">Featured this week</h2>
+        <a href="/store" class="small">View all records →</a>
+    </div>
+    <div class="row g-4">
+        {% for r in featured %}
+        <div class="col-6 col-lg-4 col-xl-2">
+            {% include "_card.html" %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="container-xxl pb-5">
+    <div class="d-flex align-items-baseline justify-content-between mb-4">
+        <h2 class="gt-section">New arrivals</h2>
+        <a href="/store" class="small">View all records →</a>
+    </div>
+    <div class="row g-4">
+        {% for r in newarr %}
+        <div class="col-6 col-lg-4 col-xl-2">
+            {% include "_card.html" %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Customer reviews — Groove Therapy{% endblock %}
+{% block content %}
+<section class="container-xxl py-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h1 class="gt-page-title">What customers say</h1>
+            <p class="text-muted mb-4">
+                Honest reviews from the Groove Therapy community. We don't edit them.
+            </p>
+
+            {% if request.args.get('submitted') %}
+            <div class="alert alert-success">Thanks — your review has been posted.</div>
+            {% endif %}
+
+            <div class="gt-reviews">
+                {% for r in reviews %}
+                <article class="gt-review">
+                    <header class="d-flex justify-content-between align-items-baseline mb-1">
+                        <strong class="gt-review-name">{{ r.name }}</strong>
+                        <time class="gt-review-time">{{ r.time.strftime('%d %b %Y') }}</time>
+                    </header>
+                    <div class="gt-review-text">{{ r.text }}</div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+        <aside class="col-lg-4">
+            <div class="gt-panel">
+                <h2 class="gt-section" style="font-size: 1.1rem;">Leave a review</h2>
+                <form method="POST" action="/api/review">
+                    <div class="mb-2">
+                        <label class="form-label small fw-medium">Name</label>
+                        <input type="text" name="name" class="form-control form-control-sm" maxlength="40">
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label small fw-medium">Your review</label>
+                        <textarea name="text" class="form-control form-control-sm" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn gt-btn-primary btn-sm w-100">Post review</button>
+                </form>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

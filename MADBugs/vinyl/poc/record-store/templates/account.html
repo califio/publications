@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Your account — Groove Therapy{% endblock %}
+{% block content %}
+<section class="container-xxl py-5">
+    <div class="row g-5">
+        <div class="col-lg-4">
+            <div class="gt-panel">
+                <p class="gt-eyebrow mb-1">Account</p>
+                <h1 class="gt-page-title" style="font-size: 1.5rem;">{{ user.name }}</h1>
+                <p class="small text-muted mb-3">{{ user.email }}</p>
+                <p class="small mb-0"><span class="text-muted">Member since</span> {{ user.joined }}</p>
+            </div>
+        </div>
+        <div class="col-lg-8">
+            <h2 class="gt-section mb-3" style="font-size: 1.25rem;">Recent orders</h2>
+            <div class="table-responsive">
+                <table class="table gt-orders">
+                    <thead>
+                        <tr>
+                            <th>Order</th>
+                            <th>Date</th>
+                            <th>Item</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for o in user.orders %}
+                        <tr>
+                            <td><code>{{ o.id }}</code></td>
+                            <td>{{ o.date }}</td>
+                            <td>{{ o.item }}</td>
+                            <td><span class="badge gt-badge-{{ o.status|lower }}">{{ o.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

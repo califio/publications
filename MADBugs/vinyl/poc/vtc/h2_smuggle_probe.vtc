@@ -1,0 +1,30 @@
+vtest "Probe: measure leftover bytes between bare CRLF and body"
+
+server s1 {
+	rxreq
+	expect req.method == "POST"
+	# body == leftover_headers + (CL - leftover_len) bytes of DATA
+	txresp
+} -start
+
+vinyl v1 -arg "-p feature=+http2" -vcl+backend {
+	sub vcl_recv { return (pass); }
+} -start
+
+client c1 {
+	stream 1 {
+		txreq -noadd \
+		    -idxHdr 3 \
+		    -litIdxHdr never 4 plain "/attacker" \
+		    -idxHdr 7 \
+		    -hdr "content-length" "200" \
+		    -litHdr never plain ":a" plain "xx" \
+		    -hdr "probe" "pad" \
+		    -hdr "host" "example.com" \
+		    -nostrend
+		txdata -data "${string,repeat,200,Z}"
+		rxresp
+	} -run
+} -run
+
+vinyl v1 -vsl_catchup

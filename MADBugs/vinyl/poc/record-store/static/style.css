@@ -1,0 +1,260 @@
+/* Groove Therapy — record shop styling.
+   Dark, warm palette. Serif display typography. Vinyl-disc motif reused
+   across covers, favicon, and the hero.
+*/
+
+:root {
+    --bg: #0f0e0c;
+    --bg-2: #1a1713;
+    --bg-3: #2a241d;
+    --fg: #f4ede2;
+    --fg-muted: #b3a896;
+    --fg-dim: #7c7363;
+    --accent: #e8a54c;
+    --accent-2: #d8713a;
+    --border: rgba(244, 237, 226, 0.10);
+    --border-2: rgba(244, 237, 226, 0.18);
+    --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .gt-title, .gt-page-title, .gt-section, .gt-record-title, .gt-record-artist {
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.01em;
+    color: var(--fg);
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-2); text-decoration: underline; }
+.text-muted { color: var(--fg-muted) !important; }
+
+code { color: var(--accent); }
+
+/* ── Nav ──────────────────────────────────────────────────────────────── */
+.gt-nav {
+    background: rgba(15, 14, 12, 0.88);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 0.85rem 0;
+}
+.gt-brand { display: flex; align-items: center; gap: 0.55rem; }
+.gt-brand-text { font-family: 'Fraunces', serif; font-weight: 800; font-size: 1.1rem; color: var(--fg); letter-spacing: -0.015em; }
+.gt-brand-disc {
+    width: 24px; height: 24px; border-radius: 50%;
+    background:
+        radial-gradient(circle at center, var(--accent) 0 3px, transparent 3px),
+        repeating-radial-gradient(circle at center, #111 0 2px, #1a1a1a 2px 4px);
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.08) inset;
+    flex-shrink: 0;
+}
+.navbar-nav .nav-link { color: var(--fg-muted); font-weight: 500; padding: 0.25rem 0.85rem; }
+.navbar-nav .nav-link:hover { color: var(--fg); }
+.gt-search { background: var(--bg-2); border: 1px solid var(--border); color: var(--fg); min-width: 260px; }
+.gt-search::placeholder { color: var(--fg-dim); }
+.gt-search:focus { background: var(--bg-2); border-color: var(--accent); box-shadow: none; color: var(--fg); }
+
+/* ── Buttons ─────────────────────────────────────────────────────────── */
+.gt-btn-primary { background: var(--accent); color: #1a1713; font-weight: 600; border: 0; padding: 0.6rem 1.1rem; }
+.gt-btn-primary:hover { background: var(--accent-2); color: #1a1713; }
+.gt-btn-ghost { background: transparent; color: var(--fg); border: 1px solid var(--border-2); font-weight: 500; padding: 0.6rem 1.1rem; }
+.gt-btn-ghost:hover { background: rgba(255,255,255,0.04); color: var(--fg); }
+.gt-btn-link { color: var(--fg-muted); }
+.gt-btn-link:hover { color: var(--fg); }
+
+/* ── Hero ────────────────────────────────────────────────────────────── */
+.gt-hero {
+    padding: 5rem 0 4rem;
+    background: linear-gradient(180deg, rgba(232,165,76,0.06) 0%, transparent 70%);
+}
+.gt-eyebrow {
+    font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em;
+    color: var(--accent); font-weight: 600; margin-bottom: 0.75rem;
+}
+.gt-title {
+    font-size: clamp(2.4rem, 5vw, 4rem); font-weight: 800;
+    line-height: 1.05; margin-bottom: 1.25rem;
+}
+.gt-page-title { font-size: clamp(1.8rem, 3vw, 2.5rem); font-weight: 800; margin-bottom: 0.75rem; }
+.gt-section { font-size: 1.35rem; font-weight: 600; }
+.gt-hero-disc {
+    width: 100%; aspect-ratio: 1; max-width: 400px; margin-left: auto;
+    position: relative; border-radius: 50%;
+    background:
+        radial-gradient(circle at center, var(--accent) 0 10%, transparent 10.1%),
+        repeating-radial-gradient(circle at center, #0a0a0a 0 3px, #1a1a1a 3px 6px, #0a0a0a 6px 9px);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05);
+    animation: gt-spin 16s linear infinite;
+}
+.gt-hero-disc-inner {
+    position: absolute; inset: 0; margin: auto;
+    width: 3%; height: 3%; border-radius: 50%;
+    background: #0a0a0a; box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+    top: 0; left: 0; right: 0; bottom: 0;
+}
+@keyframes gt-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+/* ── Cover placeholder (uses --hue from template) ────────────────────── */
+.gt-cover {
+    width: 100%; aspect-ratio: 1; position: relative; border-radius: 6px; overflow: hidden;
+    background:
+        linear-gradient(135deg, hsl(var(--hue), 60%, 25%) 0%, hsl(var(--hue), 40%, 12%) 100%);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    display: flex; align-items: flex-end;
+}
+.gt-cover-disc {
+    position: absolute; top: 50%; right: -30%; transform: translateY(-50%);
+    width: 85%; aspect-ratio: 1; border-radius: 50%;
+    background:
+        radial-gradient(circle at center, hsl(var(--hue), 70%, 55%) 0 15%, transparent 15.1%),
+        repeating-radial-gradient(circle at center, #0a0a0a 0 3px, #1a1a1a 3px 5px);
+    opacity: 0.45; pointer-events: none;
+}
+.gt-cover-label {
+    position: relative; z-index: 1; padding: 12px 14px;
+    background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+    width: 100%;
+}
+.gt-cover-artist { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: rgba(255,255,255,0.7); font-weight: 600; }
+.gt-cover-title { font-family: 'Fraunces', serif; font-size: 0.95rem; font-weight: 600; color: white; line-height: 1.15; margin-top: 2px; }
+.gt-cover-lg .gt-cover-title { font-size: 1.6rem; }
+.gt-cover-lg .gt-cover-artist { font-size: 0.85rem; }
+.gt-cover-lg .gt-cover-label { padding: 24px 28px; }
+
+/* ── Card ────────────────────────────────────────────────────────────── */
+.gt-card {
+    display: block; color: var(--fg); text-decoration: none;
+    transition: transform 0.15s ease;
+}
+.gt-card:hover { color: var(--fg); text-decoration: none; transform: translateY(-3px); }
+.gt-card-body { padding-top: 10px; }
+.gt-card-artist { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--fg-muted); font-weight: 600; }
+.gt-card-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1rem; line-height: 1.2; margin-top: 2px; }
+.gt-card-year { color: var(--fg-dim); font-size: 0.85rem; }
+.gt-card-price { color: var(--accent); font-weight: 600; }
+
+/* ── Record page ─────────────────────────────────────────────────────── */
+.gt-record-title { font-size: 2.5rem; font-weight: 800; line-height: 1.1; }
+.gt-record-artist { font-size: 1.25rem; color: var(--fg-muted); font-weight: 500; }
+.gt-price-box { display: flex; align-items: baseline; gap: 1rem; padding: 1rem 1.25rem; border: 1px solid var(--border-2); border-radius: var(--radius); background: var(--bg-2); }
+.gt-price { font-family: 'Fraunces', serif; font-weight: 700; font-size: 1.75rem; color: var(--accent); }
+.gt-stock { font-size: 0.85rem; color: var(--fg-muted); }
+
+/* ── Panels ──────────────────────────────────────────────────────────── */
+.gt-panel { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; }
+.gt-login { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 2rem; }
+.form-control { background: var(--bg-3); border: 1px solid var(--border-2); color: var(--fg); }
+.form-control:focus { background: var(--bg-3); border-color: var(--accent); box-shadow: none; color: var(--fg); }
+.form-label { color: var(--fg); }
+
+/* ── Reviews ─────────────────────────────────────────────────────────── */
+.gt-reviews { display: flex; flex-direction: column; gap: 1.25rem; }
+.gt-review { background: var(--bg-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem 1.5rem; }
+.gt-review-name { color: var(--fg); font-weight: 600; }
+.gt-review-time { font-size: 0.8rem; color: var(--fg-dim); }
+.gt-review-text {
+    color: var(--fg-muted);
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* ── Orders table ────────────────────────────────────────────────────── */
+/* Override Bootstrap's default table CSS variables so .table inherits the
+   dark palette instead of its near-white background/border set. */
+.gt-orders {
+    --bs-table-bg: transparent;
+    --bs-table-color: var(--fg);
+    --bs-table-color-state: var(--fg);
+    --bs-table-color-type: var(--fg);
+    --bs-table-border-color: var(--border);
+    --bs-table-striped-bg: transparent;
+    --bs-table-striped-color: var(--fg);
+    --bs-table-active-bg: transparent;
+    --bs-table-active-color: var(--fg);
+    --bs-table-hover-bg: rgba(244, 237, 226, 0.04);
+    --bs-table-hover-color: var(--fg);
+    color: var(--fg);
+    margin-bottom: 0;
+    background: transparent;
+}
+.gt-orders th,
+.gt-orders td {
+    background: transparent !important;
+    color: var(--fg);
+    border-color: var(--border);
+    box-shadow: none;
+}
+.gt-orders thead th {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-dim);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border-2);
+    padding: 0.5rem 0.75rem 0.75rem;
+}
+.gt-orders tbody td {
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+}
+.gt-orders tbody tr:last-child td { border-bottom: 0; }
+.gt-orders code {
+    background: transparent;
+    color: var(--accent);
+    padding: 0;
+    font-size: 0.9em;
+}
+.gt-orders .badge {
+    padding: 0.35em 0.7em;
+    font-size: 0.72rem;
+    font-weight: 500;
+    border-radius: 999px;
+    letter-spacing: 0.02em;
+}
+.gt-badge-delivered { background: rgba(90, 200, 110, 0.15); color: #7cd08f; }
+.gt-badge-shipped { background: rgba(232, 165, 76, 0.15); color: var(--accent); }
+.gt-badge-processing { background: rgba(120, 160, 220, 0.15); color: #8fb3e0; }
+.gt-badge-cancelled { background: rgba(220, 90, 90, 0.12); color: #e07a7a; }
+
+/* ── Footer ──────────────────────────────────────────────────────────── */
+.gt-footer { background: var(--bg-2); border-top: 1px solid var(--border); margin-top: 6rem; }
+.gt-footer a { color: var(--fg-muted); }
+.gt-footer a:hover { color: var(--fg); }
+.gt-footer h6 { color: var(--fg); font-family: 'Inter', sans-serif; letter-spacing: 0.1em; }
+.gt-hr { border-color: var(--border); margin: 1.5rem 0 1rem; }
+
+/* ── Bootstrap overrides ─────────────────────────────────────────────── */
+.alert { border-radius: var(--radius); border: 0; }
+.alert-success { background: rgba(90, 200, 110, 0.12); color: #7cd08f; }
+.alert-danger { background: rgba(220, 90, 90, 0.12); color: #e07a7a; }
+.alert-light { background: var(--bg-2); color: var(--fg); border: 1px solid var(--border); }
+
+/* ── Notifications bell ─────────────────────────────────────────────── */
+.gt-bell { position: relative; padding-right: 14px; }
+.gt-bell-ico { font-size: 1.05rem; line-height: 1; }
+.gt-bell-badge {
+    position: absolute;
+    top: -2px; right: -2px;
+    min-width: 18px;
+    padding: 1px 5px;
+    font-size: 0.72rem; font-weight: 600; line-height: 1.2;
+    color: #fff;
+    background: #d85a3a;
+    border-radius: 10px;
+    display: none;
+}
+.gt-bell.gt-bell-has .gt-bell-badge { display: inline-block; }

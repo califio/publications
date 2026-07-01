@@ -1,0 +1,34 @@
+vtest "H2 :a prefix-match → empty hd[] entry → bare CRLF in bereq"
+
+# Tstrcmp(nm, ":authority") prefix-matches `:a`. With a 2-byte value,
+# out_u = 2+2+2 = 6, and after `hdr.b += 6` we get hdr.b == hdr.e.
+# That zero-length txt survives http_FilterReq and HTTP1_Write emits
+# it as a bare "\r\n", terminating the bereq header block early.
+# Any headers placed after `:a` in the HPACK block land *after* the
+# blank line on the backend wire — the backend never sees them.
+
+server s1 {
+	rxreq
+	expect req.method == "GET"
+	txresp
+} -start
+
+vinyl v1 -arg "-p feature=+http2 -p debug=+syncvsl" -vcl+backend {
+	sub vcl_recv { return (pass); }
+} -start
+
+client c1 {
+	stream 1 {
+		txreq -noadd \
+		    -idxHdr 2 \
+		    -idxHdr 4 \
+		    -idxHdr 7 \
+		    -litHdr never plain ":a" plain "xx" \
+		    -hdr "host" "example.com" \
+		    -hdr "probe" "marker"
+		rxresp
+		expect resp.status == 200
+	} -run
+} -run
+
+vinyl v1 -vsl_catchup

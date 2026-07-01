@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 170">
+  <style>
+    .cell { stroke: #888; stroke-width: 0.8; }
+    .ch { font-family: 'Menlo', 'Consolas', monospace; font-size: 12px; text-anchor: middle; }
+    .heading { font-family: sans-serif; font-size: 11px; font-weight: 600; fill: #888; }
+    .label { font-family: 'Menlo', 'Consolas', monospace; font-size: 8px; text-anchor: middle; fill: #999; }
+    .ptr { font-family: 'Menlo', 'Consolas', monospace; font-size: 9px; font-weight: 600; text-anchor: middle; }
+    .code { font-family: 'Menlo', 'Consolas', monospace; font-size: 10px; }
+  </style>
+
+  <text x="210" y="12" class="heading" text-anchor="middle">Attack: :a prefix-match</text>
+
+  <g transform="translate(36, 24)">
+    <text x="16" y="8" class="label">0</text><text x="50" y="8" class="label">1</text>
+    <text x="84" y="8" class="label">2</text><text x="118" y="8" class="label">3</text>
+    <text x="152" y="8" class="label">4</text><text x="186" y="8" class="label">5</text>
+    <text x="220" y="8" class="label">6</text><text x="254" y="8" class="label">7</text>
+    <text x="288" y="8" class="label">8</text><text x="322" y="8" class="label">9</text>
+
+    <!-- Cells 0-1: :a (name, blue) -->
+    <rect x="0" y="12" width="32" height="24" rx="3" fill="#dbeafe" class="cell"/>
+    <text x="16" y="27" class="ch" fill="#1e40af">:</text>
+    <rect x="34" y="12" width="32" height="24" rx="3" fill="#dbeafe" class="cell"/>
+    <text x="50" y="27" class="ch" fill="#1e40af">a</text>
+
+    <!-- Cells 2-3: separator (grey) -->
+    <rect x="68" y="12" width="32" height="24" rx="3" fill="#f0f0f0" class="cell"/>
+    <text x="84" y="27" class="ch" fill="#888">:</text>
+    <rect x="102" y="12" width="32" height="24" rx="3" fill="#f0f0f0" class="cell"/>
+    <text x="118" y="27" class="ch" fill="#888">_</text>
+
+    <!-- Cells 4-5: value xx (green) -->
+    <rect x="136" y="12" width="32" height="24" rx="3" fill="#d5f5d3" class="cell"/>
+    <text x="152" y="27" class="ch" fill="#166534">x</text>
+    <rect x="170" y="12" width="32" height="24" rx="3" fill="#d5f5d3" class="cell"/>
+    <text x="186" y="27" class="ch" fill="#166534">x</text>
+
+    <!-- Cells 6-9: past buffer, dashed, filled by memcpy -->
+    <rect x="204" y="12" width="32" height="24" rx="3" class="cell" stroke-dasharray="4,3">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#f5f5f5;#fef08a;#fef08a;#fef08a" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="220" y="27" class="ch" fill="#854d0e" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>h</text>
+
+    <rect x="238" y="12" width="32" height="24" rx="3" class="cell" stroke-dasharray="4,3">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#f5f5f5;#fef08a;#fef08a;#fef08a" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="254" y="27" class="ch" fill="#854d0e" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>o</text>
+
+    <rect x="272" y="12" width="32" height="24" rx="3" class="cell" stroke-dasharray="4,3">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#f5f5f5;#fef08a;#fef08a;#fef08a" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="288" y="27" class="ch" fill="#854d0e" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>s</text>
+
+    <rect x="306" y="12" width="32" height="24" rx="3" class="cell" stroke-dasharray="4,3">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#f5f5f5;#fef08a;#fef08a;#fef08a" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="322" y="27" class="ch" fill="#854d0e" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>t</text>
+
+    <!-- d->out below (static, always at cell 0) -->
+    <polygon points="16,38 12,44 20,44" fill="#888"/>
+    <text x="16" y="54" class="ptr" fill="#888">d->out</text>
+
+    <!-- hdr.b above (moves to 6 in phase 3) -->
+    <polygon fill="#dc2626">
+      <animate attributeName="points" dur="12s" repeatCount="indefinite" calcMode="discrete"
+        values="16,10 12,4 20,4;16,10 12,4 20,4;220,10 216,4 224,4;220,10 216,4 224,4" keyTimes="0;0.25;0.5;0.75"/></polygon>
+    <text y="0" class="ptr" fill="#dc2626">
+      <animate attributeName="x" dur="12s" repeatCount="indefinite" calcMode="discrete" values="16;16;220;220" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="visible;visible;hidden;hidden" keyTimes="0;0.5;0.75;1"/>hdr.b</text>
+
+    <!-- hdr.e below (at position 6 = x:204, arrow at x:220 center of cell) -->
+    <!-- Actually hdr.e = d->out + out_u = d->out + 6, which is the start of cell 6 -->
+    <!-- Arrow should point between cell 5 and 6, at x=202 -->
+    <polygon points="220,38 216,44 224,44" fill="#2563eb">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="visible;visible;hidden;hidden" keyTimes="0;0.5;0.75;1"/></polygon>
+    <text x="220" y="54" class="ptr" fill="#2563eb">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="visible;visible;hidden;hidden" keyTimes="0;0.5;0.75;1"/>hdr.e</text>
+
+    <!-- Phase 3-4: both converge at same position, red -->
+    <polygon points="220,10 216,4 224,4" fill="#dc2626" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;visible;visible" keyTimes="0;0.5;0.75;1"/></polygon>
+    <text x="220" y="0" class="ptr" fill="#dc2626" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;visible;visible" keyTimes="0;0.5;0.75;1"/>hdr.b</text>
+    <polygon points="220,38 216,44 224,44" fill="#dc2626" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;visible;visible" keyTimes="0;0.5;0.75;1"/></polygon>
+    <text x="220" y="54" class="ptr" fill="#dc2626" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;visible;visible" keyTimes="0;0.5;0.75;1"/>hdr.e</text>
+  </g>
+
+  <!-- Code listing -->
+  <g transform="translate(100, 106)">
+    <text x="0" y="0" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#666;#ccc;#ccc;#ccc" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="600;400;400;400" keyTimes="0;0.25;0.5;0.75"/>1. Tstrcmp(nm, ":authority") == 0</text>
+    <text x="0" y="16" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#ccc;#b45309;#ccc;#ccc" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="400;600;400;400" keyTimes="0;0.25;0.5;0.75"/>2. memcpy(d->out + 6, "host", 4);</text>
+    <text x="0" y="32" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#ccc;#ccc;#dc2626;#ccc" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="400;400;600;400" keyTimes="0;0.25;0.5;0.75"/>3. hdr.b += 6;</text>
+    <text x="0" y="48" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#ccc;#ccc;#ccc;#dc2626" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="400;400;400;600" keyTimes="0;0.25;0.5;0.75"/>   → hdr.b == hdr.e → Tlen = 0!</text>
+  </g>
+</svg>

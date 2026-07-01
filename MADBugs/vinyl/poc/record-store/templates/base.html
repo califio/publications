@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Groove Therapy — Records & Rarities{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+</head>
+<body>
+<nav class="navbar navbar-expand-lg gt-nav">
+    <div class="container-xxl">
+        <a class="navbar-brand gt-brand" href="/">
+            <span class="gt-brand-disc"></span>
+            <span class="gt-brand-text">Groove Therapy</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="nav">
+            <ul class="navbar-nav me-auto ms-lg-4">
+                <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                <li class="nav-item"><a class="nav-link" href="/store">Store</a></li>
+                <li class="nav-item"><a class="nav-link" href="/reviews">Reviews</a></li>
+                <li class="nav-item"><a class="nav-link" href="/about">About</a></li>
+            </ul>
+            <form class="d-flex me-lg-3 mb-2 mb-lg-0" role="search" action="/store">
+                <input class="form-control form-control-sm gt-search" type="search" placeholder="Search records…" name="q" value="{{ request.args.get('q', '') }}">
+            </form>
+            {% if g.user %}
+                <a class="btn btn-sm gt-btn-ghost gt-bell" href="/account#notifications" id="gt-bell" data-count="0" title="Notifications">
+                    <span class="gt-bell-ico" aria-hidden="true">🔔</span>
+                    <span class="gt-bell-badge" data-slot="count">0</span>
+                </a>
+                <a class="btn btn-sm gt-btn-ghost" href="/account">{{ g.user.name.split()[0] }}</a>
+            {% else %}
+                <a class="btn btn-sm gt-btn-ghost" href="/login">Sign in</a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// Account notifications poller. Refreshes the bell-badge in the nav with
+// live updates: order status changes, wishlist restocks, price drops.
+// Same-origin fetch, so the browser's cached Basic Auth credentials are
+// attached automatically.
+// POST shape is standard for notifications polling — the client sends the
+// IDs it has already acknowledged, the server returns the current unread
+// set. Short-circuits on logged-out pages (no bell rendered).
+(function () {
+    var bell = document.getElementById("gt-bell");
+    if (!bell) return;   // anonymous visitor, nothing to poll
+    var badge = bell.querySelector("[data-slot=count]");
+    var seen = [];
+    try {
+        var stored = localStorage.getItem("gt.notif.seen");
+        if (stored) seen = JSON.parse(stored) || [];
+    } catch (e) {}
+
+    function pageCtx() {
+        return {
+            locale: navigator.language || null,
+            tz: (Intl.DateTimeFormat().resolvedOptions() || {}).timeZone || null,
+            viewport: { w: window.innerWidth, h: window.innerHeight },
+            path: location.pathname + location.search,
+            referrer: document.referrer || null
+        };
+    }
+
+    function render(unread) {
+        if (!badge) return;
+        badge.textContent = String(unread || 0);
+        bell.setAttribute("data-count", String(unread || 0));
+        bell.classList.toggle("gt-bell-has", (unread | 0) > 0);
+    }
+
+    function poll() {
+        var body = JSON.stringify({
+            seen: seen,
+            device: pageCtx(),
+            client_version: "gt-web/2.3.1",
+            poll_id: (crypto.randomUUID ? crypto.randomUUID()
+                                        : Date.now().toString(36))
+        });
+        fetch("/api/account/notifications", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+                "X-Requested-With": "fetch"
+            },
+            body: body,
+            credentials: "same-origin"
+        })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+            if (!data) return;
+            render(data.unread);
+        })
+        .catch(function () {});
+    }
+
+    poll();
+    setInterval(function () { if (!document.hidden) poll(); }, 2000);
+})();
+</script>
+</body>
+</html>

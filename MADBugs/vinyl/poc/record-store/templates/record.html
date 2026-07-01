@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ r.artist }} — {{ r.title }} | Groove Therapy{% endblock %}
+{% block content %}
+<section class="container-xxl py-5">
+    <nav aria-label="breadcrumb" class="small mb-3">
+        <a href="/store" class="text-muted">← Back to the store</a>
+    </nav>
+    <div class="row g-5">
+        <div class="col-lg-5">
+            <div class="gt-cover gt-cover-lg" style="--hue: {{ r.hue }};">
+                <div class="gt-cover-disc"></div>
+                <div class="gt-cover-label">
+                    <div class="gt-cover-artist">{{ r.artist }}</div>
+                    <div class="gt-cover-title">{{ r.title }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <p class="gt-eyebrow mb-1">{{ r.genre }} · {{ r.year }}</p>
+            <h1 class="gt-record-title mb-2">{{ r.title }}</h1>
+            <h2 class="gt-record-artist mb-4">{{ r.artist }}</h2>
+            <div class="gt-price-box mb-4">
+                <span class="gt-price">£{{ "%.2f"|format(r.price) }}</span>
+                <span class="gt-stock">In stock — ships tomorrow</span>
+            </div>
+            <div class="mb-4">
+                <button class="btn gt-btn-primary me-2">Add to basket</button>
+                <button class="btn gt-btn-ghost">Save for later</button>
+            </div>
+            <dl class="row small text-muted">
+                <dt class="col-sm-4">Format</dt><dd class="col-sm-8">180 g vinyl, 2×LP, gatefold</dd>
+                <dt class="col-sm-4">Pressing</dt><dd class="col-sm-8">Optimal Media, Germany</dd>
+                <dt class="col-sm-4">Condition</dt><dd class="col-sm-8">New & sealed</dd>
+                <dt class="col-sm-4">Catalogue</dt><dd class="col-sm-8">GT-{{ r.id|upper }}-{{ r.year }}</dd>
+            </dl>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 580 170">
+  <style>
+    .cell { stroke: #888; stroke-width: 0.8; }
+    .ch { font-family: 'Menlo', 'Consolas', monospace; font-size: 12px; text-anchor: middle; }
+    .heading { font-family: sans-serif; font-size: 11px; font-weight: 600; fill: #888; }
+    .label { font-family: 'Menlo', 'Consolas', monospace; font-size: 8px; text-anchor: middle; fill: #999; }
+    .ptr { font-family: 'Menlo', 'Consolas', monospace; font-size: 9px; font-weight: 600; text-anchor: middle; }
+    .code { font-family: 'Menlo', 'Consolas', monospace; font-size: 10px; }
+  </style>
+
+  <text x="290" y="12" class="heading" text-anchor="middle">Normal: :authority → host rewrite</text>
+
+  <g transform="translate(18, 24)">
+    <!-- Offset labels -->
+    <text x="10" y="8" class="label">0</text><text x="32" y="8" class="label">1</text>
+    <text x="54" y="8" class="label">2</text><text x="76" y="8" class="label">3</text>
+    <text x="98" y="8" class="label">4</text><text x="120" y="8" class="label">5</text>
+    <text x="142" y="8" class="label">6</text><text x="164" y="8" class="label">7</text>
+    <text x="186" y="8" class="label">8</text><text x="208" y="8" class="label">9</text>
+    <text x="230" y="8" class="label">10</text><text x="252" y="8" class="label">11</text>
+    <text x="274" y="8" class="label">12</text><text x="296" y="8" class="label">13</text>
+    <text x="318" y="8" class="label">14</text><text x="340" y="8" class="label">15</text>
+    <text x="362" y="8" class="label">16</text><text x="384" y="8" class="label">17</text>
+    <text x="406" y="8" class="label">18</text><text x="428" y="8" class="label">19</text>
+    <text x="450" y="8" class="label">20</text><text x="472" y="8" class="label">21</text>
+    <text x="494" y="8" class="label">22</text><text x="516" y="8" class="label">23</text>
+
+    <!-- Cells 0-5: :autho (name, blue) -->
+    <rect x="0"   y="12" width="21" height="22" rx="2" fill="#dbeafe" class="cell"/><text x="10"  y="26" class="ch" fill="#1e40af">:</text>
+    <rect x="22"  y="12" width="21" height="22" rx="2" fill="#dbeafe" class="cell"/><text x="32"  y="26" class="ch" fill="#1e40af">a</text>
+    <rect x="44"  y="12" width="21" height="22" rx="2" fill="#dbeafe" class="cell"/><text x="54"  y="26" class="ch" fill="#1e40af">u</text>
+    <rect x="66"  y="12" width="21" height="22" rx="2" fill="#dbeafe" class="cell"/><text x="76"  y="26" class="ch" fill="#1e40af">t</text>
+    <rect x="88"  y="12" width="21" height="22" rx="2" fill="#dbeafe" class="cell"/><text x="98"  y="26" class="ch" fill="#1e40af">h</text>
+    <rect x="110" y="12" width="21" height="22" rx="2" fill="#dbeafe" class="cell"/><text x="120" y="26" class="ch" fill="#1e40af">o</text>
+
+    <!-- Cells 6-9: rity(blue) → host(yellow flash → green) -->
+    <rect x="132" y="12" width="21" height="22" rx="2" class="cell"><animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#dbeafe;#fef08a;#fef9c3;#fef9c3" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="142" y="26" class="ch" fill="#1e40af"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="visible;hidden;hidden;hidden" keyTimes="0;0.25;0.5;1"/>r</text>
+    <text x="142" y="26" class="ch" fill="#854d0e" visibility="hidden"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>h</text>
+
+    <rect x="154" y="12" width="21" height="22" rx="2" class="cell"><animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#dbeafe;#fef08a;#fef9c3;#fef9c3" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="164" y="26" class="ch" fill="#1e40af"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="visible;hidden;hidden;hidden" keyTimes="0;0.25;0.5;1"/>i</text>
+    <text x="164" y="26" class="ch" fill="#854d0e" visibility="hidden"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>o</text>
+
+    <rect x="176" y="12" width="21" height="22" rx="2" class="cell"><animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#dbeafe;#fef08a;#fef9c3;#fef9c3" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="186" y="26" class="ch" fill="#1e40af"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="visible;hidden;hidden;hidden" keyTimes="0;0.25;0.5;1"/>t</text>
+    <text x="186" y="26" class="ch" fill="#854d0e" visibility="hidden"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>s</text>
+
+    <rect x="198" y="12" width="21" height="22" rx="2" class="cell"><animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#dbeafe;#fef08a;#fef9c3;#fef9c3" keyTimes="0;0.25;0.5;0.75"/></rect>
+    <text x="208" y="26" class="ch" fill="#1e40af"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="visible;hidden;hidden;hidden" keyTimes="0;0.25;0.5;1"/>y</text>
+    <text x="208" y="26" class="ch" fill="#854d0e" visibility="hidden"><animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;visible;visible;visible" keyTimes="0;0.25;0.5;1"/>t</text>
+
+    <!-- Cells 10-11: separator (grey) -->
+    <rect x="220" y="12" width="21" height="22" rx="2" fill="#f0f0f0" class="cell"/><text x="230" y="26" class="ch" fill="#888">:</text>
+    <rect x="242" y="12" width="21" height="22" rx="2" fill="#f0f0f0" class="cell"/><text x="252" y="26" class="ch" fill="#888">_</text>
+
+    <!-- Cells 12-22: example.com (green) -->
+    <rect x="264" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="274" y="26" class="ch" fill="#166534">e</text>
+    <rect x="286" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="296" y="26" class="ch" fill="#166534">x</text>
+    <rect x="308" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="318" y="26" class="ch" fill="#166534">a</text>
+    <rect x="330" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="340" y="26" class="ch" fill="#166534">m</text>
+    <rect x="352" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="362" y="26" class="ch" fill="#166534">p</text>
+    <rect x="374" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="384" y="26" class="ch" fill="#166534">l</text>
+    <rect x="396" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="406" y="26" class="ch" fill="#166534">e</text>
+    <rect x="418" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="428" y="26" class="ch" fill="#166534">.</text>
+    <rect x="440" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="450" y="26" class="ch" fill="#166534">c</text>
+    <rect x="462" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="472" y="26" class="ch" fill="#166534">o</text>
+    <rect x="484" y="12" width="21" height="22" rx="2" fill="#d5f5d3" class="cell"/><text x="494" y="26" class="ch" fill="#166534">m</text>
+
+    <!-- NUL guard -->
+    <rect x="506" y="12" width="21" height="22" rx="2" fill="#f3f3f3" class="cell"/><text x="516" y="26" class="ch" fill="#bbb">\0</text>
+
+    <!-- d->out below (static, always at cell 0) -->
+    <polygon points="10,36 6,42 14,42" fill="#888"/>
+    <text x="10" y="52" class="ptr" fill="#888">d->out</text>
+
+    <!-- hdr.b above -->
+    <polygon fill="#dc2626">
+      <animate attributeName="points" dur="12s" repeatCount="indefinite" calcMode="discrete"
+        values="10,10 6,4 14,4;10,10 6,4 14,4;142,10 138,4 146,4;142,10 138,4 146,4" keyTimes="0;0.25;0.5;0.75"/></polygon>
+    <text y="0" class="ptr" fill="#dc2626">
+      <animate attributeName="x" dur="12s" repeatCount="indefinite" calcMode="discrete" values="10;10;142;142" keyTimes="0;0.25;0.5;0.75"/>hdr.b</text>
+
+    <!-- hdr.e below, pointing at NUL cell 23 (center x=516) -->
+    <polygon points="516,36 512,42 520,42" fill="#2563eb"/>
+    <text x="516" y="52" class="ptr" fill="#2563eb">hdr.e</text>
+
+    <!-- Phase 4: result bracket -->
+    <line x1="142" y1="56" x2="142" y2="62" stroke="#16a34a" stroke-width="1.5" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;hidden;visible" keyTimes="0;0.25;0.5;0.75"/></line>
+    <line x1="142" y1="62" x2="516" y2="62" stroke="#16a34a" stroke-width="1.5" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;hidden;visible" keyTimes="0;0.25;0.5;0.75"/></line>
+    <line x1="516" y1="56" x2="516" y2="62" stroke="#16a34a" stroke-width="1.5" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;hidden;visible" keyTimes="0;0.25;0.5;0.75"/></line>
+    <text x="324" y="72" font-family="'Menlo','Consolas',monospace" font-size="9" fill="#16a34a" text-anchor="middle" visibility="hidden">
+      <animate attributeName="visibility" dur="12s" repeatCount="indefinite" calcMode="discrete" values="hidden;hidden;hidden;visible" keyTimes="0;0.25;0.5;0.75"/>
+      "host: example.com"</text>
+  </g>
+
+  <!-- Code listing -->
+  <g transform="translate(175, 112)">
+    <text x="0" y="0" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#666;#ccc;#ccc;#ccc" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="600;400;400;400" keyTimes="0;0.25;0.5;0.75"/>1. Tstrcmp(nm, ":authority") == 0</text>
+    <text x="0" y="16" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#ccc;#b45309;#ccc;#ccc" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="400;600;400;400" keyTimes="0;0.25;0.5;0.75"/>2. memcpy(d->out + 6, "host", 4);</text>
+    <text x="0" y="32" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#ccc;#ccc;#16a34a;#ccc" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="400;400;600;400" keyTimes="0;0.25;0.5;0.75"/>3. hdr.b += 6;</text>
+    <text x="0" y="48" class="code">
+      <animate attributeName="fill" dur="12s" repeatCount="indefinite" calcMode="discrete" values="#ccc;#ccc;#ccc;#16a34a" keyTimes="0;0.25;0.5;0.75"/>
+      <animate attributeName="font-weight" dur="12s" repeatCount="indefinite" calcMode="discrete" values="400;400;400;600" keyTimes="0;0.25;0.5;0.75"/>   → "host: example.com" (Tlen=18 ✓)</text>
+  </g>
+</svg>

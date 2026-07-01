@@ -1,0 +1,17 @@
+<a class="gt-card" href="/record/{{ r.id }}">
+    <div class="gt-cover" style="--hue: {{ r.hue }};" aria-hidden="true">
+        <div class="gt-cover-disc"></div>
+        <div class="gt-cover-label">
+            <div class="gt-cover-artist">{{ r.artist }}</div>
+            <div class="gt-cover-title">{{ r.title }}</div>
+        </div>
+    </div>
+    <div class="gt-card-body">
+        <div class="gt-card-artist">{{ r.artist }}</div>
+        <div class="gt-card-title">{{ r.title }}</div>
+        <div class="d-flex justify-content-between align-items-baseline mt-1">
+            <span class="gt-card-year">{{ r.year }}</span>
+            <span class="gt-card-price">£{{ "%.2f"|format(r.price) }}</span>
+        </div>
+    </div>
+</a>

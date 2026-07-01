@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Store — Groove Therapy{% endblock %}
+{% block content %}
+<section class="container-xxl py-5">
+    <h1 class="gt-page-title">{% if q %}Search results for "{{ q }}"{% else %}The store{% endif %}</h1>
+    <p class="text-muted mb-4">
+        {% if q %}{{ items|length }} record{{ 's' if items|length != 1 }} match{{ '' if items|length != 1 else 'es' }} your search.
+        {% else %}{{ items|length }} titles in stock right now.{% endif %}
+    </p>
+    {% if items %}
+    <div class="row g-4">
+        {% for r in items %}
+        <div class="col-6 col-lg-4 col-xl-3">
+            {% include "_card.html" %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-light border">
+        We don't have anything matching that right now. Try <a href="/store">browsing the full catalogue</a>.
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

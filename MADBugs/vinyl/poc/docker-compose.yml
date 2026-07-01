@@ -1,0 +1,32 @@
+services:
+  record-store:
+    build: ./record-store
+    container_name: groove_therapy
+    expose:
+      - "8000"
+    networks:
+      - internal
+
+  varnish:
+    build: ./varnish
+    container_name: vinyl_varnish
+    expose:
+      - "6086"          # PROXY-protocol inlet from hitch (internal only)
+    depends_on:
+      - record-store
+    networks:
+      - internal
+
+  tls:
+    build: ./tls
+    container_name: vinyl_tls
+    ports:
+      - "443:443"       # browser HTTPS → hitch → varnish
+    depends_on:
+      - varnish
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge

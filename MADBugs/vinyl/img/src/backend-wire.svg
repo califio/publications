@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 650 228">
+  <style>
+    .heading { font-family: sans-serif; font-size: 12px; font-weight: 600; }
+    .mono { font-family: 'Menlo', 'Consolas', monospace; font-size: 11px; }
+    .label { font-family: sans-serif; font-size: 10px; font-weight: 600; }
+    .small { font-family: sans-serif; font-size: 9px; }
+  </style>
+
+  <defs>
+    <marker id="arrowhead" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#888"/>
+    </marker>
+  </defs>
+
+  <!-- === LEFT: Attacker's H/2 request === -->
+  <text x="12" y="16" class="heading" fill="#888">Attacker (HTTP/2)</text>
+
+  <g transform="translate(12, 26)">
+    <rect x="0" y="0" width="195" height="19" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.8"/>
+    <text x="5" y="14" class="mono" fill="#1e40af">:method POST</text>
+    <rect x="0" y="22" width="195" height="19" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.8"/>
+    <text x="5" y="36" class="mono" fill="#1e40af">:path /attacker</text>
+    <rect x="0" y="44" width="195" height="19" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.8"/>
+    <text x="5" y="58" class="mono" fill="#1e40af">:scheme https</text>
+
+    <rect x="0" y="68" width="195" height="19" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.8"/>
+    <text x="5" y="82" class="mono" fill="#1e40af">content-length: 109</text>
+
+    <rect x="0" y="92" width="195" height="19" rx="3" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="5" y="106" class="mono" fill="#dc2626" font-weight="600">:a: xx</text>
+
+    <rect x="0" y="116" width="195" height="19" rx="3" fill="#f3f3f3" stroke="#d1d5db" stroke-width="0.8"/>
+    <text x="5" y="130" class="mono" fill="#666">probe: pad</text>
+    <rect x="0" y="138" width="195" height="19" rx="3" fill="#f3f3f3" stroke="#d1d5db" stroke-width="0.8"/>
+    <text x="5" y="152" class="mono" fill="#666">host: example.com</text>
+
+    <rect x="0" y="164" width="195" height="19" rx="3" fill="#d5f5d3" stroke="#22c55e" stroke-width="1"/>
+    <text x="5" y="178" class="mono" fill="#166534" font-weight="600">DATA (109 bytes)</text>
+  </g>
+
+  <!-- === RIGHT: Backend wire (HTTP/1.1) === -->
+  <text x="260" y="16" class="heading" fill="#888">Backend wire (HTTP/1.1)</text>
+
+  <g transform="translate(260, 26)">
+    <!-- Headers -->
+    <rect x="0" y="0" width="320" height="60" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="1"/>
+    <text x="6" y="16" class="mono" fill="#1e40af">POST /attacker HTTP/1.1\r\n</text>
+    <text x="6" y="32" class="mono" fill="#1e40af">scheme: https\r\n</text>
+    <text x="6" y="48" class="mono" fill="#1e40af">content-length: 109\r\n</text>
+    <text x="330" y="34" class="label" fill="#2563eb">headers</text>
+
+    <!-- Bare CRLF -->
+    <rect x="0" y="64" width="320" height="16" rx="0" fill="#fef2f2" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="6" y="76" class="mono" fill="#dc2626" font-weight="600">\r\n</text>
+    <text x="330" y="76" class="label" fill="#dc2626">end of hdrs!</text>
+
+    <!-- Leftover = body -->
+    <rect x="0" y="84" width="320" height="48" rx="3" fill="#f5f3ff" stroke="#8b5cf6" stroke-width="1"/>
+    <text x="6" y="100" class="mono" fill="#7c3aed">probe: pad\r\n</text>
+    <text x="6" y="116" class="mono" fill="#7c3aed">host: example.com\r\n ...</text>
+    <text x="330" y="100" class="label" fill="#7c3aed">body</text>
+    <text x="330" y="114" class="small" fill="#7c3aed">(109 B = CL)</text>
+
+    <!-- Smuggled request -->
+    <rect x="0" y="136" width="320" height="60" rx="3" fill="#d5f5d3" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="6" y="152" class="mono" fill="#166534" font-weight="600">POST /api/review HTTP/1.1\r\n</text>
+    <text x="6" y="168" class="mono" fill="#166534">Host: x\r\n</text>
+    <text x="6" y="184" class="mono" fill="#166534">Content-Length: 500\r\n\r\n...</text>
+    <text x="330" y="156" class="label" fill="#166534">smuggled</text>
+    <text x="330" y="170" class="label" fill="#166534">request</text>
+  </g>
+
+  <!-- Color-matching lines -->
+  <line x1="207" y1="100" x2="260" y2="72" stroke="#93c5fd" stroke-width="0.8"/>
+  <line x1="207" y1="124" x2="260" y2="96" stroke="#ef4444" stroke-width="0.8"/>
+  <line x1="207" y1="152" x2="260" y2="130" stroke="#8b5cf6" stroke-width="0.8"/>
+  <line x1="207" y1="196" x2="260" y2="186" stroke="#22c55e" stroke-width="0.8"/>
+</svg>

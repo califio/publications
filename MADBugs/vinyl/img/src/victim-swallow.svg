@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 680 180">
+  <style>
+    .heading { font-family: sans-serif; font-size: 12px; font-weight: 600; }
+    .mono { font-family: 'Menlo', 'Consolas', monospace; font-size: 11px; }
+    .label { font-family: sans-serif; font-size: 10px; font-weight: 600; }
+    .small { font-family: sans-serif; font-size: 9px; }
+  </style>
+
+  <defs>
+    <marker id="arr-green" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#22c55e"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="7" markerHeight="5" refX="7" refY="2.5" orient="auto">
+      <polygon points="0 0, 7 2.5, 0 5" fill="#2563eb"/>
+    </marker>
+  </defs>
+
+  <!-- === LEFT: What's on the pooled connection === -->
+  <text x="12" y="16" class="heading" fill="#888">Pooled connection</text>
+
+  <g transform="translate(12, 26)">
+    <!-- Smuggled request -->
+    <rect x="0" y="0" width="195" height="19" rx="3" fill="#d5f5d3" stroke="#22c55e" stroke-width="1"/>
+    <text x="5" y="14" class="mono" fill="#166534" font-weight="600">POST /api/review</text>
+    <rect x="0" y="22" width="195" height="19" rx="3" fill="#d5f5d3" stroke="#22c55e" stroke-width="1"/>
+    <text x="5" y="36" class="mono" fill="#166534">Host: x</text>
+    <rect x="0" y="44" width="195" height="19" rx="3" fill="#d5f5d3" stroke="#22c55e" stroke-width="1"/>
+    <text x="5" y="58" class="mono" fill="#166534">Content-Length: 500</text>
+    <rect x="0" y="66" width="195" height="19" rx="3" fill="#d5f5d3" stroke="#22c55e" stroke-width="1"/>
+    <text x="5" y="80" class="mono" fill="#166534">AAAAAAA... (filler)</text>
+
+    <!-- Victim's request nested inside, same width -->
+    <rect x="0" y="90" width="195" height="38" rx="3" fill="#dbeafe" stroke="#93c5fd" stroke-width="0.8"/>
+    <text x="5" y="106" class="mono" fill="#1e40af">GET /account HTTP/1.1</text>
+    <text x="5" y="122" class="mono" fill="#1e40af">Authorization: Basic...</text>
+  </g>
+
+  <!-- === RIGHT: What the backend parses === -->
+  <text x="260" y="16" class="heading" fill="#888">Backend parses</text>
+
+  <g transform="translate(260, 26)">
+    <!-- Smuggled request headers -->
+    <rect x="0" y="0" width="320" height="60" rx="3" fill="#d5f5d3" stroke="#22c55e" stroke-width="1.5"/>
+    <text x="6" y="16" class="mono" fill="#166534" font-weight="600">POST /api/review HTTP/1.1\r\n</text>
+    <text x="6" y="32" class="mono" fill="#166534">Host: x\r\n</text>
+    <text x="6" y="48" class="mono" fill="#166534">Content-Length: 500\r\n\r\n</text>
+    <text x="330" y="34" class="label" fill="#166534">headers</text>
+
+    <!-- Body = filler + victim nested inside -->
+    <rect x="0" y="64" width="320" height="76" rx="3" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+    <text x="6" y="80" class="mono" fill="#dc2626">AAAAAAAAAAAAAAAA...</text>
+
+    <!-- Victim nested inside the body -->
+    <rect x="8" y="88" width="304" height="44" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1"/>
+    <text x="14" y="104" class="mono" fill="#1e40af">GET /account HTTP/1.1\r\n</text>
+    <text x="14" y="120" class="mono" fill="#1e40af">Authorization: Basic YWxpY2U6...</text>
+
+    <text x="330" y="80" class="label" fill="#dc2626">body</text>
+    <text x="330" y="94" class="small" fill="#dc2626">(500 B = CL)</text>
+    <text x="330" y="110" class="small" fill="#dc2626">victim's request</text>
+    <text x="330" y="121" class="small" fill="#dc2626">swallowed</text>
+  </g>
+
+  <!-- Connecting lines -->
+  <line x1="207" y1="56" x2="260" y2="56" stroke="#22c55e" stroke-width="0.8"/>
+  <line x1="207" y1="135" x2="268" y2="135" stroke="#2563eb" stroke-width="0.8"/>
+</svg>
