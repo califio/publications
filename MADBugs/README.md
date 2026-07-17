@@ -39,3 +39,4 @@ The write-ups and PoCs in this series are AI-generated and human-verified. We ke
 * 2026-06-10: [Squidbleed: Heartbleed's Ancient Cousin in Squid Proxy (CVE-2026-47729)](squidbleed)
 * 2026-06-17: [How to format a ciphertext](ciphertext-format)
 * 2026-07-01: [My Cousin Vinyl: HTTP Request Smuggling in Vinyl Cache (CVE-2026-50052)](vinyl)
+* 2026-07-16: [Journey to Root, Episode I: The Maglev King (Chrome renderer exploit chain)](chrome)

