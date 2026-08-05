@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 702" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <!-- card -->
+  <rect x="1" y="1" width="818" height="700" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+
+  <!-- title -->
+  <text x="410" y="42" text-anchor="middle" font-size="20" font-weight="700" fill="#0f172a">Copy Fail and the fileless root transition</text>
+
+  <!-- privilege lane bar -->
+  <rect x="36" y="74" width="20" height="330" rx="7" fill="#2563eb"/>
+  <rect x="36" y="452" width="20" height="188" rx="7" fill="#dc2626"/>
+  <text transform="translate(46,239) rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="1">www-data</text>
+  <text transform="translate(46,546) rotate(-90)" text-anchor="middle" font-size="12" font-weight="700" fill="#ffffff" letter-spacing="1">root</text>
+
+  <!-- arrows (drawn first, behind boxes) -->
+  <g stroke="#94a3b8" stroke-width="2" marker-end="url(#arrow)">
+    <line x1="475" y1="126" x2="475" y2="148"/>
+    <line x1="475" y1="232" x2="475" y2="254"/>
+    <line x1="475" y1="386" x2="475" y2="450"/>
+    <line x1="475" y1="528" x2="475" y2="550"/>
+  </g>
+
+  <!-- setuid boundary -->
+  <line x1="170" y1="428" x2="780" y2="428" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6 5"/>
+  <rect x="300" y="416" width="350" height="24" rx="12" fill="#fef2f2" stroke="#fecaca"/>
+  <text x="475" y="432" text-anchor="middle" font-size="12" font-weight="600" fill="#b91c1c">setuid-root boundary: privileges change here</text>
+
+  <!-- Box 1: ROP -->
+  <g>
+    <rect x="170" y="74" width="610" height="52" rx="9" fill="#f5f8ff" stroke="#c7d2fe"/>
+    <rect x="170" y="74" width="6" height="52" rx="3" fill="#2563eb"/>
+    <text x="190" y="105" font-size="14" font-weight="600" fill="#0f172a">ROP chain in the PHP worker runs a raw position-independent (PIC) launcher</text>
+  </g>
+
+  <!-- Box 2: loader -->
+  <g>
+    <rect x="170" y="148" width="610" height="84" rx="9" fill="#f5f8ff" stroke="#c7d2fe"/>
+    <rect x="170" y="148" width="6" height="84" rx="3" fill="#2563eb"/>
+    <text x="190" y="171" font-size="14" font-weight="700" fill="#0f172a">PIC launcher (fileless loader)</text>
+    <text x="190" y="192" font-size="13" fill="#334155" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace">memfd_create &#8594; dup2 to fd 197 &#8594; write helper ELF &#8594; execveat(fd 197)</text>
+    <text x="190" y="221" font-size="12" font-style="italic" fill="#047857">↳ helper ELF lives in anonymous memory, never written to /tmp; the worker becomes the helper</text>
+  </g>
+
+  <!-- Box 3: helper -->
+  <g>
+    <rect x="170" y="254" width="610" height="130" rx="9" fill="#f5f8ff" stroke="#c7d2fe"/>
+    <rect x="170" y="254" width="6" height="130" rx="3" fill="#2563eb"/>
+    <text x="190" y="277" font-size="14" font-weight="700" fill="#0f172a">Helper process (uid = www-data)</text>
+    <text x="190" y="299" font-size="13" fill="#334155">•  builds a tiny replacement stub in memory</text>
+    <text x="190" y="320" font-size="13" fill="#334155">•  overwrites the page-cache image of setuid-root <tspan font-family="ui-monospace, Menlo, monospace">/usr/bin/su</tspan>, 4 bytes at a time,</text>
+    <text x="206" y="339" font-size="13" fill="#334155">via <tspan font-family="ui-monospace, Menlo, monospace">AF_ALG</tspan> + <tspan font-family="ui-monospace, Menlo, monospace">MSG_SPLICE_PAGES</tspan> + <tspan font-family="ui-monospace, Menlo, monospace">splice()</tspan></text>
+    <text x="190" y="360" font-size="13" fill="#334155">•  executes <tspan font-family="ui-monospace, Menlo, monospace">/usr/bin/su</tspan></text>
+    <text x="190" y="379" font-size="12" font-style="italic" fill="#047857">↳ the on-disk su binary is never modified, only its cached pages</text>
+  </g>
+
+  <!-- Box 4: su as root -->
+  <g>
+    <rect x="170" y="450" width="610" height="78" rx="9" fill="#fff6f6" stroke="#fecaca"/>
+    <rect x="170" y="450" width="6" height="78" rx="3" fill="#dc2626"/>
+    <text x="190" y="473" font-size="14" font-weight="700" fill="#0f172a">Overwritten /usr/bin/su runs as ROOT (setuid)</text>
+    <text x="190" y="495" font-size="13" fill="#334155" font-family="ui-monospace, Menlo, Consolas, monospace">setresuid(0,0,0)</text>
+    <text x="190" y="516" font-size="13" fill="#334155" font-family="ui-monospace, Menlo, Consolas, monospace">execveat(197, ["root-helper", "--pwned"], AT_EMPTY_PATH)</text>
+  </g>
+
+  <!-- Box 5: root helper -->
+  <g>
+    <rect x="170" y="550" width="610" height="88" rx="9" fill="#fff6f6" stroke="#fecaca"/>
+    <rect x="170" y="550" width="6" height="88" rx="3" fill="#dc2626"/>
+    <text x="190" y="573" font-size="14" font-weight="700" fill="#0f172a">Root helper (uid = 0), re-entered from fd 197</text>
+    <text x="190" y="595" font-size="13" fill="#334155">runs a user-chosen root command,</text>
+    <text x="190" y="616" font-size="13" fill="#334155">or returns an interactive root shell</text>
+  </g>
+
+  <!-- legend -->
+  <g font-size="12" fill="#475569">
+    <rect x="170" y="664" width="14" height="14" rx="3" fill="#2563eb"/>
+    <text x="190" y="675">runs as www-data</text>
+    <rect x="316" y="664" width="14" height="14" rx="3" fill="#dc2626"/>
+    <text x="336" y="675">runs as root</text>
+    <text x="446" y="675" fill="#047857" font-style="italic">↳ green = stays entirely off disk</text>
+  </g>
+</svg>
