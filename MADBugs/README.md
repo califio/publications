@@ -43,3 +43,4 @@ The write-ups and PoCs in this series are AI-generated and human-verified. We ke
 * 2026-07-22: [Dark Elevator: Windows InstallService Local Privilege Escalation (CVE-2026-50343)](windows-CVE-2026-50343)
 * 2026-08-05: [The WordPress Chain Massacre: from PHP execution to Linux root](wp2root)
 * 2026-08-06: [The Taking of FreeBSD One Two Three: three unauthenticated remote kernel RCEs in CTL HA](freebsd-one-two-three)
+* 2026-09-30: [The Great Glyph Grift (CVE-2026-86950)](CVE-2026-86950)
