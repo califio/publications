@@ -13,7 +13,7 @@ Each directory is self-contained: build the target, start it under a memory cap,
 | Envoy 1.37.2 | fat `cookie` crumbs | ~5,700:1 | [`envoy/`](envoy) |
 | Apache httpd 2.4.67 | empty `cookie` crumbs | ~4,000:1 | [`httpd/`](httpd) |
 | nginx 1.29.7 | tiny `a:` header | ~70:1 | [`nginx/`](nginx) |
-| Microsoft IIS (Windows Server 2025) | tiny header, 900 refs | ~68:1 | [`microsoft-iis/`](microsoft-iis) |
+| Microsoft IIS (Windows Server 2022, 2025) | tiny header, 900 refs | ~68:1 | [`microsoft-iis/`](microsoft-iis) |
 | Cloudflare Pingora 0.8.0 | tiny `a:` header | ~62:1 | [`pingora/`](pingora) |
 
 Please don't point these at infrastructure you don't own.
