@@ -33,7 +33,11 @@ There is no per-connection or global memory budget for HTTP/2 request processing
 
 ### Setup
 
-- **Target:** Windows Server 2025 Build 26100.32860 (http.sys 10.0.26100.32684), IIS with HTTPS on port 443 (default configuration)
+- **Target:**
+  - Windows Server 2025 Standard Build 26100.32860 (http.sys 10.0.26100.32684)
+  - Windows Server 2022 Standard Build 20348.587 (http.sys 10.0.20348.1)
+  
+  All targets require IIS with HTTPS on port 443 (default configuration).
 - **Attacker:** Windows machine with Python 3 on the same network
 - **Observer:** Any machine with `curl` on the same network
 
